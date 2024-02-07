@@ -12,6 +12,7 @@
  * Will go through the file to create
  * the token array
  *****************************************************/
+
 typedef struct lexer
 {
     int col;
@@ -20,5 +21,9 @@ typedef struct lexer
     int cursor;
     char *filename;
 } lexer_t;
+
+lexer_t new_lexer(char *filename);
+
+void kill_lexer(lexer_t l);
 
 #endif // LEXER_H
