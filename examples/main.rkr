@@ -1,0 +1,9 @@
+let main : void -> int  => {
+    let () = printf "Hello, World !\n" in
+    0
+}
+
+let fact n : int -> int => {
+    if n < 1 then 1
+    else n * fact (n-1)
+}
