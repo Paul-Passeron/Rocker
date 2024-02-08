@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     while (lexer_peek(l))
     {
         token_t t = step_lexer(&l);
-        printf("'%s' -> %s\n", t.lexeme, lexeme_of_type(t.type));
+        printf("%5s -> %s\n", t.lexeme, lexeme_of_type(t.type));
         free(t.lexeme);
     }
 

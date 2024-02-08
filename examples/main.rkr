@@ -1,5 +1,10 @@
 // This is a single line comment
 
+/* This is a C-style 
+multi line
+comment !
+
+*/
 
 let main : void -> int  => {
     let () => printf "Hello, World !\n" in

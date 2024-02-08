@@ -20,6 +20,24 @@ static token_type_t keywords[] = {
     TOK_REC,
 };
 
+static token_type_t operators[] = {
+    TOK_STAR,
+    TOK_MINUS,
+    TOK_PLUS,
+    TOK_DIV,
+    TOK_MODULO,
+    TOK_LOG_AND,
+    TOK_LOG_OR,
+    TOK_BIT_AND,
+    TOK_BIT_OR,
+    TOK_BIT_XOR,
+    TOK_GRTR,
+    TOK_GRTR_EQ,
+    TOK_LSSR,
+    TOK_LSSR_EQ,
+    TOK_EQUAL,
+    TOK_DIFF};
+
 char *lexeme_of_type(token_type_t t)
 {
     assert(TOK_COUNT == 36 && "Exhaustive handling of token types in lexeme_of_type");
@@ -51,13 +69,81 @@ token_type_t type_of_lexeme(char *s)
 int is_type_keyword(token_type_t t)
 {
     for (unsigned int i = 0; i < sizeof(keywords) / sizeof(token_type_t); i++)
-    {
         if (t == keywords[i])
             return 1;
-    }
     return 0;
 }
+
+int is_type_operator(token_type_t t)
+{
+    for (unsigned int i = 0; i < sizeof(keywords) / sizeof(token_type_t); i++)
+        if (t == operators[i])
+            return 1;
+    return 0;
+}
+
 int is_lexeme_keyword(char *s)
 {
     return is_type_keyword(type_of_lexeme(s));
+}
+
+void new_token_array(token_array_t *arr)
+{
+    arr->capacity = INIT_TOK_ARR;
+    arr->length = 0;
+    arr->data = malloc(sizeof(token_t) * arr->capacity);
+}
+
+void free_token(token_t tok)
+{
+    free(tok.lexeme);
+}
+
+void kill_token_array(token_array_t arr)
+{
+    for (int i = 0; i < arr.length; i++)
+        free_token(arr.data[i]);
+    if (arr.data != NULL)
+        free(arr.data);
+}
+
+int get_precedence(token_type_t t)
+{
+    switch (t)
+    {
+    case TOK_STAR:
+        return 3;
+    case TOK_DIV:
+        return 3;
+    case TOK_MODULO:
+        return 3;
+    case TOK_PLUS:
+        return 4;
+    case TOK_MINUS:
+        return 4;
+    case TOK_GRTR:
+        return 6;
+    case TOK_LSSR:
+        return 6;
+    case TOK_LSSR_EQ:
+        return 6;
+    case TOK_GRTR_EQ:
+        return 6;
+    case TOK_EQUAL:
+        return 7;
+    case TOK_DIFF:
+        return 7;
+    case TOK_BIT_AND:
+        return 8;
+    case TOK_BIT_XOR:
+        return 9;
+    case TOK_BIT_OR:
+        return 10;
+    case TOK_LOG_AND:
+        return 11;
+    case TOK_LOG_OR:
+        return 12;
+    default:
+        return -1;
+    }
 }

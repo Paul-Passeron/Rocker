@@ -7,6 +7,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#define INIT_TOK_ARR 64
+
 /*****************************************************
  * Primary Token Type enumeration
  * Holds info about what kind of token one is
@@ -60,6 +62,7 @@ char *lexeme_of_type(token_type_t);
 token_type_t type_of_lexeme(char *);
 int is_lexeme_keyword(char *s);
 int is_type_keyword(token_type_t t);
+int is_type_operator(token_type_t t);
 
 typedef struct token_t
 {
@@ -76,4 +79,7 @@ typedef struct token_array_t
     int capacity;
 } token_array_t;
 
+void new_token_array(token_array_t *);
+void kill_token_array(token_array_t);
+int get_precedence(token_type_t t);
 #endif // TOKEN_H
