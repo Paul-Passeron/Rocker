@@ -231,6 +231,10 @@ token_t step_lexer(lexer_t *l)
         while (is_whitespace(lexer_peek(*l)))
             lexer_consume(l);
     }
+    if (lexer_peek(*l) == 0)
+    {
+        return (token_t){0};
+    }
     res.col = l->col;
     res.line = l->line;
     // The case must fall through
@@ -278,4 +282,17 @@ token_t step_lexer(lexer_t *l)
         lexer_consume_n(l, length);
     }
     return res;
+}
+
+token_array_t lex_program(lexer_t *l)
+{
+    token_array_t arr;
+    new_token_array(&arr);
+    while (lexer_peek(*l))
+    {
+        token_t t = step_lexer(l);
+        if (t.lexeme)
+            token_array_push(&arr, t);
+    }
+    return arr;
 }

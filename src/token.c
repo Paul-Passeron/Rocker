@@ -107,7 +107,7 @@ void kill_token_array(token_array_t arr)
         free(arr.data);
 }
 
-int get_precedence(token_type_t t)
+int get_precedence_aux(token_type_t t)
 {
     switch (t)
     {
@@ -146,4 +146,28 @@ int get_precedence(token_type_t t)
     default:
         return -1;
     }
+}
+int get_precedence(token_type_t t)
+{
+    // Doing this because our precedence is reversed
+
+    int res = get_precedence_aux(t);
+    if (res == -1)
+        return -1;
+    return 13 - res;
+}
+
+int is_type_typ_def(token_type_t t)
+{
+    return t == TOK_PRO || t == TOK_REC;
+}
+
+void token_array_push(token_array_t *arr, token_t tok)
+{
+    if (arr->length >= arr->capacity)
+    {
+        arr->capacity *= 2;
+        arr->data = realloc(arr->data, arr->capacity * sizeof(token_t));
+    }
+    arr->data[arr->length++] = tok;
 }

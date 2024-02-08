@@ -63,7 +63,7 @@ token_type_t type_of_lexeme(char *);
 int is_lexeme_keyword(char *s);
 int is_type_keyword(token_type_t t);
 int is_type_operator(token_type_t t);
-
+int is_type_typ_def(token_type_t t);
 typedef struct token_t
 {
     token_type_t type;
@@ -82,5 +82,13 @@ typedef struct token_array_t
 void new_token_array(token_array_t *);
 void kill_token_array(token_array_t);
 int get_precedence(token_type_t t);
+
+typedef enum typdef_type_t
+{
+    TYPEDEF_RECORD,
+    TYPEDEF_PRODUCT
+} typdef_type_t;
+
+void token_array_push(token_array_t *arr, token_t tok);
 
 #endif // TOKEN_H

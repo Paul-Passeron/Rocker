@@ -9,6 +9,8 @@
 
 #include "token.h"
 
+#define INIT_AST_ARR 64
+
 typedef struct node_t node_t;
 typedef node_t *ast_t;
 
@@ -26,6 +28,8 @@ typedef struct node_t
         ast_type,
         ast_identifier,
         ast_let_binding,
+        ast_literal,
+        ast_operation,
     } tag;
     union
     {
@@ -43,12 +47,33 @@ typedef struct node_t
         {
             ast_t left;
             ast_t right;
+            ast_t type_sig;
         } ast_let_binding;
+
+        struct ast_literal
+        {
+            token_t literal;
+        } ast_literal;
+
+        struct ast_operation
+        {
+            token_type_t op;
+            ast_t left;
+            ast_t right;
+        } ast_operation;
 
     } data;
 } node_t;
 
 ast_t new_ast(node_t n);
 void free_ast(ast_t a);
+
+void new_ast_array(ast_array_t *arr);
+void kill_ast_array(ast_array_t arr);
+void ast_array_push(ast_array_t *arr, ast_t a);
+
+ast_t new_op_ast(ast_t left, token_type_t op, ast_t right);
+
+void ast_print(ast_t a);
 
 #endif // AST_H
