@@ -7,6 +7,8 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include "token.h"
+
 /*****************************************************
  * Primary Lexer structure
  * Will go through the file to create
@@ -15,15 +17,17 @@
 
 typedef struct lexer
 {
-    int col;
-    int line;
     char *data;
     int cursor;
+    int length;
+    int col;
+    int line;
     char *filename;
 } lexer_t;
 
 lexer_t new_lexer(char *filename);
-
 void kill_lexer(lexer_t l);
+
+token_t step_lexer(lexer_t *l);
 
 #endif // LEXER_H

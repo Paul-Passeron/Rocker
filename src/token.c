@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *lexemes[TOK_COUNT] = {"", "", "", "", "let", ":", ",", "->", "=>", "{",
-                            "}", "(", ")", "in", "if", "then", "else", "rec", "pro", "match", "*", "+",
-                            "/", "%", "||", "&&", "|", "^", "&", "<", "<=", ">", ">=", "=", "!="};
+static char *lexemes[TOK_COUNT] = {"", "", "", "", "let", ":", ",", "->", "=>", "{",
+                                   "}", "(", ")", "in", "if", "then", "else", "rec", "pro", "match", "*", "+",
+                                   "/", "%", "||", "&&", "|", "^", "&", "<", "<=", ">", ">=", "=", "!="};
 
 char *lexeme_of_type(token_type_t t)
 {
@@ -87,10 +87,10 @@ char *lexeme_of_type(token_type_t t)
         assert(0 && "Unreachable");
     }
 }
+
 token_type_t type_of_lexeme(char *s)
 {
     assert(TOK_COUNT == 35 && "Exhaustive handling of token types in type_of_lexeme");
-
     for (int i = 4; i < TOK_COUNT; i++)
         if (strcmp(lexemes[i], s) == 0)
             return i;

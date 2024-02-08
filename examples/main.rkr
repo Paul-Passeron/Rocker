@@ -112,3 +112,9 @@ let i_think_this_is_cool : 'c =>
         }
         (arg2)
         (arg3)
+
+
+// This should be able to interface with C functions
+// Maybe not all because we won't have pointers (bc purely funtionnal)
+// So functions without side effects like printf can be fine
+// This would be very hard to typecheck consistently though

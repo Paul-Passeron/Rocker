@@ -18,13 +18,14 @@ int main(int argc, char *argv[])
     }
     printf("Trying to read file: %s\n", argv[1]);
     lexer_t l = new_lexer(argv[1]);
-    (void)l;
     printf("Successfully read file %s\n", argv[1]);
 
     token_type_t test = TOK_MATCH;
     char test_string[] = "let";
     printf("Token %d is: %s\n", test, lexeme_of_type(test));
     printf("Token %s is: %d\n", test_string, type_of_lexeme(test_string));
-
+    printf("Trying to kill lexer\n");
+    kill_lexer(l);
+    printf("Successfully killed lexer\n");
     return 0;
 }
