@@ -36,6 +36,7 @@ typedef enum token_type_t
     TOK_PRO,
     TOK_MATCH,
     TOK_STAR,
+    TOK_MINUS,
     TOK_PLUS,
     TOK_DIV,
     TOK_MODULO,
