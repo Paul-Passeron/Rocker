@@ -3,7 +3,7 @@ CFLAGS=-Werror -Wall -Wextra -pedantic
 SRC=src/
 BUILD=build/
 
-DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o
+DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)ast.o
 
 all: clean main lines
 main: $(DEP)

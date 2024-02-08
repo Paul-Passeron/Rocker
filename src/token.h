@@ -82,4 +82,5 @@ typedef struct token_array_t
 void new_token_array(token_array_t *);
 void kill_token_array(token_array_t);
 int get_precedence(token_type_t t);
+
 #endif // TOKEN_H
