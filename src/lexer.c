@@ -157,7 +157,7 @@ char *create_lexeme(lexer_t l, int length)
 }
 typedef enum comment_type_t
 {
-    COM_SINGLE,
+    COM_SINGLE = 1,
     COM_MULTI
 } comment_type_t;
 
@@ -205,12 +205,6 @@ token_t step_lexer(lexer_t *l)
 {
     token_t res;
 
-    while (is_whitespace(lexer_peek(*l)))
-        lexer_consume(l);
-
-    res.col = l->col;
-    res.line = l->line;
-
     // Possible cases:
     // - we have a comment
     // - we have a literal
@@ -219,18 +213,29 @@ token_t step_lexer(lexer_t *l)
     // - we have an identifier
 
     // First case: Comment
-    int is_com_type = is_comment(*l);
-    if (is_com_type)
+    while (is_comment(*l) || is_whitespace(lexer_peek(*l)))
     {
-        lexer_consume_n(l, 2); // consume the initial comment 'declaration'
-        while (!is_end_comment(*l, is_com_type))
+        int is_com_type = is_comment(*l);
+
+        if (is_com_type)
+        {
+            lexer_consume_n(l, 2); // consume the initial comment 'declaration'
+            while (!is_end_comment(*l, is_com_type))
+            {
+                lexer_consume(l);
+            }
+            if (is_com_type == COM_MULTI)
+                lexer_consume(l);
+            lexer_consume(l); // consume the matching end;
+        }
+        while (is_whitespace(lexer_peek(*l)))
             lexer_consume(l);
-        if (is_com_type == COM_MULTI)
-            lexer_consume(l);
-        lexer_consume(l); // consume the matching end;
     }
+    res.col = l->col;
+    res.line = l->line;
+    // The case must fall through
     // Second case: Num Literal
-    else if (is_char_num(lexer_peek(*l)))
+    if (is_char_num(lexer_peek(*l)))
     {
         int length = length_of_num_lit(*l);
         res.lexeme = create_lexeme(*l, length);
@@ -267,13 +272,9 @@ token_t step_lexer(lexer_t *l)
         int length = length_until_next_delimiter(*l);
         res.lexeme = create_lexeme(*l, length);
         if (is_lexeme_keyword(res.lexeme))
-        {
             res.type = type_of_lexeme(res.lexeme);
-        }
         else
-        {
             res.type = TOK_IDENTIFIER;
-        }
         lexer_consume_n(l, length);
     }
     return res;
