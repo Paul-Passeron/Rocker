@@ -16,16 +16,14 @@ int main(int argc, char *argv[])
         usage(argv[0]);
         exit(1);
     }
-    printf("Trying to read file: %s\n", argv[1]);
     lexer_t l = new_lexer(argv[1]);
-    printf("Successfully read file %s\n", argv[1]);
+    while (lexer_peek(l))
+    {
+        token_t t = step_lexer(&l);
+        printf("'%s' -> %s\n", t.lexeme, lexeme_of_type(t.type));
+        free(t.lexeme);
+    }
 
-    token_type_t test = TOK_MATCH;
-    char test_string[] = "let";
-    printf("Token %d is: %s\n", test, lexeme_of_type(test));
-    printf("Token %s is: %d\n", test_string, type_of_lexeme(test_string));
-    printf("Trying to kill lexer\n");
     kill_lexer(l);
-    printf("Successfully killed lexer\n");
     return 0;
 }

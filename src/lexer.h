@@ -27,7 +27,7 @@ typedef struct lexer
 
 lexer_t new_lexer(char *filename);
 void kill_lexer(lexer_t l);
-
+char lexer_peek(lexer_t l);
 token_t step_lexer(lexer_t *l);
 
 #endif // LEXER_H

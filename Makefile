@@ -5,7 +5,7 @@ BUILD=build/
 
 DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o
 
-all: main
+all: clean main lines
 main: $(DEP)
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -14,3 +14,6 @@ $(BUILD)%.o: $(SRC)%.c
 
 clean:
 	rm -rf $(BUILD)*
+
+lines:
+	wc -l $$( find -name '*.[hc]' -o -name '*.rkr' -o -name '*.bnf') | tail -n 1

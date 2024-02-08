@@ -7,6 +7,17 @@ static char *lexemes[TOK_COUNT] = {"", "", "", "", "let", ":", ",", "->", "=>", 
                                    "}", "(", ")", "in", "if", "then", "else", "rec", "pro", "match", "*", "+",
                                    "/", "%", "||", "&&", "|", "^", "&", "<", "<=", ">", ">=", "=", "!="};
 
+static token_type_t keywords[] = {
+    TOK_LET,
+    TOK_IF,
+    TOK_THEN,
+    TOK_ELSE,
+    TOK_IN,
+    TOK_MATCH,
+    TOK_PRO,
+    TOK_REC,
+};
+
 char *lexeme_of_type(token_type_t t)
 {
     assert(TOK_COUNT == 35 && "Exhaustive handling of token types in lexeme_of_type");
@@ -84,7 +95,7 @@ char *lexeme_of_type(token_type_t t)
     case TOK_DIFF:
         return "!=";
     default:
-        assert(0 && "Unreachable");
+        return "";
     }
 }
 
@@ -95,4 +106,18 @@ token_type_t type_of_lexeme(char *s)
         if (strcmp(lexemes[i], s) == 0)
             return i;
     return TOK_COUNT;
+}
+
+int is_type_keyword(token_type_t t)
+{
+    for (unsigned int i = 0; i < sizeof(keywords) / sizeof(token_type_t); i++)
+    {
+        if (t == keywords[i])
+            return 1;
+    }
+    return 0;
+}
+int is_lexeme_keyword(char *s)
+{
+    return is_type_keyword(type_of_lexeme(s));
 }
