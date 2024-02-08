@@ -86,8 +86,14 @@ int length_until_next_delimiter(lexer_t l)
 
 int length_of_delimiter(lexer_t l)
 {
-    (void)l;
-    return 0;
+    char c1 = lexer_peek(l);
+    lexer_consume(&l);
+    char c2 = lexer_peek(l);
+    char str[2]={c1, c2, 0};
+    
+
+    return -1;
+
 }
 
 token_t step_lexer(lexer_t *l)
