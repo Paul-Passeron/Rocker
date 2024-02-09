@@ -33,7 +33,20 @@ void parser_consume_n(parser_t *p, int n)
 int is_primary(parser_t p)
 {
     token_type_t t = parser_peek_type(p);
-    return t == TOK_OPEN_BRACE || t == TOK_OPEN_PAREN || t == TOK_IDENTIFIER || t == TOK_STR_LIT || t == TOK_CHR_LIT || t == TOK_NUM_LIT;
+    return t == TOK_OPEN_BRACE || t == TOK_OPEN_PAREN || t == TOK_IDENTIFIER || t == TOK_STR_LIT || t == TOK_CHR_LIT || t == TOK_NUM_LIT || t == TOK_WILDCARD;
+}
+
+ast_t parse_leaf(parser_t *p)
+{
+    token_t t = parser_consume(p);
+    if (t.type == TOK_IDENTIFIER)
+        return new_ast((node_t){
+            ast_identifier, {.ast_identifier = {t}}});
+    else if (t.type == TOK_NUM_LIT || t.type == TOK_STR_LIT || t.type == TOK_CHR_LIT)
+        return new_ast((node_t){
+            ast_literal, {.ast_literal = {t}}});
+    printf("Expected leaf\n");
+    exit(1);
 }
 
 ast_t parse_primary(parser_t *p)
@@ -42,34 +55,46 @@ ast_t parse_primary(parser_t *p)
 
     // first case: identifier
     token_type_t type = parser_peek_type(*p);
-    if (type == TOK_IDENTIFIER || type == TOK_WILDCARD)
+
+    //     token_t iden = parser_consume(p);
+    //     ast_t identifier = new_ast((node_t){
+    //         ast_identifier, {.ast_identifier = {iden}}});
+    //     if (parser_peek_type(*p) == TOK_CLOSE_PAREN)
+    //     {
+    //         printf("%d\n", p->cursor);
+    //         return identifier;
+    //     }
+    //     if (is_primary(*p))
+    //     {
+    //         return new_ast((node_t){
+    //             ast_curry, {.ast_curry = {.caller = identifier, .arg = parse_primary(p)}}});
+    //     }
+    //     return identifier;
+
+    // else if (type == TOK_NUM_LIT || type == TOK_STR_LIT || type == TOK_CHR_LIT)
+    // {
+    //     ast_t lit = new_ast((node_t){
+    //         ast_literal, {.ast_literal = {parser_consume(p)}}});
+    //     if (is_primary(*p))
+    //     {
+    //         return new_ast((node_t){
+    //             ast_curry, {.ast_curry = {.caller = lit, .arg = parse_primary(p)}}});
+    //     }
+    //     return lit;
+    // }
+    if (type == TOK_IDENTIFIER || type == TOK_STR_LIT || type == TOK_CHR_LIT || type == TOK_NUM_LIT || type == TOK_WILDCARD)
     {
-        token_t iden = parser_consume(p);
-        ast_t identifier = new_ast((node_t){
-            ast_identifier, {.ast_identifier = {iden}}});
-        if (parser_peek_type(*p) == TOK_CLOSE_PAREN)
+
+        ast_t tree = parse_leaf(p);
+        while (is_primary(*p))
         {
-            printf("%d\n", p->cursor);
-            return identifier;
+            ast_t leaf = parse_leaf(p);
+            tree = new_ast((node_t){
+                ast_curry, {.ast_curry = {.caller = tree, .arg = leaf}}});
         }
-        if (is_primary(*p))
-        {
-            return new_ast((node_t){
-                ast_curry, {.ast_curry = {.caller = identifier, .arg = parse_primary(p)}}});
-        }
-        return identifier;
+        return tree;
     }
-    else if (type == TOK_NUM_LIT || type == TOK_STR_LIT || type == TOK_CHR_LIT)
-    {
-        ast_t lit = new_ast((node_t){
-            ast_literal, {.ast_literal = {parser_consume(p)}}});
-        if (is_primary(*p))
-        {
-            return new_ast((node_t){
-                ast_curry, {.ast_curry = {.caller = lit, .arg = parse_primary(p)}}});
-        }
-        return lit;
-    }
+
     else if (type == TOK_OPEN_PAREN)
     {
         (void)parser_consume(p);

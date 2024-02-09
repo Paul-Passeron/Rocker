@@ -6,92 +6,97 @@
 
 
 rec token_type_t => {
-  TOK_IDENTIFIER : void,
-  TOK_CHR_LIT : void,
-  TOK_STR_LIT : void,
-  TOK_NUM_LIT : void,
-  TOK_LET : void,
-  TOK_COLON : void,
-  TOK_COMMA : void,
+  TOK_IDENTIFIER  : void,
+  TOK_CHR_LIT     : void,
+  TOK_STR_LIT     : void,
+  TOK_NUM_LIT     : void,
+  TOK_LET         : void,
+  TOK_COLON       : void,
+  TOK_COMMA       : void,
   TOK_SMALL_ARROW : void,
-  TOK_BIG_ARROW : void,
-  TOK_OPEN_BRACE : void,
+  TOK_BIG_ARROW   : void,
+  TOK_OPEN_BRACE  : void,
   TOK_CLOSE_BRACE : void,
-  TOK_OPEN_PAREN : void,
+  TOK_OPEN_PAREN  : void,
   TOK_CLOSE_PAREN : void,
-  TOK_IN : void,
-  TOK_IF : void,
-  TOK_THEN : void,
-  TOK_ELSE : void,
-  TOK_REC : void,
-  TOK_PRO : void,
-  TOK_MATCH : void,
-  TOK_STAR : void,
-  TOK_MINUS : void,
-  TOK_PLUS : void,
-  TOK_DIV : void,
-  TOK_MODULO : void,
-  TOK_LOG_OR : void,
-  TOK_LOG_AND : void,
-  TOK_BIT_OR : void,
-  TOK_BIT_XOR : void,
-  TOK_BIT_AND : void,
-  TOK_LSSR : void,
-  TOK_LSSR_EQ : void,
-  TOK_GRTR : void,
-  TOK_GRTR_EQ : void,
-  TOK_EQUAL : void,
-  TOK_DIFF : void,
-  TOK_WILDCARD : void
+  TOK_IN          : void,
+  TOK_IF          : void,
+  TOK_THEN        : void,
+  TOK_ELSE        : void,
+  TOK_REC         : void,
+  TOK_PRO         : void,
+  TOK_MATCH       : void,
+  TOK_STAR        : void,
+  TOK_MINUS       : void,
+  TOK_PLUS        : void,
+  TOK_DIV         : void,
+  TOK_MODULO      : void,
+  TOK_LOG_OR      : void,
+  TOK_LOG_AND     : void,
+  TOK_BIT_OR      : void,
+  TOK_BIT_XOR     : void,
+  TOK_BIT_AND     : void,
+  TOK_LSSR        : void,
+  TOK_LSSR_EQ     : void,
+  TOK_GRTR        : void,
+  TOK_GRTR_EQ     : void,
+  TOK_EQUAL       : void,
+  TOK_DIFF        : void,
+  TOK_WILDCARD    : void
 }
 
 pro token_t => {
-  type : token_type_t,
-  lexeme : string,
-  col: int,
-  line: int
+  type            : token_type_t,
+  lexeme          : string,
+  col             : int,
+  line            : int
 }
 
 
 
 let lexeme_of_type t: token_type_t -> string => {
-   match t => {
-   -> TOK_IDENTIFIER : "TOK_IDENTIFIER"
-   -> TOK_CHR_LIT : "TOK_CHR_LIT"
-   -> TOK_STR_LIT : "TOK_STR_LIT"
-   -> TOK_NUM_LIT : "TOK_NUM_LIT"
-   -> TOK_LET : "TOK_LET"
-   -> TOK_COLON : "TOK_COLON"
-   -> TOK_COMMA : "TOK_COMMA"
-   -> TOK_SMALL_ARROW : "TOK_SMALL_ARROW"
-   -> TOK_BIG_ARROW : "TOK_BIG_ARROW"
-   -> TOK_OPEN_BRACE : "TOK_OPEN_BRACE"
-   -> TOK_CLOSE_BRACE : "TOK_CLOSE_BRACE"
-   -> TOK_OPEN_PAREN : "TOK_OPEN_PAREN"
-   -> TOK_CLOSE_PAREN : "TOK_CLOSE_PAREN"
-   -> TOK_IN : "TOK_IN"
-   -> TOK_IF : "TOK_IF"
-   -> TOK_THEN : "TOK_THEN"
-   -> TOK_ELSE : "TOK_ELSE"
-   -> TOK_REC : "TOK_REC"
-   -> TOK_PRO : "TOK_PRO"
-   -> TOK_MATCH : "TOK_MATCH"
-   -> TOK_STAR : "TOK_STAR"
-   -> TOK_MINUS : "TOK_MINUS"
-   -> TOK_PLUS : "TOK_PLUS"
-   -> TOK_DIV : "TOK_DIV"
-   -> TOK_MODULO : "TOK_MODULO"
-   -> TOK_LOG_OR : "TOK_LOG_OR"
-   -> TOK_LOG_AND : "TOK_LOG_AND"
-   -> TOK_BIT_OR : "TOK_BIT_OR"
-   -> TOK_BIT_XOR : "TOK_BIT_XOR"
-   -> TOK_BIT_AND : "TOK_BIT_AND"
-   -> TOK_LSSR : "TOK_LSSR"
-   -> TOK_LSSR_EQ : "TOK_LSSR_EQ"
-   -> TOK_GRTR : "TOK_GRTR"
-   -> TOK_GRTR_EQ : "TOK_GRTR_EQ"
-   -> TOK_EQUAL : "TOK_EQUAL"
-   -> TOK_DIFF : "TOK_DIFF"
-   -> TOK_WILDCARD : "TOK_WILDCARD"
-   }
- }
+  match t => {
+    -> TOK_IDENTIFIER  : "<identifier>"
+    -> TOK_CHR_LIT     : "<char literal>"
+    -> TOK_STR_LIT     : "<string literal>"
+    -> TOK_NUM_LIT     : "<numeric literal>"
+    -> TOK_LET         : "let"
+    -> TOK_COLON       : ":"
+    -> TOK_COMMA       : ","
+    -> TOK_SMALL_ARROW : "->"
+    -> TOK_BIG_ARROW   : "=>"
+    -> TOK_OPEN_BRACE  : "{"
+    -> TOK_CLOSE_BRACE : "}"
+    -> TOK_OPEN_PAREN  : "("
+    -> TOK_CLOSE_PAREN : ")"
+    -> TOK_IN          : "in"
+    -> TOK_IF          : "if"
+    -> TOK_THEN        : "then"
+    -> TOK_ELSE        : "else"
+    -> TOK_REC         : "rec"
+    -> TOK_PRO         : "pro"
+    -> TOK_MATCH       : "match"
+    -> TOK_STAR        : "*"
+    -> TOK_MINUS       : "-"
+    -> TOK_PLUS        : "+"
+    -> TOK_DIV         : "/"
+    -> TOK_MODULO      : "%"
+    -> TOK_LOG_OR      : "||"
+    -> TOK_LOG_AND     : "&&"
+    -> TOK_BIT_OR      : "|"
+    -> TOK_BIT_XOR     : "^"
+    -> TOK_BIT_AND     : "&"
+    -> TOK_LSSR        : "<"
+    -> TOK_LSSR_EQ     : "<="
+    -> TOK_GRTR        : ">"
+    -> TOK_GRTR_EQ     : ">="
+    -> TOK_EQUAL       : "="
+    -> TOK_DIFF        : "!="
+    -> TOK_WILDCARD    : "_"
+  }
+}
+
+let main : void -> int => {
+  let () => fun a b c d in 
+  0
+}
