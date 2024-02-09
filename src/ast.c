@@ -56,7 +56,7 @@ void kill_ast_array(ast_array_t arr)
 void print_n_tabs(int n)
 {
     for (int i = 0; i < n; i++)
-        printf("\t");
+        printf("    ");
 }
 
 void ast_print_aux(ast_t a, int d)
@@ -88,10 +88,14 @@ void ast_print_aux(ast_t a, int d)
     {
         struct ast_let_binding data = a->data.ast_let_binding;
         printf("Let binding:\n");
-        ast_print_aux(data.type_sig, d + 1);
-        print_n_tabs(d + 1);
-        printf("LEFT:\n");
-        ast_print_aux(data.left, d + 2);
+        if (data.type_sig != NULL)
+            ast_print_aux(data.type_sig, d + 1);
+        if (data.left != NULL)
+        {
+            print_n_tabs(d + 1);
+            printf("LEFT:\n");
+            ast_print_aux(data.left, d + 2);
+        }
         print_n_tabs(d + 1);
         printf("RIGHT:\n");
         ast_print_aux(data.right, d + 2);
@@ -113,6 +117,30 @@ void ast_print_aux(ast_t a, int d)
         print_n_tabs(d + 1);
         printf("RIGHT:\n");
         ast_print_aux(data.right, d + 2);
+    }
+    break;
+    case ast_curry:
+    {
+        struct ast_curry data = a->data.ast_curry;
+        printf("Curry:\n");
+        print_n_tabs(d + 1);
+        printf("Caller:\n");
+        ast_print_aux(data.caller, d + 2);
+        print_n_tabs(d + 1);
+        printf("Arg:\n");
+        ast_print_aux(data.arg, d + 2);
+    }
+    break;
+    case ast_in:
+    {
+        struct ast_in data = a->data.ast_in;
+        printf("In:\n");
+        print_n_tabs(d + 1);
+        printf("First:\n");
+        ast_print_aux(data.first, d + 2);
+        print_n_tabs(d + 1);
+        printf("Second:\n");
+        ast_print_aux(data.second, d + 2);
     }
     break;
     }

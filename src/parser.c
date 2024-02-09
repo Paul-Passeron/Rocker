@@ -30,6 +30,12 @@ void parser_consume_n(parser_t *p, int n)
     p->cursor += n;
 }
 
+int is_primary(parser_t p)
+{
+    token_type_t t = parser_peek_type(p);
+    return t == TOK_OPEN_BRACE || t == TOK_OPEN_PAREN || t == TOK_IDENTIFIER || t == TOK_STR_LIT || t == TOK_CHR_LIT || t == TOK_NUM_LIT;
+}
+
 ast_t parse_primary(parser_t *p)
 {
     // Either an identifier, a literal, or an expression between {} or ()
@@ -38,15 +44,43 @@ ast_t parse_primary(parser_t *p)
     token_type_t type = parser_peek_type(*p);
     if (type == TOK_IDENTIFIER)
     {
-        return new_ast((node_t){
-            ast_identifier, {.ast_identifier = {parser_consume(p)}}});
+        token_t iden = parser_consume(p);
+        ast_t identifier = new_ast((node_t){
+            ast_identifier, {.ast_identifier = {iden}}});
+        if (is_primary(*p))
+        {
+            return new_ast((node_t){
+                ast_curry, {.ast_curry = {.caller = identifier, .arg = parse_primary(p)}}});
+        }
+        return identifier;
     }
     else if (type == TOK_NUM_LIT || type == TOK_STR_LIT || type == TOK_CHR_LIT)
     {
-        return new_ast((node_t){
+        ast_t lit = new_ast((node_t){
             ast_literal, {.ast_literal = {parser_consume(p)}}});
+        if (is_primary(*p))
+        {
+            return new_ast((node_t){
+                ast_curry, {.ast_curry = {.caller = lit, .arg = parse_primary(p)}}});
+        }
+        return lit;
     }
     else if (type == TOK_OPEN_PAREN)
+    {
+        (void)parser_consume(p);
+        ast_t res = parse_expression(p);
+        type = parser_peek_type(*p);
+        if (type != TOK_CLOSE_PAREN)
+        {
+            printf("TODO : Better error reporting\n");
+            printf("Unclosed parenthesis !\n");
+            exit(1);
+        }
+        (void)parser_consume(p);
+        return res;
+    }
+
+    else if (type == TOK_OPEN_BRACE)
     {
         (void)parser_consume(p);
         ast_t res = parse_expression(p);
@@ -63,22 +97,56 @@ ast_t parse_primary(parser_t *p)
     return NULL;
 }
 
-int is_primary(parser_t *p)
-{
-    (void)p;
-    assert(0 && "TODO: is primary !");
-    return 0;
-}
-
-ast_t parse_funcall(parser_t *p)
-{
-    (void)p;
-    assert(0 && "TODO: parse function call !");
-    return NULL;
-}
+// ast_t parse_funcall(parser_t *p)
+// {
+//     (void)p;
+//     assert(0 && "TODO: parse function call !");
+//     return NULL;
+// }
 
 ast_t parse_expression(parser_t *p)
 {
+    token_type_t a = parser_peek_type(*p);
+    if (a == TOK_OPEN_BRACE)
+    {
+        (void)parser_consume(p);
+        ast_t res = parse_expression(p);
+        // we expect closing '}'
+        if (parser_consume(p).type != TOK_CLOSE_BRACE)
+        {
+            printf("TODO: Unclosed brace\n");
+            exit(1);
+        }
+        return res;
+    }
+    else if (a == TOK_OPEN_PAREN)
+    {
+        (void)parser_consume(p);
+        ast_t res = parse_expression(p);
+        // we expect closing ')'
+        if (parser_consume(p).type != TOK_CLOSE_PAREN)
+        {
+            printf("TODO: Unclosed parenthesis\n");
+            exit(1);
+        }
+        return res;
+    }
+    else if (a == TOK_LET)
+    {
+        // let expression followed by 'in' followed by another expression
+
+        ast_t binding = parse_let_binding(p);
+        // We expect 'in'
+        if (parser_consume(p).type != TOK_IN)
+        {
+            printf("Expected in keyword to evaluate let binding as expression\n");
+            exit(1);
+        }
+        // We parse the expression
+        ast_t expr = parse_expression(p);
+        return new_ast((node_t){
+            ast_in, {.ast_in = {binding, expr}}});
+    }
     return parse_expression_aux(p, -1);
 }
 
@@ -143,6 +211,8 @@ ast_t parse_let_binding(parser_t *p)
 {
     // Synatx of a let binding:
     // let <primary> : <type specification> => <expression>
+    // OR
+    // let () => <expression>
 
     // We expect 'let' keyword
     if (parser_consume(p).type != TOK_LET)
@@ -150,18 +220,40 @@ ast_t parse_let_binding(parser_t *p)
         printf("Unreachable\n");
         exit(1);
     }
+    ast_t primary = NULL;
+    ast_t type_sig = NULL;
 
-    ast_t primary = parse_primary(p);
-
-    // We expect a colon ':' here
-
-    if (parser_consume(p).type != TOK_COLON)
+    if (parser_peek_type(*p) == TOK_IDENTIFIER)
     {
-        printf("TODO: Syntax Error: Expected type signature\n");
-        exit(1);
-    }
+        primary = parse_primary(p);
 
-    ast_t type_sig = parse_type_signature(p);
+        // We expect a colon ':' here
+
+        if (parser_consume(p).type != TOK_COLON)
+        {
+            printf("TODO: Syntax Error: Expected type signature\n");
+            exit(1);
+        }
+
+        type_sig = parse_type_signature(p);
+        printf("Here\n");
+        fflush(stdout);
+    }
+    else
+    {
+        // We must have a let()=>
+        // We expect '('
+        if (parser_consume(p).type != TOK_OPEN_PAREN)
+        {
+            printf("Expected Identifier or '()' in let binding\n");
+            exit(1);
+        }
+        if (parser_consume(p).type != TOK_CLOSE_PAREN)
+        {
+            printf("Unclosed '(' in let binding\n");
+            exit(1);
+        }
+    }
 
     // We expect a big arrow '=>' here
 
@@ -172,7 +264,7 @@ ast_t parse_let_binding(parser_t *p)
         exit(1);
     }
 
-    ast_t expression = parse_expression(p);
+    ast_t expression = parse_primary(p);
 
     return new_ast((node_t){
         ast_let_binding, {.ast_let_binding = {.left = primary, .right = expression, .type_sig = type_sig}}});
@@ -189,7 +281,7 @@ ast_t parse_val(parser_t *p)
     if (t == TOK_LET)
         return parse_let_binding(p);
     else
-        return NULL;
+        return parse_primary(p);
 }
 
 void parse_program(parser_t *p)

@@ -29,5 +29,6 @@ ast_t parse_expression(parser_t *p);
 ast_t parse_increasing_precedence(parser_t *p, ast_t left, int min_prec);
 ast_t parse_expression_aux(parser_t *p, int min_precedence);
 void parse_program(parser_t *p);
+ast_t parse_let_binding(parser_t *p);
 
 #endif // PARSER_H

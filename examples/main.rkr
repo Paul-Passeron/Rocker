@@ -1,1 +1,9 @@
-let main : void -> int => 1 + 2 * 3 + 2
+// let main : void -> int => {
+//     let () => print "Hello, World !\n" in 0
+// }
+
+let fun a b c : int -> int -> int -> int => {
+    let d : int => fun2 a b c in
+    let e : int -> int => fun3 b in
+    e d
+}

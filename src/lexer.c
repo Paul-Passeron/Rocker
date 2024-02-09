@@ -34,7 +34,7 @@ void kill_lexer(lexer_t l)
     free(l.filename);
 }
 
-static char delimeters[] = ",:-+*/%&|!=0123456789(){}^ \n\'\"";
+static char delimeters[] = ",:-+*/%&|!=(){}^ \n\'\"";
 
 int is_delimeter(char c)
 {

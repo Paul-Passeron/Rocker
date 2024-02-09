@@ -30,6 +30,8 @@ typedef struct node_t
         ast_let_binding,
         ast_literal,
         ast_operation,
+        ast_curry,
+        ast_in,
     } tag;
     union
     {
@@ -61,6 +63,17 @@ typedef struct node_t
             ast_t left;
             ast_t right;
         } ast_operation;
+
+        struct ast_curry
+        {
+            ast_t caller;
+            ast_t arg;
+        } ast_curry;
+        struct ast_in
+        {
+            ast_t first;
+            ast_t second;
+        } ast_in;
 
     } data;
 } node_t;
