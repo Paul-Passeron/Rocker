@@ -59,7 +59,11 @@ ast_t parse_primary_aux(parser_t *p, int curry)
         ast_t tree = parse_leaf(p);
         while (is_primary(*p) && curry)
         {
-            ast_t leaf = parse_primary_aux(p, 0);
+            ast_t leaf;
+            if (parser_peek_type(*p) != TOK_OPEN_PAREN && parser_peek_type(*p) != TOK_OPEN_BRACE)
+                leaf = parse_primary_aux(p, 0);
+            else
+                leaf = parse_expression(p);
             tree = new_ast((node_t){
                 ast_curry, {.ast_curry = {.caller = tree, .arg = leaf}}});
         }

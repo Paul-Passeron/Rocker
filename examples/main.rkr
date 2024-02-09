@@ -1,3 +1,4 @@
-let test a : int -> int => {
-     (((test2 a) + 4))
+let main : int -> int => {
+     let () = print "Hello, World !\n" in
+     0
 }

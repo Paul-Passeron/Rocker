@@ -97,5 +97,5 @@ let lexeme_of_type t: token_type_t -> string => {
 }
 
 let test a : int -> int => {
-  test2 (a+ 2) ((test3 a)+4)
+   token ((test3 a) + 4)
 }
