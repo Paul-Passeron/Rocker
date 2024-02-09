@@ -20,7 +20,7 @@ token_type_t parser_peek_type(parser_t p)
 token_t parser_consume(parser_t *p)
 {
     token_t res = parser_peek(*p);
-    printf("Consumming token '%s'\n", res.lexeme);
+    // printf("Consumming token '%s'\n", res.lexeme);
     p->cursor++;
     return res;
 }
@@ -42,11 +42,16 @@ ast_t parse_primary(parser_t *p)
 
     // first case: identifier
     token_type_t type = parser_peek_type(*p);
-    if (type == TOK_IDENTIFIER)
+    if (type == TOK_IDENTIFIER || type == TOK_WILDCARD)
     {
         token_t iden = parser_consume(p);
         ast_t identifier = new_ast((node_t){
             ast_identifier, {.ast_identifier = {iden}}});
+        if (parser_peek_type(*p) == TOK_CLOSE_PAREN)
+        {
+            printf("%d\n", p->cursor);
+            return identifier;
+        }
         if (is_primary(*p))
         {
             return new_ast((node_t){
@@ -68,6 +73,7 @@ ast_t parse_primary(parser_t *p)
     else if (type == TOK_OPEN_PAREN)
     {
         (void)parser_consume(p);
+
         ast_t res = parse_expression(p);
         type = parser_peek_type(*p);
         if (type != TOK_CLOSE_PAREN)
@@ -94,15 +100,72 @@ ast_t parse_primary(parser_t *p)
         (void)parser_consume(p);
         return res;
     }
-    return NULL;
+    else
+    {
+        printf("Could not parse as a primary !\n");
+        exit(1);
+    }
 }
 
-// ast_t parse_funcall(parser_t *p)
-// {
-//     (void)p;
-//     assert(0 && "TODO: parse function call !");
-//     return NULL;
-// }
+ast_t parse_match_case(parser_t *p)
+{
+    // We expect the first token to be '->'
+    if (parser_consume(p).type != TOK_SMALL_ARROW)
+    {
+        printf("Expected '->' token for match case\n");
+        exit(1);
+    }
+    // We expect an expression
+    ast_t match_expr = parse_expression(p);
+    // We expect ':'
+    if (parser_consume(p).type != TOK_COLON)
+    {
+        printf("Expected ':' token for match case\n");
+        exit(1);
+    }
+    // We expect the returned expression
+    ast_t ret = parse_expression(p);
+    return new_ast((node_t){
+        ast_match_case, {.ast_match_case = {.expression = ret, .matcher = match_expr}}});
+}
+
+ast_t parse_match_expression(parser_t *p)
+{
+    // The fisrt token must be 'match'
+    if (parser_consume(p).type != TOK_MATCH)
+    {
+        printf("Unreachable !\n");
+        exit(1);
+    }
+    // Then we parse an expression
+    ast_t matched = parse_expression(p);
+    // Then we expect a =>
+    if (parser_consume(p).type != TOK_BIG_ARROW)
+    {
+        printf("Must put '=>' following match expression\n");
+        exit(1);
+    }
+    // Then a '{'
+    if (parser_consume(p).type != TOK_OPEN_BRACE)
+    {
+        printf("Must put '{'...'}' to enclose match expression cases\n");
+        exit(1);
+    }
+    ast_array_t cases;
+    new_ast_array(&cases);
+    while (parser_peek_type(*p) == TOK_SMALL_ARROW)
+        ast_array_push(&cases, parse_match_case(p));
+    // We expect a closing bracket
+
+    if (parser_consume(p).type != TOK_CLOSE_BRACE)
+    {
+        printf("Unclosed brace in match expression\n");
+        exit(1);
+    }
+
+    return new_ast((node_t){
+        ast_match, {.ast_match = {.cases = cases, .to_match = matched}}});
+}
 
 ast_t parse_expression(parser_t *p)
 {
@@ -146,6 +209,10 @@ ast_t parse_expression(parser_t *p)
         ast_t expr = parse_expression(p);
         return new_ast((node_t){
             ast_in, {.ast_in = {binding, expr}}});
+    }
+    else if (a == TOK_MATCH)
+    {
+        return parse_match_expression(p);
     }
     return parse_expression_aux(p, -1);
 }
@@ -236,8 +303,6 @@ ast_t parse_let_binding(parser_t *p)
         }
 
         type_sig = parse_type_signature(p);
-        printf("Here\n");
-        fflush(stdout);
     }
     else
     {
@@ -270,6 +335,12 @@ ast_t parse_let_binding(parser_t *p)
         ast_let_binding, {.ast_let_binding = {.left = primary, .right = expression, .type_sig = type_sig}}});
 }
 
+int is_type_def(parser_t p)
+{
+    token_type_t t = parser_peek_type(p);
+    return t == TOK_REC || t == TOK_PRO;
+}
+
 ast_t parse_val(parser_t *p)
 {
     // Can be a let binding
@@ -280,8 +351,15 @@ ast_t parse_val(parser_t *p)
     token_type_t t = parser_peek_type(*p);
     if (t == TOK_LET)
         return parse_let_binding(p);
-    else
+    else if (is_primary(*p))
         return parse_primary(p);
+    else if (is_type_def(*p))
+        return parse_type_def(p);
+    else
+    {
+        printf("Could not parse as val\n");
+        exit(1);
+    }
 }
 
 void parse_program(parser_t *p)
@@ -298,4 +376,71 @@ parser_t new_parser(token_array_t arr, char *filename)
     new_ast_array(&res.prog);
     res.tokens = arr;
     return res;
+}
+
+ast_t parse_type_def(parser_t *p)
+{
+    // expect 'rec' or 'pro' keyword
+    token_t t = parser_peek(*p);
+    if (t.type == TOK_REC)
+        return parse_rec_type(p);
+    else if (t.type != TOK_PRO)
+    {
+        printf("Expected a valid type specifier, like 'rec' or 'pro'\n");
+        exit(1);
+    }
+    return parse_rec_type(p);
+}
+
+ast_t parse_constructor(parser_t *p)
+{
+    // expect identifier
+    token_t constructor_name = parser_consume(p);
+    if (constructor_name.type != TOK_IDENTIFIER)
+    {
+        printf("Expected constructor name in type definition\n");
+        exit(1);
+    }
+    // expect colon
+    if (parser_consume(p).type != TOK_COLON)
+    {
+        printf("Expected ':' after constructor name in type definition\n");
+        exit(1);
+    }
+
+    // expect type signature
+}
+
+ast_t parse_rec_type(parser_t *p)
+{
+    // expect rec token
+    if (parser_consume(p).type != TOK_REC)
+    {
+        printf("Expected 'rec' keyword in rec type definition\n");
+        exit(1);
+    }
+    // We expect an identier, it's the name of the type
+    token_t type_name = parser_consume(p);
+
+    // We expect a big arrow
+    if (parser_consume(p).type != TOK_BIG_ARROW)
+    {
+        printf("Expected '=>' in type definition");
+        exit(1);
+    }
+    // We expect a '{'
+    if (parser_consume(p).type != TOK_OPEN_BRACE)
+    {
+        printf("Expected '{' in type definition");
+        exit(1);
+    }
+    ast_array_t constructors;
+    new_ast_array(&constructors);
+}
+
+ast_t parse_pro_type(parser_t *p)
+{
+    (void)p;
+    assert(0 && "TODO: parse_pro_type: not implemented yet");
+    return NULL;
 }

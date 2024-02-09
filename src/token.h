@@ -53,6 +53,7 @@ typedef enum token_type_t
     TOK_GRTR_EQ,
     TOK_EQUAL,
     TOK_DIFF,
+    TOK_WILDCARD,
 
     TOK_COUNT
 

@@ -32,6 +32,8 @@ typedef struct node_t
         ast_operation,
         ast_curry,
         ast_in,
+        ast_match,
+        ast_match_case,
     } tag;
     union
     {
@@ -74,6 +76,18 @@ typedef struct node_t
             ast_t first;
             ast_t second;
         } ast_in;
+
+        struct ast_match
+        {
+            ast_t to_match;
+            ast_array_t cases;
+        } ast_match;
+
+        struct ast_match_case
+        {
+            ast_t matcher;
+            ast_t expression;
+        } ast_match_case;
 
     } data;
 } node_t;

@@ -1,6 +1,7 @@
 #include "ast.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 ast_t new_ast(node_t n)
 {
@@ -56,7 +57,7 @@ void kill_ast_array(ast_array_t arr)
 void print_n_tabs(int n)
 {
     for (int i = 0; i < n; i++)
-        printf("    ");
+        printf("|   ");
 }
 
 void ast_print_aux(ast_t a, int d)
@@ -89,16 +90,21 @@ void ast_print_aux(ast_t a, int d)
         struct ast_let_binding data = a->data.ast_let_binding;
         printf("Let binding:\n");
         if (data.type_sig != NULL)
+        {
             ast_print_aux(data.type_sig, d + 1);
+            printf("\n");
+        }
         if (data.left != NULL)
         {
             print_n_tabs(d + 1);
             printf("LEFT:\n");
             ast_print_aux(data.left, d + 2);
+            printf("\n");
         }
         print_n_tabs(d + 1);
         printf("RIGHT:\n");
         ast_print_aux(data.right, d + 2);
+        printf("\n");
     }
     break;
     case ast_literal:
@@ -114,6 +120,7 @@ void ast_print_aux(ast_t a, int d)
         print_n_tabs(d + 1);
         printf("LEFT:\n");
         ast_print_aux(data.left, d + 2);
+        printf("\n");
         print_n_tabs(d + 1);
         printf("RIGHT:\n");
         ast_print_aux(data.right, d + 2);
@@ -126,6 +133,7 @@ void ast_print_aux(ast_t a, int d)
         print_n_tabs(d + 1);
         printf("Caller:\n");
         ast_print_aux(data.caller, d + 2);
+        printf("\n");
         print_n_tabs(d + 1);
         printf("Arg:\n");
         ast_print_aux(data.arg, d + 2);
@@ -143,8 +151,35 @@ void ast_print_aux(ast_t a, int d)
         ast_print_aux(data.second, d + 2);
     }
     break;
+    case ast_match:
+    {
+        struct ast_match data = a->data.ast_match;
+        printf("Match:\n");
+        print_n_tabs(d + 1);
+        printf("Expression to match:\n");
+        ast_print_aux(data.to_match, d + 2);
+        printf("\n");
+        print_n_tabs(d + 1);
+        printf("Cases:");
+        for (int i = 0; i < data.cases.length; i++)
+        {
+            printf("\n");
+            ast_print_aux(data.cases.data[i], d + 2);
+        }
     }
-    printf("\n");
+    break;
+    case ast_match_case:
+    {
+        struct ast_match_case data = a->data.ast_match_case;
+        printf("Case:\n");
+        ast_print_aux(data.matcher, d + 1);
+        printf("\n");
+        print_n_tabs(d + 1);
+        printf("Expression:\n");
+        ast_print_aux(data.expression, d + 2);
+    }
+    break;
+    }
 }
 
 void ast_print(ast_t a)

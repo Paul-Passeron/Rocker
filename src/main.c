@@ -20,9 +20,11 @@ int main(int argc, char *argv[])
     token_array_t arr = lex_program(&l);
     parser_t p = new_parser(arr, argv[1]);
     parse_program(&p);
-
-    ast_print(p.prog.data[0]);
-
+    for (int i = 0; i < p.prog.length; i++)
+    {
+        printf("\n\n");
+        ast_print(p.prog.data[i]);
+    }
     kill_lexer(l);
     return 0;
 }

@@ -1,9 +1,16 @@
-// let main : void -> int => {
-//     let () => print "Hello, World !\n" in 0
-// }
-
-let fun a b c : int -> int -> int -> int => {
-    let d : int => fun2 a b c in
-    let e : int -> int => fun3 b in
-    e d
+let fun fact n : int -> int => {
+    match n => {
+        -> 0: 1
+        -> 1: 1
+        -> _:  n * fact (n-1)
+    }
 }
+
+
+let main : void -> int => {
+    let () => print "Hello, World !\n" in
+    0
+}
+
+
+
