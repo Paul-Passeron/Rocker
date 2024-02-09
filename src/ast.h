@@ -34,6 +34,8 @@ typedef struct node_t
         ast_in,
         ast_match,
         ast_match_case,
+        ast_type_def,
+        ast_constructor,
     } tag;
     union
     {
@@ -88,6 +90,19 @@ typedef struct node_t
             ast_t matcher;
             ast_t expression;
         } ast_match_case;
+
+        struct ast_type_def
+        {
+            int is_rec;
+            token_t name;
+            ast_array_t constructors;
+        } ast_type_def;
+
+        struct ast_constructor
+        {
+            token_t name;
+            ast_t signature;
+        } ast_constructor;
 
     } data;
 } node_t;

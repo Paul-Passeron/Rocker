@@ -179,6 +179,34 @@ void ast_print_aux(ast_t a, int d)
         ast_print_aux(data.expression, d + 2);
     }
     break;
+    case ast_type_def:
+    {
+        struct ast_type_def data = a->data.ast_type_def;
+        printf("Typedef (");
+        if (data.is_rec)
+            printf("record");
+        else
+            printf("product");
+        printf(") '%s'\n", data.name.lexeme);
+        print_n_tabs(d + 1);
+        printf("Constructors:");
+        for (int i = 0; i < data.constructors.length; i++)
+        {
+            printf("\n");
+            ast_print_aux(data.constructors.data[i], d + 2);
+        }
+        printf("\n");
+    }
+    break;
+    case ast_constructor:
+    {
+        struct ast_constructor data = a->data.ast_constructor;
+        printf("Constructor '%s'\n", data.name.lexeme);
+        print_n_tabs(d + 1);
+        printf("Signature:\n");
+        ast_print_aux(data.signature, d + 2);
+    }
+    break;
     }
 }
 

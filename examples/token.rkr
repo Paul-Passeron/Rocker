@@ -45,6 +45,15 @@ rec token_type_t => {
   TOK_WILDCARD : void
 }
 
+pro token_t => {
+  type : token_type_t,
+  lexeme : string,
+  col: int,
+  line: int
+}
+
+
+
 let lexeme_of_type t: token_type_t -> string => {
    match t => {
    -> TOK_IDENTIFIER : "TOK_IDENTIFIER"

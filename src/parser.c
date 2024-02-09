@@ -389,7 +389,7 @@ ast_t parse_type_def(parser_t *p)
         printf("Expected a valid type specifier, like 'rec' or 'pro'\n");
         exit(1);
     }
-    return parse_rec_type(p);
+    return parse_pro_type(p);
 }
 
 ast_t parse_constructor(parser_t *p)
@@ -409,16 +409,22 @@ ast_t parse_constructor(parser_t *p)
     }
 
     // expect type signature
+
+    ast_t type_sig = parse_type_signature(p);
+
+    return new_ast((node_t){
+        ast_constructor, {.ast_constructor = {.name = constructor_name, .signature = type_sig}}});
 }
 
-ast_t parse_rec_type(parser_t *p)
+ast_t parse_general_type(parser_t *p, int is_rec)
 {
     // expect rec token
-    if (parser_consume(p).type != TOK_REC)
-    {
-        printf("Expected 'rec' keyword in rec type definition\n");
-        exit(1);
-    }
+    // if (parser_consume(p).type != TOK_REC)
+    // {
+    //     printf("Expected 'rec' keyword in rec type definition\n");
+    //     exit(1);
+    // }
+    (void)parser_consume(p);
     // We expect an identier, it's the name of the type
     token_t type_name = parser_consume(p);
 
@@ -436,11 +442,33 @@ ast_t parse_rec_type(parser_t *p)
     }
     ast_array_t constructors;
     new_ast_array(&constructors);
+    // We expect at least one constructor
+    ast_array_push(&constructors, parse_constructor(p));
+    while (parser_peek_type(*p) == TOK_COMMA)
+    {
+        (void)parser_consume(p);
+        if (parser_peek_type(*p) == TOK_COMMA)
+        {
+            (void)parser_consume(p);
+            break;
+        }
+        ast_array_push(&constructors, parse_constructor(p));
+    }
+    // We expect '}'
+    if (parser_consume(p).type != TOK_CLOSE_BRACE)
+    {
+        printf("Unclosed brace in type definition\n");
+        exit(1);
+    }
+    return new_ast((node_t){
+        ast_type_def, {.ast_type_def = {.name = type_name, .is_rec = is_rec, .constructors = constructors}}});
 }
 
+ast_t parse_rec_type(parser_t *p)
+{
+    return parse_general_type(p, 1);
+}
 ast_t parse_pro_type(parser_t *p)
 {
-    (void)p;
-    assert(0 && "TODO: parse_pro_type: not implemented yet");
-    return NULL;
+    return parse_general_type(p, 0);
 }
