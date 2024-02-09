@@ -49,46 +49,17 @@ ast_t parse_leaf(parser_t *p)
     exit(1);
 }
 
-ast_t parse_primary(parser_t *p)
+ast_t parse_primary_aux(parser_t *p, int curry)
 {
-    // Either an identifier, a literal, or an expression between {} or ()
-
-    // first case: identifier
     token_type_t type = parser_peek_type(*p);
 
-    //     token_t iden = parser_consume(p);
-    //     ast_t identifier = new_ast((node_t){
-    //         ast_identifier, {.ast_identifier = {iden}}});
-    //     if (parser_peek_type(*p) == TOK_CLOSE_PAREN)
-    //     {
-    //         printf("%d\n", p->cursor);
-    //         return identifier;
-    //     }
-    //     if (is_primary(*p))
-    //     {
-    //         return new_ast((node_t){
-    //             ast_curry, {.ast_curry = {.caller = identifier, .arg = parse_primary(p)}}});
-    //     }
-    //     return identifier;
-
-    // else if (type == TOK_NUM_LIT || type == TOK_STR_LIT || type == TOK_CHR_LIT)
-    // {
-    //     ast_t lit = new_ast((node_t){
-    //         ast_literal, {.ast_literal = {parser_consume(p)}}});
-    //     if (is_primary(*p))
-    //     {
-    //         return new_ast((node_t){
-    //             ast_curry, {.ast_curry = {.caller = lit, .arg = parse_primary(p)}}});
-    //     }
-    //     return lit;
-    // }
     if (type == TOK_IDENTIFIER || type == TOK_STR_LIT || type == TOK_CHR_LIT || type == TOK_NUM_LIT || type == TOK_WILDCARD)
     {
 
         ast_t tree = parse_leaf(p);
-        while (is_primary(*p))
+        while (is_primary(*p) && curry)
         {
-            ast_t leaf = parse_leaf(p);
+            ast_t leaf = parse_primary_aux(p, 0);
             tree = new_ast((node_t){
                 ast_curry, {.ast_curry = {.caller = tree, .arg = leaf}}});
         }
@@ -103,6 +74,7 @@ ast_t parse_primary(parser_t *p)
         type = parser_peek_type(*p);
         if (type != TOK_CLOSE_PAREN)
         {
+            printf("%s\n", parser_peek(*p).lexeme);
             printf("TODO : Better error reporting\n");
             printf("Unclosed parenthesis !\n");
             exit(1);
@@ -116,11 +88,13 @@ ast_t parse_primary(parser_t *p)
         (void)parser_consume(p);
         ast_t res = parse_expression(p);
         type = parser_peek_type(*p);
-        if (type != TOK_CLOSE_BRACE)
+        while (type != TOK_CLOSE_BRACE)
         {
-            printf("TODO : Better error reporting\n");
-            printf("Unclosed brace !\n");
-            exit(1);
+            ast_t r = parse_increasing_precedence(p, res, -1);
+            type = parser_peek_type(*p);
+            if (r == res)
+                break;
+            res = r;
         }
         (void)parser_consume(p);
         return res;
@@ -130,6 +104,11 @@ ast_t parse_primary(parser_t *p)
         printf("Could not parse as a primary !\n");
         exit(1);
     }
+}
+
+ast_t parse_primary(parser_t *p)
+{
+    return parse_primary_aux(p, 1);
 }
 
 ast_t parse_match_case(parser_t *p)
@@ -200,11 +179,14 @@ ast_t parse_expression(parser_t *p)
         (void)parser_consume(p);
         ast_t res = parse_expression(p);
         // we expect closing '}'
-        if (parser_consume(p).type != TOK_CLOSE_BRACE)
+        while (parser_peek(*p).type != TOK_CLOSE_BRACE)
         {
-            printf("TODO: Unclosed brace\n");
-            exit(1);
+            ast_t node = parse_increasing_precedence(p, res, -1);
+            if (node == res)
+                break;
+            res = node;
         }
+        (void)parser_consume(p);
         return res;
     }
     else if (a == TOK_OPEN_PAREN)
@@ -212,11 +194,16 @@ ast_t parse_expression(parser_t *p)
         (void)parser_consume(p);
         ast_t res = parse_expression(p);
         // we expect closing ')'
-        if (parser_consume(p).type != TOK_CLOSE_PAREN)
+        while (parser_peek(*p).type != TOK_CLOSE_PAREN)
         {
-            printf("TODO: Unclosed parenthesis\n");
-            exit(1);
+            ast_t node = parse_increasing_precedence(p, res, -1);
+            if (node == res)
+                break;
+            res = node;
+            // printf("TODO: Unclosed parenthesis\n");
+            // exit(1);
         }
+        (void)parser_consume(p);
         return res;
     }
     else if (a == TOK_LET)
@@ -244,6 +231,7 @@ ast_t parse_expression(parser_t *p)
 
 ast_t parse_expression_aux(parser_t *p, int min_precedence)
 {
+    printf("Here\n");
     ast_t left = parse_primary(p);
     while (1)
     {
@@ -382,6 +370,7 @@ ast_t parse_val(parser_t *p)
         return parse_type_def(p);
     else
     {
+        printf("%s\n", lexeme_of_type(t));
         printf("Could not parse as val\n");
         exit(1);
     }
