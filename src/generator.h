@@ -21,4 +21,7 @@ typedef struct generator_t
 generator_t new_generator(parser_t p, char *filename);
 void kill_generator(generator_t g);
 
+void generate_function_sig(char *name, ast_t signature);
+void generate_semicolon(void);
+
 #endif // GENERATOR_H
