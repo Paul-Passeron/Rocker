@@ -1,4 +1,4 @@
 let main : int -> int => {
-     let () = print "Hello, World !\n" in
+     let () => print "Hello, World !\n" in
      0
 }

@@ -6,55 +6,55 @@
 
 
 rec token_type_t => {
-  TOK_IDENTIFIER  : void,
-  TOK_CHR_LIT     : void,
-  TOK_STR_LIT     : void,
-  TOK_NUM_LIT     : void,
-  TOK_LET         : void,
-  TOK_COLON       : void,
-  TOK_COMMA       : void,
-  TOK_SMALL_ARROW : void,
-  TOK_BIG_ARROW   : void,
-  TOK_OPEN_BRACE  : void,
-  TOK_CLOSE_BRACE : void,
-  TOK_OPEN_PAREN  : void,
-  TOK_CLOSE_PAREN : void,
-  TOK_IN          : void,
-  TOK_IF          : void,
-  TOK_THEN        : void,
-  TOK_ELSE        : void,
-  TOK_REC         : void,
-  TOK_PRO         : void,
-  TOK_MATCH       : void,
-  TOK_STAR        : void,
-  TOK_MINUS       : void,
-  TOK_PLUS        : void,
-  TOK_DIV         : void,
-  TOK_MODULO      : void,
-  TOK_LOG_OR      : void,
-  TOK_LOG_AND     : void,
-  TOK_BIT_OR      : void,
-  TOK_BIT_XOR     : void,
-  TOK_BIT_AND     : void,
-  TOK_LSSR        : void,
-  TOK_LSSR_EQ     : void,
-  TOK_GRTR        : void,
-  TOK_GRTR_EQ     : void,
-  TOK_EQUAL       : void,
-  TOK_DIFF        : void,
-  TOK_WILDCARD    : void
+  TOK_IDENTIFIER       : void,
+  TOK_CHR_LIT          : void,
+  TOK_STR_LIT          : void,
+  TOK_NUM_LIT          : void,
+  TOK_LET              : void,
+  TOK_COLON            : void,
+  TOK_COMMA            : void,
+  TOK_SMALL_ARROW      : void,
+  TOK_BIG_ARROW        : void,
+  TOK_OPEN_BRACE       : void,
+  TOK_CLOSE_BRACE      : void,
+  TOK_OPEN_PAREN       : void,
+  TOK_CLOSE_PAREN      : void,
+  TOK_IN               : void,
+  TOK_IF               : void,
+  TOK_THEN             : void,
+  TOK_ELSE             : void,
+  TOK_REC              : void,
+  TOK_PRO              : void,
+  TOK_MATCH            : void,
+  TOK_STAR             : void,
+  TOK_MINUS            : void,
+  TOK_PLUS             : void,
+  TOK_DIV              : void,
+  TOK_MODULO           : void,
+  TOK_LOG_OR           : void,
+  TOK_LOG_AND          : void,
+  TOK_BIT_OR           : void,
+  TOK_BIT_XOR          : void,
+  TOK_BIT_AND          : void,
+  TOK_LSSR             : void,
+  TOK_LSSR_EQ          : void,
+  TOK_GRTR             : void,
+  TOK_GRTR_EQ          : void,
+  TOK_EQUAL            : void,
+  TOK_DIFF             : void,
+  TOK_WILDCARD         : void
 }
 
 pro token_t => {
-  type            : token_type_t,
-  lexeme          : string,
-  col             : int,
-  line            : int
+  type                 : token_type_t,
+  lexeme               : string,
+  col                  : int,
+  line                 : int
 }
 
 
 
-let lexeme_of_type t: token_type_t -> string => {
+let lexeme_of_type t   : token_type_t -> string => {
   match t => {
     -> TOK_IDENTIFIER  : "<identifier>"
     -> TOK_CHR_LIT     : "<char literal>"
@@ -96,6 +96,3 @@ let lexeme_of_type t: token_type_t -> string => {
   }
 }
 
-let test a : int -> int => {
-   token ((test3 a) + 4)
-}

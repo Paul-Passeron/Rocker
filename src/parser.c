@@ -235,7 +235,6 @@ ast_t parse_expression(parser_t *p)
 
 ast_t parse_expression_aux(parser_t *p, int min_precedence)
 {
-    printf("Here\n");
     ast_t left = parse_primary(p);
     while (1)
     {
