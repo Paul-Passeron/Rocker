@@ -5,6 +5,16 @@
 #include "parser.h"
 #include "generator.h"
 
+// void(*outer(void))
+// {
+//     int a = 1;
+//     void print_a(void)
+//     {
+//         printf("%d\n", a);
+//     }
+//     return &print_a;
+// }
+
 void usage(char *name)
 {
     printf("Usage:\n");
@@ -22,8 +32,9 @@ int main(int argc, char *argv[])
     token_array_t arr = lex_program(&l);
     parser_t p = new_parser(arr, argv[1]);
     parse_program(&p);
-    char out[] = "output.c\n";
+    char out[] = "output.c";
     generator_t g = new_generator(p, out);
+    generate_prolog();
     for (int i = 0; i < p.prog.length; i++)
     {
         printf("\n\n");
@@ -31,16 +42,29 @@ int main(int argc, char *argv[])
         ast_print(a);
         if (a->tag == ast_let_binding)
         {
-            ast_t types = a->data.ast_let_binding.type_sig;
-            char *fun_name = a->data.ast_let_binding.left->data.ast_identifier.id.lexeme;
-            generate_function_sig(fun_name, types);
-            generate_semicolon();
+            // ast_t types = a->data.ast_let_binding.type_sig;
+            // char *fun_name = a->data.ast_let_binding.name.lexeme;
+            // generate_function_sig(fun_name, types, a->data.ast_let_binding.args);
+            // generate_semicolon();
+            generate_let_binding(a);
+        }
+        if (a->tag == ast_type_def)
+        {
+            if (a->data.ast_type_def.is_rec)
+                generate_rec_type(a);
+            else
+                generate_pro_type(a);
         }
     }
 
     kill_generator(g);
 
     kill_lexer(l);
+
+    // void (*fnc)(void) = outer();
+    // fnc();
+
+    printf("Test : %5d\n", 1);
 
     return 0;
 }

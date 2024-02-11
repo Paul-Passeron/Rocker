@@ -51,9 +51,11 @@ typedef struct node_t
 
         struct ast_let_binding
         {
-            ast_t left;
-            ast_t right;
+            int is_void;
+            token_t name;
+            token_array_t args;
             ast_t type_sig;
+            ast_t right;
         } ast_let_binding;
 
         struct ast_literal

@@ -1,9 +1,14 @@
 let main : void -> int => {
-     let () => print "Hello, World !\n" in
-     0
+     let a : void -> int => {let () => print "Hello World !\n" in 0} in
+     let () => print "Hello World !\n" in
+     let () => {a _ }in a _
 }
 
 
-let fun : void -> int => {
-     let a : int => {1 + 2 * 7 + 3} in a
+let fact n : int -> int => {
+     match n => {
+          -> 0 : 1
+          -> 1 : 1
+          -> n : n * fact(n - 1)
+     }
 }

@@ -18,6 +18,7 @@ static token_type_t keywords[] = {
     TOK_MATCH,
     TOK_PRO,
     TOK_REC,
+    TOK_WILDCARD,
 };
 
 static token_type_t operators[] = {

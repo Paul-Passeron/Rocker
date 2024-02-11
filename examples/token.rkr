@@ -1,11 +1,4 @@
-/*****************************************************
- * ROCKER TOKEN HEADER
- * MIT License
- * Copyright (c) 2024 Paul Passeron
- *****************************************************/
-
-
-rec token_type_t => {
+pro token_type_t => {
   TOK_IDENTIFIER       : void,
   TOK_CHR_LIT          : void,
   TOK_STR_LIT          : void,
@@ -45,13 +38,12 @@ rec token_type_t => {
   TOK_WILDCARD         : void
 }
 
-pro token_t => {
+rec token_t => {
   type                 : token_type_t,
   lexeme               : string,
   col                  : int,
   line                 : int
 }
-
 
 
 let lexeme_of_type t   : token_type_t -> string => {
@@ -96,3 +88,7 @@ let lexeme_of_type t   : token_type_t -> string => {
   }
 }
 
+
+let main : void -> int => {
+  0
+}

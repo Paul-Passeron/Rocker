@@ -94,12 +94,19 @@ void ast_print_aux(ast_t a, int d)
             ast_print_aux(data.type_sig, d + 1);
             printf("\n");
         }
-        if (data.left != NULL)
+        if (!data.is_void)
         {
             print_n_tabs(d + 1);
-            printf("LEFT:\n");
-            ast_print_aux(data.left, d + 2);
-            printf("\n");
+            printf("NAME: %s\n", data.name.lexeme);
+
+            if (data.args.data != NULL && data.args.length > 0)
+            {
+                print_n_tabs(d + 1);
+                printf("ARGS:");
+                for (int i = 0; i < data.args.length; i++)
+                    printf(" '%s' ", data.args.data[i].lexeme);
+                printf("\n");
+            }
         }
         print_n_tabs(d + 1);
         printf("RIGHT:\n");

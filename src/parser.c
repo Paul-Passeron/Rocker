@@ -42,7 +42,7 @@ ast_t parse_leaf(parser_t *p)
     if (t.type == TOK_IDENTIFIER)
         return new_ast((node_t){
             ast_identifier, {.ast_identifier = {t}}});
-    else if (t.type == TOK_NUM_LIT || t.type == TOK_STR_LIT || t.type == TOK_CHR_LIT)
+    else if (t.type == TOK_NUM_LIT || t.type == TOK_STR_LIT || t.type == TOK_CHR_LIT || t.type == TOK_WILDCARD)
         return new_ast((node_t){
             ast_literal, {.ast_literal = {t}}});
     printf("Expected leaf\n");
@@ -303,13 +303,21 @@ ast_t parse_let_binding(parser_t *p)
         printf("Unreachable\n");
         exit(1);
     }
-    ast_t primary = NULL;
     ast_t type_sig = NULL;
+
+    token_array_t args;
+    new_token_array(&args);
+
+    token_t name;
+    int is_void;
 
     if (parser_peek_type(*p) == TOK_IDENTIFIER)
     {
-        primary = parse_primary(p);
+        is_void = 0;
+        name = parser_consume(p);
 
+        while (parser_peek_type(*p) == TOK_IDENTIFIER)
+            token_array_push(&args, parser_consume(p));
         // We expect a colon ':' here
 
         if (parser_consume(p).type != TOK_COLON)
@@ -322,6 +330,7 @@ ast_t parse_let_binding(parser_t *p)
     }
     else
     {
+        is_void = 1;
         // We must have a let()=>
         // We expect '('
         if (parser_consume(p).type != TOK_OPEN_PAREN)
@@ -348,7 +357,7 @@ ast_t parse_let_binding(parser_t *p)
     ast_t expression = parse_primary(p);
 
     return new_ast((node_t){
-        ast_let_binding, {.ast_let_binding = {.left = primary, .right = expression, .type_sig = type_sig}}});
+        ast_let_binding, {.ast_let_binding = {.name = name, .args = args, .is_void = is_void, .type_sig = type_sig, .right = expression}}});
 }
 
 int is_type_def(parser_t p)
@@ -435,12 +444,6 @@ ast_t parse_constructor(parser_t *p)
 
 ast_t parse_general_type(parser_t *p, int is_rec)
 {
-    // expect rec token
-    // if (parser_consume(p).type != TOK_REC)
-    // {
-    //     printf("Expected 'rec' keyword in rec type definition\n");
-    //     exit(1);
-    // }
     (void)parser_consume(p);
     // We expect an identier, it's the name of the type
     token_t type_name = parser_consume(p);

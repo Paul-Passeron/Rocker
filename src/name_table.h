@@ -25,7 +25,4 @@ typedef struct name_table_t
     int capacity;
 } name_table_t;
 
-name_table_t new_name_table(void);
-void kill_name_table(name_table_t);
-
 #endif // NAME_TABLE_H
