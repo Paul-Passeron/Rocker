@@ -14,6 +14,7 @@ $(BUILD)%.o: $(SRC)%.c
 
 clean:
 	rm -rf $(BUILD)*
+	rm -rf main
 
 lines:
 	wc -l $$( find -name '*.[hc]' -o -name '*.rkr' -o -name '*.bnf') | tail -n 1

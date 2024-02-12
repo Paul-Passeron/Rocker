@@ -7,26 +7,42 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
+#include <assert.h>
 #include <stdio.h>
+
 #include "ast.h"
-#include "parser.h"
+#include "token.h"
 
-typedef struct generator_t
-{
-    FILE *out;
-    ast_array_t program;
+#define TYPED_ARG_CAP 1024
+#define CLOSURE_CAP 1024
 
-} generator_t;
+typedef struct typed_arg {
+  token_t name;
+  token_array_t type;
+} typed_arg;
 
-generator_t new_generator(parser_t p, char *filename);
-void kill_generator(generator_t g);
+typedef struct fun_def {
+  token_t name;
+  typed_arg args[TYPED_ARG_CAP];
+  token_array_t return_type;
+  int arity;
+  char *closure_name;
+} fun_def;
 
-void generate_function_sig(char *name, ast_t signature, token_array_t args);
-void generate_semicolon(void);
-void generate_rec_type(ast_t type_def);
-void generate_pro_type(ast_t type_def);
-void generate_prolog(void);
-void generate_let_binding(ast_t bind);
-void generate_expression(ast_t expr);
-void generate_match(ast_t match_ast, ast_t type);
+typedef struct closure_t {
+  typed_arg elems[TYPED_ARG_CAP];
+  int length;
+  char *name;
+} closure_t;
+
+typedef struct closure_stack {
+  closure_t data[CLOSURE_CAP];
+  int length;
+} closure_stack;
+
+void generate_closure_def(closure_t closure, FILE *f);
+void generate_type_name(token_array_t arr, FILE *f);
+void generate_function_signature(fun_def fun, FILE *f);
+fun_def fundef_from_let(ast_t bind);
+void generate_prolog(FILE *f);
 #endif // GENERATOR_H

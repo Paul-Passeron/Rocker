@@ -4,6 +4,7 @@
 #include "token.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 // void(*outer(void))
 // {
@@ -29,30 +30,37 @@ int main(int argc, char *argv[]) {
   token_array_t arr = lex_program(&l);
   parser_t p = new_parser(arr, argv[1]);
   parse_program(&p);
-  //   char out[] = "output.c";
-  //   generator_t g = new_generator(p, out);
-  //   generate_prolog();
+
+  char out[] = "out.c";
+  FILE *f = fopen(out, "wb");
+  if (f == NULL) {
+    perror("\n");
+  }
+  generate_prolog(f);
+
+  closure_t closure;
+  closure.name = "global";
+  closure.length = 0;
+  generate_closure_def(closure, f);
+
   for (int i = 0; i < p.prog.length; i++) {
     printf("\n\n");
     ast_t a = p.prog.data[i];
     ast_print(a);
-    // if (a->tag == ast_let_binding)
-    // {
-    //     // ast_t types = a->data.ast_let_binding.type_sig;
-    //     // char *fun_name = a->data.ast_let_binding.name.lexeme;
-    //     // generate_function_sig(fun_name, types,
-    //     a->data.ast_let_binding.args);
-    //     // generate_semicolon();
-    //     generate_let_binding(a);
-    // }
-    // if (a->tag == ast_type_def)
-    // {
-    //     if (a->data.ast_type_def.is_rec)
-    //         generate_rec_type(a);
-    //     else
-    //         generate_pro_type(a);
-    // }
+
+    if (a->tag == ast_let_binding) {
+
+      closure_t clos;
+      clos.name = a->data.ast_let_binding.name.lexeme;
+      clos.length = 0;
+      generate_closure_def(clos, f);
+      generate_function_signature(fundef_from_let(a), f);
+      fprintf(f, ";\n");
+    }
   }
+
+  fclose(f);
+  execl("/usr/bin/clang-format", "--style=\"LLVM\"", "-i", out, NULL);
 
   //   kill_generator(g);
 
