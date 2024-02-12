@@ -12,10 +12,10 @@
 #define INIT_AST_ARR 64
 
 typedef struct node_t node_t;
-typedef node_t *ast_t;
+typedef node_t* ast_t;
 
 typedef struct ast_array_t {
-  ast_t *data;
+  ast_t* data;
   int length;
   int capacity;
 } ast_array_t;
@@ -97,9 +97,9 @@ typedef struct node_t {
 ast_t new_ast(node_t n);
 void free_ast(ast_t a);
 
-void new_ast_array(ast_array_t *arr);
+void new_ast_array(ast_array_t* arr);
 void kill_ast_array(ast_array_t arr);
-void ast_array_push(ast_array_t *arr, ast_t a);
+void ast_array_push(ast_array_t* arr, ast_t a);
 
 ast_t new_op_ast(ast_t left, token_type_t op, ast_t right);
 
@@ -107,4 +107,4 @@ void ast_print(ast_t a);
 
 ast_array_t uncurry(ast_t curr);
 
-#endif // AST_H
+#endif  // AST_H

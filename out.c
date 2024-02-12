@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 typedef struct {
-  char *s;
+  char* s;
   int length;
 } string;
 
@@ -14,10 +14,19 @@ typedef struct global_closure {
   char __closure__;
 } global_closure;
 
-typedef struct main_closure {
+typedef struct print_name_closure {
   char __closure__;
-} main_closure;
+} print_name_closure;
 
-// Generating function definition for: main
-int main(const struct global_closure global_closure,
-         struct main_closure *local_closure);
+// Generating function definition for: print_name
+void print_name(const global_closure __gcl,
+                struct print_name_closure* __lcl,
+                string name);
+typedef struct print_name_closure {
+  char __closure__;
+} print_name_closure;
+
+// Generating function definition for: print_name
+void print_name(const global_closure __gcl,
+                struct print_name_closure* __lcl,
+                string name);

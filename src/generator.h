@@ -26,13 +26,13 @@ typedef struct fun_def {
   typed_arg args[TYPED_ARG_CAP];
   token_array_t return_type;
   int arity;
-  char *closure_name;
+  char* closure_name;
 } fun_def;
 
 typedef struct closure_t {
   typed_arg elems[TYPED_ARG_CAP];
   int length;
-  char *name;
+  char* name;
 } closure_t;
 
 typedef struct closure_stack {
@@ -40,9 +40,18 @@ typedef struct closure_stack {
   int length;
 } closure_stack;
 
-void generate_closure_def(closure_t closure, FILE *f);
-void generate_type_name(token_array_t arr, FILE *f);
-void generate_function_signature(fun_def fun, FILE *f);
+typedef struct doubles_table {
+  char* names[1024];
+  int num[1024];
+  int length;
+} doubles_table;
+
+int get_num_repeat(doubles_table d, char* name);
+
+void generate_closure_def(closure_t closure, FILE* f);
+void generate_type_name(token_array_t arr, FILE* f);
+void generate_function_signature(fun_def fun, FILE* f);
 fun_def fundef_from_let(ast_t bind);
-void generate_prolog(FILE *f);
-#endif // GENERATOR_H
+void generate_prolog(FILE* f);
+char* name_mangle(ast_t let_binding);
+#endif  // GENERATOR_H

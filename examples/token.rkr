@@ -1,3 +1,16 @@
-let main  : void -> int => {
-0
+let print_name name: string -> void => {
+  let () => print "Hey " in
+  let () => print name in
+  print " !\n"
 }
+
+// Case that will later be illegal (function redefinition) 
+// to test wether or not the mangler works
+
+let print_name name: string -> void => {
+  let () => print "Hey " in
+  let () => print name in
+  print " !\n"
+}
+
+// Spoiler: it does

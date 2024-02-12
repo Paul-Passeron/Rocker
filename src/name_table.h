@@ -11,18 +11,16 @@
 
 #define INIT_NT_ARR 64
 
-typedef struct table_elem_t
-{
-    char *name;
-    int arity;
-    ast_t type_sig;
+typedef struct table_elem_t {
+  char* name;
+  int arity;
+  ast_t type_sig;
 } table_elem_t;
 
-typedef struct name_table_t
-{
-    table_elem_t *data;
-    int length;
-    int capacity;
+typedef struct name_table_t {
+  table_elem_t* data;
+  int length;
+  int capacity;
 } name_table_t;
 
-#endif // NAME_TABLE_H
+#endif  // NAME_TABLE_H
