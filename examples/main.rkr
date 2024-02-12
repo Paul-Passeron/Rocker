@@ -1,14 +1,26 @@
-let main : void -> int => {
-     let a : void -> int => {let () => print "Hello World !\n" in 0} in
-     let () => print "Hello World !\n" in
-     let () => {a _ }in a _
+let outer name : string -> void -> void => {
+    let msg: string => "Hey " in
+    let () => print "Producing inner function with name: " in
+    let () => print name in
+    let () => print "\n" in
+    let inner : void -> void => {
+        let () => print msg in
+        let () => print name in
+        print " !\n"
+    } in
+    inner
 }
 
+let fun : void -> void => {
+    outer "Paul"
+}
 
-let fact n : int -> int => {
-     match n => {
-          -> 0 : 1
-          -> 1 : 1
-          -> n : n * fact(n - 1)
-     }
+let main : void -> int => {
+    let () => print "Hello, World !\n" in
+    let fun2 : void -> void => {outer "Marie"} in
+    let () => fun _ in
+    let () => fun _ in
+    let () => fun2 _ in
+    let () => fun2 _ in
+    0
 }
