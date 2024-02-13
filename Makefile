@@ -1,5 +1,5 @@
-CC=gcc
-CFLAGS= -Wall -Wextra -g
+CC=clang
+CFLAGS=-Werror -Wall -Wextra
 SRC=src/
 BUILD=build/
 

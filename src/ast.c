@@ -249,7 +249,6 @@ void free_ast(ast_t a) {
       // free_token(data.name);
       free_ast(data.signature);
     } break;
-    
   }
   free(a);
 }
