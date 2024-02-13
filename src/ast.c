@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 ast_t new_ast(node_t n) {
+  printf("new ast\n");
   ast_t ptr = malloc(sizeof(node_t));
   if (ptr == NULL) {
     printf("Could not allocate memory\n");
@@ -11,11 +12,6 @@ ast_t new_ast(node_t n) {
   }
   *ptr = n;
   return ptr;
-}
-
-void free_ast(ast_t a) {
-  if (a == NULL)
-    return;
 }
 
 ast_t new_op_ast(ast_t left, token_type_t op, ast_t right) {
@@ -36,14 +32,17 @@ void ast_array_push(ast_array_t* arr, ast_t a) {
 }
 
 void new_ast_array(ast_array_t* arr) {
+  printf("new ast array\n");
   arr->capacity = INIT_AST_ARR;
   arr->length = 0;
   arr->data = malloc(sizeof(ast_t) * arr->capacity);
 }
 
 void kill_ast_array(ast_array_t arr) {
-  // TODO
-  (void)arr;
+  for (int i = 0; i < arr.length; i++) {
+    free_ast(arr.data[i]);
+  }
+  free(arr.data);
 }
 
 void print_n_tabs(int n) {
@@ -195,4 +194,68 @@ ast_array_t uncurry(ast_t curr) {
   new_ast_array(&res);
   uncurry_aux(&res, curr);
   return res;
+}
+
+void free_ast(ast_t a) {
+  if (a == NULL)
+    return;
+  switch (a->tag) {
+    case ast_type: {
+      struct ast_type data = a->data.ast_type;
+      // free_token_array(data.chain);
+    } break;
+    case ast_identifier: {
+      struct ast_identifier data = a->data.ast_identifier;
+      // free_token(data.id);
+    } break;
+    case ast_let_binding: {
+      struct ast_let_binding data = a->data.ast_let_binding;
+      // free_token_array(data.args);
+      free_ast(data.type_sig);
+      free_ast(data.right);
+      // if (!data.is_void)
+      //   free_token(data.name);
+    } break;
+    case ast_literal: {
+      struct ast_literal data = a->data.ast_literal;
+      // free_token(data.literal);
+    } break;
+    case ast_operation: {
+      struct ast_operation data = a->data.ast_operation;
+      free_ast(data.left);
+      free_ast(data.right);
+      // free_token(data.op);
+    } break;
+    case ast_curry: {
+      struct ast_curry data = a->data.ast_curry;
+      free_ast(data.arg);
+      free_ast(data.caller);
+    } break;
+    case ast_in: {
+      struct ast_in data = a->data.ast_in;
+      free_ast(data.first);
+      free_ast(data.second);
+    } break;
+    case ast_match: {
+      struct ast_match data = a->data.ast_match;
+      free_ast(data.to_match);
+      kill_ast_array(data.cases);
+    } break;
+    case ast_match_case: {
+      struct ast_match_case data = a->data.ast_match_case;
+      free_ast(data.expression);
+      free_ast(data.matcher);
+    } break;
+    case ast_type_def: {
+      struct ast_type_def data = a->data.ast_type_def;
+      // free_token(data.name);
+      kill_ast_array(data.constructors);
+    } break;
+    case ast_constructor: {
+      struct ast_constructor data = a->data.ast_constructor;
+      // free_token(data.name);
+      free_ast(data.signature);
+    } break;
+  }
+  free(a);
 }

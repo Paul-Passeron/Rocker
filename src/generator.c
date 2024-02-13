@@ -119,6 +119,7 @@ int get_num_repeat(doubles_table t, char* name) {
 char* name_mangle(ast_t let_binding) {
   // is not meant to be called multiple times for
   // the same function !!!
+  printf("name mangle\n");
   char* buffer = malloc(128);
   memset(buffer, 0, 128);
   struct ast_let_binding data = let_binding->data.ast_let_binding;

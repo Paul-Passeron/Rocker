@@ -18,6 +18,8 @@ typedef struct parser_t {
 } parser_t;
 
 parser_t new_parser(token_array_t arr, char* filename);
+void kill_parser(parser_t p);
+
 token_t parser_peek(parser_t p);
 token_t parser_consume(parser_t* p);
 void parser_consume_n(parser_t* p, int n);
@@ -32,4 +34,5 @@ ast_t parse_let_binding(parser_t* p);
 ast_t parse_type_def(parser_t* p);
 ast_t parse_pro_type(parser_t* p);
 ast_t parse_rec_type(parser_t* p);
+
 #endif  // PARSER_H

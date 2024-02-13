@@ -71,12 +71,13 @@ int main(int argc, char* argv[]) {
   if (output == NULL) {
     output = "out.c";
   }
-
-  ast_array_t arr = generate_ast_prog_file(input);
+  compiler_t c;
+  ast_array_t arr = generate_ast_prog_file(&c, input);
   if (print_tree)
     print_program(arr);
 
   (void)output;
+  kill_compiler(c);
 
   return 0;
 }

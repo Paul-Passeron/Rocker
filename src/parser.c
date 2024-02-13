@@ -353,6 +353,11 @@ parser_t new_parser(token_array_t arr, char* filename) {
   return res;
 }
 
+void kill_parser(parser_t p) {
+  kill_ast_array(p.prog);
+  free_token_array(p.tokens);
+}
+
 ast_t parse_type_def(parser_t* p) {
   // expect 'rec' or 'pro' keyword
   token_t t = parser_peek(*p);

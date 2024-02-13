@@ -78,8 +78,9 @@ typedef struct token_array_t {
 } token_array_t;
 
 void new_token_array(token_array_t*);
-void kill_token_array(token_array_t);
+void free_token_array(token_array_t);
 int get_precedence(token_type_t t);
+void free_token(token_t);
 
 typedef enum typdef_type_t { TYPEDEF_RECORD, TYPEDEF_PRODUCT } typdef_type_t;
 

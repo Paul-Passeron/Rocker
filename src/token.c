@@ -65,16 +65,18 @@ int is_lexeme_keyword(char* s) {
 }
 
 void new_token_array(token_array_t* arr) {
+  printf("new token array\n");
   arr->capacity = INIT_TOK_ARR;
   arr->length = 0;
   arr->data = malloc(sizeof(token_t) * arr->capacity);
 }
 
 void free_token(token_t tok) {
-  free(tok.lexeme);
+  if (tok.lexeme != NULL)
+    free(tok.lexeme);
 }
 
-void kill_token_array(token_array_t arr) {
+void free_token_array(token_array_t arr) {
   for (int i = 0; i < arr.length; i++)
     free_token(arr.data[i]);
   if (arr.data != NULL)
