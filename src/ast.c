@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 ast_t new_ast(node_t n) {
-  printf("new ast\n");
   ast_t ptr = malloc(sizeof(node_t));
   if (ptr == NULL) {
     printf("Could not allocate memory\n");
@@ -32,7 +31,6 @@ void ast_array_push(ast_array_t* arr, ast_t a) {
 }
 
 void new_ast_array(ast_array_t* arr) {
-  printf("new ast array\n");
   arr->capacity = INIT_AST_ARR;
   arr->length = 0;
   arr->data = malloc(sizeof(ast_t) * arr->capacity);
@@ -202,24 +200,19 @@ void free_ast(ast_t a) {
   switch (a->tag) {
     case ast_type: {
       struct ast_type data = a->data.ast_type;
-      // free_token_array(data.chain);
+      free(data.chain.data);
     } break;
-    case ast_identifier: {
-      struct ast_identifier data = a->data.ast_identifier;
-      // free_token(data.id);
-    } break;
+    case ast_identifier: break;
     case ast_let_binding: {
       struct ast_let_binding data = a->data.ast_let_binding;
       // free_token_array(data.args);
+      free(data.args.data);
       free_ast(data.type_sig);
       free_ast(data.right);
       // if (!data.is_void)
       //   free_token(data.name);
     } break;
-    case ast_literal: {
-      struct ast_literal data = a->data.ast_literal;
-      // free_token(data.literal);
-    } break;
+    case ast_literal:  break;
     case ast_operation: {
       struct ast_operation data = a->data.ast_operation;
       free_ast(data.left);
@@ -256,6 +249,7 @@ void free_ast(ast_t a) {
       // free_token(data.name);
       free_ast(data.signature);
     } break;
+    
   }
   free(a);
 }

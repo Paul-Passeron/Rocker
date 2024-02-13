@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "generator.h"
-#include "lexer.h"
-#include "parser.h"
-#include "token.h"
 
 #include "compiler.h"
 
@@ -14,7 +10,7 @@ void usage(char* name) {
   printf("\t%s [flags] <input file> [output file]\n", name);
   printf("Possible flags:\n");
   printf("\t-t:\t\tPrints the ast\n");
-  printf("\t-m:\t\tPrints the list of mangled names\n");
+  printf("\t-m:t\tPrints the list of mangled names\n");
 }
 
 void print_program(ast_array_t prog) {

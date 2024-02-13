@@ -15,20 +15,20 @@ lexer_t new_lexer(char* filename) {
     perror("");
     exit(1);
   }
-  printf("new filename\n");
   res.filename = malloc(strlen(filename) + 1);
   strcpy(res.filename, filename);
   fseek(f, 0, SEEK_END);
   size_t file_size = ftell(f) + 1;
   fseek(f, 0, SEEK_SET);
-  printf("new file\n");
   res.data = malloc(file_size);
   res.length = file_size;
   fread(res.data, 1, file_size, f);
+  fclose(f);
   return res;
 }
 
 void kill_lexer(lexer_t l) {
+
   free(l.data);
   free(l.filename);
 }
@@ -129,7 +129,6 @@ int length_of_delimited_literal(lexer_t l, char c) {
 }
 
 char* create_lexeme(lexer_t l, int length) {
-  printf("new lexeme\n");
   char* s = malloc(length + 1);
   if (s == NULL) {
     printf("Could not allocate memory\n");
@@ -179,7 +178,7 @@ void lexer_consume_n(lexer_t* l, int n) {
 }
 
 token_t step_lexer(lexer_t* l) {
-  token_t res;
+  token_t res = {0};
 
   // Possible cases:
   // - we have a comment

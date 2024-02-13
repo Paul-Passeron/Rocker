@@ -1,6 +1,7 @@
 #include "token.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 static char* lexemes[TOK_COUNT] = {
@@ -65,10 +66,10 @@ int is_lexeme_keyword(char* s) {
 }
 
 void new_token_array(token_array_t* arr) {
-  printf("new token array\n");
   arr->capacity = INIT_TOK_ARR;
   arr->length = 0;
   arr->data = malloc(sizeof(token_t) * arr->capacity);
+
 }
 
 void free_token(token_t tok) {
