@@ -32,5 +32,6 @@ let fact n : int -> int => {
 ```OCaml
 let main void -> int => {
   let () => print "Hello, World !\n" in
+  0
 }
 ```
