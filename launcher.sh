@@ -1,4 +1,5 @@
+set -xe
 clear;
+./format.sh
 make;
-./main examples/token.rkr;
-(./format.sh > /dev/null);
+./main examples/token.rkr -t;

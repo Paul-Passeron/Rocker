@@ -5,7 +5,7 @@ BUILD=build/
 
 DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o $(BUILD)compiler.o
 
-all: clean main lines
+all: main lines
 main: $(DEP)
 	$(CC) $(CFLAGS) -o $@ $^
 

@@ -202,22 +202,20 @@ void free_ast(ast_t a) {
       struct ast_type data = a->data.ast_type;
       free(data.chain.data);
     } break;
-    case ast_identifier: break;
+    case ast_identifier:
+      break;
     case ast_let_binding: {
       struct ast_let_binding data = a->data.ast_let_binding;
-      // free_token_array(data.args);
       free(data.args.data);
       free_ast(data.type_sig);
       free_ast(data.right);
-      // if (!data.is_void)
-      //   free_token(data.name);
     } break;
-    case ast_literal:  break;
+    case ast_literal:
+      break;
     case ast_operation: {
       struct ast_operation data = a->data.ast_operation;
       free_ast(data.left);
       free_ast(data.right);
-      // free_token(data.op);
     } break;
     case ast_curry: {
       struct ast_curry data = a->data.ast_curry;
@@ -241,14 +239,28 @@ void free_ast(ast_t a) {
     } break;
     case ast_type_def: {
       struct ast_type_def data = a->data.ast_type_def;
-      // free_token(data.name);
       kill_ast_array(data.constructors);
     } break;
     case ast_constructor: {
       struct ast_constructor data = a->data.ast_constructor;
-      // free_token(data.name);
       free_ast(data.signature);
     } break;
   }
   free(a);
+}
+
+ast_array_t un_nest(ast_t a) {
+  assert(a->tag == ast_in && "Expected in ast in un_nest");
+  struct ast_in data = a->data.ast_in;
+  // We'll need to free every in we find
+  // Can do it recursively but we'll do it with a while loop
+  ast_array_t arr;
+  new_ast_array(&arr);
+  ast_array_push(&arr, data.first);
+  while (data.second->tag == ast_in) {
+    data = data.second->data.ast_in;
+    ast_array_push(&arr, data.first);
+  }
+  ast_array_push(&arr, data.second);
+  return arr;
 }

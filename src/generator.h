@@ -54,4 +54,6 @@ void generate_function_signature(fun_def fun, FILE* f);
 fun_def fundef_from_let(ast_t bind);
 void generate_prolog(FILE* f);
 char* name_mangle(ast_t let_binding);
+closure_t get_closure(ast_t let);
+void print_closure(closure_t closure);
 #endif  // GENERATOR_H

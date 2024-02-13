@@ -106,5 +106,5 @@ ast_t new_op_ast(ast_t left, token_type_t op, ast_t right);
 void ast_print(ast_t a);
 
 ast_array_t uncurry(ast_t curr);
-
+ast_array_t un_nest(ast_t a);
 #endif  // AST_H

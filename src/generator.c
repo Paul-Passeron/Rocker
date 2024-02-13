@@ -63,6 +63,77 @@ void type_args(typed_arg* arr, token_array_t args, ast_t type_sig) {
   }
 }
 
+/*
+typedef struct closure_t {
+  typed_arg elems[TYPED_ARG_CAP];
+  int length;
+  char* name;
+} closure_t;
+*/
+
+closure_t get_closure(ast_t let) {
+  // a let binding is basically like so:
+  // let name : type =>
+  //  let ... in
+  //  let ... in
+  //  ...
+  //  let ... in
+  // value
+  // First we have a let binding then either a value either match (considered
+  // like a value) or finally an ast_in
+
+  assert(let->tag == ast_let_binding && "Expected let binding in get_closure");
+  struct ast_let_binding data = let->data.ast_let_binding;
+
+  closure_t res;
+  // Maybe we'll have to mangle
+  res.name = data.name.lexeme;
+  res.length = 0;
+  memset(res.elems, 0, sizeof(res.elems));
+  // We add the args of the let binding in the closure
+  token_array_t type_sig = data.type_sig->data.ast_type.chain;
+  for (int i = 0; i < data.args.length; i++) {
+    typed_arg arg;
+    arg.name = data.args.data[i];
+    token_array_t type;
+    new_token_array(&type);
+    // single type for the moment
+    token_array_push(&type, type_sig.data[i]);
+    arg.type = type;
+    res.elems[res.length++] = arg;
+  }
+  if (data.right->tag != ast_in)
+    return res;
+
+  ast_array_t arr = un_nest(data.right);
+  for (int i = 0; i < arr.length; i++) {
+    ast_t elem = arr.data[i];
+    if (elem->tag == ast_let_binding) {
+      // Then we add it to the closure if its is not a 'let ()'
+      struct ast_let_binding elem_data = elem->data.ast_let_binding;
+      if (!elem_data.is_void) {
+        typed_arg arg;
+        arg.name = elem_data.name;
+        // for the moment, we don't save functions inside
+        // closures are they are immutable and saved globally
+        token_array_t type = elem_data.type_sig->data.ast_type.chain;
+        if (type.length == 1)
+          arg.type = type;
+        res.elems[res.length++] = arg;
+      }
+    }
+  }
+  return res;
+}
+
+void print_closure(closure_t closure) {
+  printf("Closure '%s':\n", closure.name);
+  for (int i = 0; i < closure.length; i++) {
+    typed_arg arg = closure.elems[i];
+    printf("   %s: %s\n", arg.name.lexeme, arg.type.data[0].lexeme);
+  }
+}
+
 fun_def fundef_from_let(ast_t bind) {
   struct ast_let_binding binding = bind->data.ast_let_binding;
   token_array_t return_type;

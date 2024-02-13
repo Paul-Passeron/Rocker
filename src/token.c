@@ -1,7 +1,7 @@
 #include "token.h"
 #include <assert.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static char* lexemes[TOK_COUNT] = {
@@ -69,7 +69,6 @@ void new_token_array(token_array_t* arr) {
   arr->capacity = INIT_TOK_ARR;
   arr->length = 0;
   arr->data = malloc(sizeof(token_t) * arr->capacity);
-
 }
 
 void free_token(token_t tok) {

@@ -15,7 +15,7 @@ void usage(char* name) {
 
 void print_program(ast_array_t prog) {
   for (int i = 0; i < prog.length; i++) {
-    printf("\n\n");
+    printf("\n");
     ast_t a = prog.data[i];
     ast_print(a);
   }
@@ -71,6 +71,14 @@ int main(int argc, char* argv[]) {
   ast_array_t arr = generate_ast_prog_file(&c, input);
   if (print_tree)
     print_program(arr);
+
+  for (int i = 0; i < arr.length; i++) {
+    ast_t a = arr.data[i];
+    if (a->tag == ast_let_binding) {
+      closure_t closure = get_closure(a);
+      print_closure(closure);
+    }
+  }
 
   (void)output;
   kill_compiler(c);

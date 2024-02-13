@@ -28,7 +28,6 @@ lexer_t new_lexer(char* filename) {
 }
 
 void kill_lexer(lexer_t l) {
-
   free(l.data);
   free(l.filename);
 }
