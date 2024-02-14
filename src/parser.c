@@ -1,7 +1,6 @@
 #include "parser.h"
 #include "ast.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -42,6 +41,7 @@ ast_t parse_leaf(parser_t* p) {
     return new_ast((node_t){ast_literal, {.ast_literal = {t}}});
   printf("Expected leaf\n");
   exit(1);
+  return NULL;  // For TCC
 }
 
 ast_t parse_primary_aux(parser_t* p, int curry) {
@@ -95,6 +95,7 @@ ast_t parse_primary_aux(parser_t* p, int curry) {
     printf("Could not parse as a primary !\n");
     exit(1);
   }
+  return NULL;  // For TCC
 }
 
 ast_t parse_primary(parser_t* p) {
@@ -337,6 +338,7 @@ ast_t parse_val(parser_t* p) {
     printf("Could not parse as val\n");
     exit(1);
   }
+  return NULL;  // For TCC
 }
 
 void parse_program(parser_t* p) {

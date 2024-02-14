@@ -53,7 +53,6 @@ int main(int argc, char* argv[]) {
     } else if (input == NULL)
       input = arg;
     else if (output == NULL) {
-      printf("Arg is : %s\n", arg);
       output = arg;
     } else {
       printf("Unexpected argument '%s' !\n", arg);
@@ -79,9 +78,34 @@ int main(int argc, char* argv[]) {
   fprintf(
       f, "typedef struct global_closure{char __closure__;}global_closure;\n\n");
   program_closures closures = get_every_closures(arr);
+  for (int i = 0; i < closures.length; i++)
+    generate_closure_forward_def(closures.data[i], f);
+  for (int i = 0; i < closures.length; i++)
+    generate_function_ptr_type_def(closures.data[i], f);
+  for (int i = 0; i < closures.length; i++) {
+    fun_def fundef = fundef_from_let(closures.data[i].reference);
+    generate_function_signature(fundef, f, closures.data[i].name,
+                                closures.data[i].elems[0].type.data[0].lexeme);
+
+    fprintf(f, ";\n\n");
+  }
   for (int i = 0; i < closures.length; i++) {
     generate_closure_def(closures.data[i], f);
   }
+  for (int i = 0; i < closures.length; i++) {
+    fun_def fundef = fundef_from_let(closures.data[i].reference);
+    generate_function_signature(fundef, f, closures.data[i].name,
+                                closures.data[i].elems[0].type.data[0].lexeme);
+
+    fprintf(f, "{\n");
+    generate_function_body(closures.data[i], f);
+    fprintf(f, "}\n\n");
+  }
+  for (int i = 0; i < closures.length; i++) {
+    kill_closure(closures.data[i]);
+  }
+  free(closures.data);
+
   fclose(f);
 
   (void)output;

@@ -1,5 +1,4 @@
 #include "ast.h"
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -250,12 +249,16 @@ void free_ast(ast_t a) {
 }
 
 ast_array_t un_nest(ast_t a) {
-  assert(a->tag == ast_in && "Expected in ast in un_nest");
+  ast_array_t arr;
+  new_ast_array(&arr);
+  if (a->tag != ast_in) {
+    ast_array_push(&arr, a);
+    return arr;
+  }
+
   struct ast_in data = a->data.ast_in;
   // We'll need to free every in we find
   // Can do it recursively but we'll do it with a while loop
-  ast_array_t arr;
-  new_ast_array(&arr);
   ast_array_push(&arr, data.first);
   while (data.second->tag == ast_in) {
     data = data.second->data.ast_in;

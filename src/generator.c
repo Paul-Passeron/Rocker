@@ -7,7 +7,18 @@
 #include <string.h>
 
 closure_stack cl_stack;
-doubles_table table;
+doubles_table table = {0};
+
+void init_table(doubles_table* t) {
+  t->length = 0;
+  t->names = malloc(sizeof(char*) * 1024);
+  t->num = malloc(sizeof(int) * 1024);
+}
+
+void kill_global_table() {
+  free(table.names);
+  free(table.num);
+}
 
 void generate_type_name(token_array_t arr, FILE* f) {
   // Single type
@@ -22,7 +33,10 @@ void generate_type_name(token_array_t arr, FILE* f) {
   }
 }
 
-void generate_function_signature(fun_def fun, FILE* f) {
+void generate_function_signature(fun_def fun,
+                                 FILE* f,
+                                 char* name,
+                                 char* outer) {
   fprintf(f, "// Generating function definition for: %s\n", fun.name.lexeme);
 
   // if we havea simple return type (a vlue or void)
@@ -31,10 +45,8 @@ void generate_function_signature(fun_def fun, FILE* f) {
   if (fun.return_type.length == 1) {
     // a normal C function, basically
     char* ret_type_name = fun.return_type.data[0].lexeme;
-    fprintf(f,
-            "%s %s(const %s_closure __gcl, struct "
-            "%s_closure *__lcl",
-            ret_type_name, fun.name.lexeme, fun.closure_name, fun.name.lexeme);
+    fprintf(f, "%s %s(const %s __gcl, %s_closure *__lcl", ret_type_name, name,
+            outer, name);
     for (int i = 0; i < fun.arity; i++) {
       typed_arg t = fun.args[i];
       fprintf(f, ", ");
@@ -71,17 +83,18 @@ typedef struct closure_t {
 } closure_t;
 */
 
-closure_t get_closure(ast_t let, char* outer_closure) {
+closure_t get_closure(ast_t let, char* outer_closure, char* inner) {
   assert(let->tag == ast_let_binding && "Expected let binding in get_closure");
   struct ast_let_binding data = let->data.ast_let_binding;
 
   closure_t res;
   // Maybe we'll have to mangle
-  res.name = data.name.lexeme;
+  res.name = inner;
   res.length = 0;
+  res.reference = let;
   memset(res.elems, 0, sizeof(res.elems));
   // First, we add the outer closure
-  // As we onmy have the closure name, we create a fake token for a fake type
+  // As we only have the closure name, we create a fake token for a fake type
   char added[] = "_closure";
   char* closure_name = malloc(strlen(outer_closure) + strlen(added) + 1);
   sprintf(closure_name, "%s%s", outer_closure, added);
@@ -95,7 +108,7 @@ closure_t get_closure(ast_t let, char* outer_closure) {
   typed_arg outer_closure_arg;
   outer_closure_arg.name = name;
   outer_closure_arg.type = closure_type;
-  outer_closure_arg.allocated = 0;
+  outer_closure_arg.allocated = 1;
 
   res.elems[res.length++] = outer_closure_arg;
 
@@ -183,15 +196,34 @@ void generate_prolog(FILE* f) {
   fprintf(f, "}\n\n");
 }
 
+void generate_function_ptr_type_def(closure_t closure, FILE* f) {
+  // typedef ret_type (*name)(args, ...);
+  struct ast_let_binding data = closure.reference->data.ast_let_binding;
+  token_array_t sig = data.type_sig->data.ast_type.chain;
+  token_t ret_type = sig.data[sig.length - 1];
+
+  fprintf(f, "typedef %s (*%s_ptr)(", ret_type.lexeme, closure.name);
+  fprintf(f, "%s", closure.elems[0].type.data[0].lexeme);
+  fprintf(f, ", %s_closure*", closure.name);
+  for (int i = 0; i < data.args.length; i++) {
+    fprintf(f, ", %s", sig.data[i].lexeme);
+  }
+  fprintf(f, ");\n\n");
+}
+
+void generate_closure_forward_def(closure_t closure, FILE* f) {
+  fprintf(f, "typedef struct %s_closure %s_closure;\n\n", closure.name,
+          closure.name);
+}
+
 void generate_closure_def(closure_t closure, FILE* f) {
-  // TODO: mangle closure struct names
-  fprintf(f, "typedef struct %s_closure {\n", closure.name);
+  fprintf(f, "struct %s_closure {\n", closure.name);
 
   for (int i = 0; i < closure.length; i++) {
     generate_type_name(closure.elems[i].type, f);
     fprintf(f, " %s;\n", closure.elems[i].name.lexeme);
   }
-  fprintf(f, "  char __closure__;\n} %s_closure;\n\n", closure.name);
+  fprintf(f, "  char __closure__;\n};\n\n");
 }
 
 int get_num_repeat(doubles_table t, char* name) {
@@ -205,13 +237,12 @@ int get_num_repeat(doubles_table t, char* name) {
 char* name_mangle(ast_t let_binding) {
   // is not meant to be called multiple times for
   // the same function !!!
-  printf("name mangle\n");
   char* buffer = malloc(128);
   memset(buffer, 0, 128);
   struct ast_let_binding data = let_binding->data.ast_let_binding;
   char* function_mangler_prefix = "_Z";
   int num = get_num_repeat(table, data.name.lexeme);
-  sprintf(buffer, "%s%ld%s%i\n", function_mangler_prefix,
+  sprintf(buffer, "%s%ld%s%i", function_mangler_prefix,
           strlen(data.name.lexeme), data.name.lexeme, num);
   // We increment the counter
   if (num == 0) {
@@ -230,12 +261,22 @@ char* name_mangle(ast_t let_binding) {
 void kill_closure(closure_t closure) {
   // First is outer closure which is allocated if it is global_closure
   // free_token(closure.elems[0].name);
+  free(closure.name);
   if (strcmp(closure.elems[0].name.lexeme, "global") == 0)
     free_token(closure.elems[0].type.data[0]);
-
   for (int i = 0; i < closure.length; i++) {
     if (closure.elems[i].allocated) {
       free(closure.elems[i].type.data);
+      for (int j = 0; j < closure.elems[i].type.length; j++) {
+        token_t tok = closure.elems[i].type.data[j];
+        if (tok.lexeme != NULL && strlen(tok.lexeme) > 1) {
+          if ((tok.lexeme[0] == '_' && tok.lexeme[1] == 'Z')) {
+            free(tok.lexeme);
+          }
+        } else if (strcmp(tok.lexeme, "global_closure") == 0) {
+          free(tok.lexeme);
+        }
+      }
     }
   }
 }
@@ -250,25 +291,34 @@ int is_let_binding_function_def(ast_t let) {
   return 0;
 }
 
+// This is supposed to be in this file as we 'hide' it
+// from the interface lol
 typedef struct {
   char** outer;
+  char** inner;
   int length;
 } closure_helper;
 
 void get_every_closures_aux(ast_t let,
                             ast_array_t* res,
-                            closure_helper* helper) {
+                            closure_helper* helper,
+                            char* outer_mangled) {
   struct ast_let_binding data = let->data.ast_let_binding;
   if (data.right->tag == ast_in) {
     ast_array_t defs = un_nest(data.right);
+    char* inner_mangled = outer_mangled;
     for (int i = 0; i < defs.length - 1; i++) {
       ast_t def = defs.data[i];
+
       if (def->tag == ast_let_binding)  // Should be the case
         if (is_let_binding_function_def(def)) {
           ast_array_push(res, def);
-          helper->outer[helper->length++] = data.name.lexeme;
+          inner_mangled = name_mangle(def);
+          helper->inner[helper->length] = inner_mangled;
+          helper->outer[helper->length] = outer_mangled;
+          helper->length++;
         }
-      get_every_closures_aux(def, res, helper);
+      get_every_closures_aux(def, res, helper, inner_mangled);
     }
 
     free(defs.data);
@@ -278,19 +328,23 @@ void get_every_closures_aux(ast_t let,
 char global_closure_name[] = "global";
 
 program_closures get_every_closures(ast_array_t program) {
+  init_table(&table);
   // We create closures only for function definitions
   ast_array_t stack;  // We keep track of every function definition
   new_ast_array(&stack);
   closure_helper helper = {0};
   helper.outer = malloc(sizeof(char*) * stack.capacity);
+  helper.inner = malloc(sizeof(char*) * stack.capacity);
   for (int i = 0; i < program.length; i++) {
     ast_t a = program.data[i];
     if (a->tag == ast_let_binding) {
       // is it a function call ?
       if (is_let_binding_function_def(a)) {
         ast_array_push(&stack, a);
-        helper.outer[helper.length++] = global_closure_name;
-        get_every_closures_aux(a, &stack, &helper);
+        helper.outer[helper.length] = global_closure_name;
+        helper.inner[helper.length++] = name_mangle(a);
+        get_every_closures_aux(a, &stack, &helper,
+                               helper.inner[helper.length - 1]);
       }
     }
   }
@@ -298,9 +352,70 @@ program_closures get_every_closures(ast_array_t program) {
   // closure array
   closure_t* arr = malloc(sizeof(*arr) * helper.length);
   for (int i = 0; i < helper.length; i++) {
-    arr[i] = get_closure(stack.data[i], helper.outer[i]);
+    arr[i] = get_closure(stack.data[i], helper.outer[i], helper.inner[i]);
   }
   free(stack.data);
   free(helper.outer);
+  free(helper.inner);
   return (program_closures){arr, helper.length};
+}
+
+void generate_expression(ast_t expr, FILE* f) {
+  switch (expr->tag) {
+    case ast_literal: {
+      fprintf(f, "%s", expr->data.ast_literal.literal.lexeme);
+    } break;
+    default:
+      break;
+  }
+}
+
+void generate_var_def(ast_t let, FILE* f) {
+  if (let->tag != ast_let_binding)
+    return;
+  struct ast_let_binding data = let->data.ast_let_binding;
+  assert(data.args.length == 0);
+  if (data.is_void) {
+    assert(0 && "TODO: handle void let bindings in var def function");
+  }
+  if (data.right->tag != ast_in) {
+    // We are ok, the value to return must be right there
+    token_t type = data.type_sig->data.ast_type.chain.data[0];
+    assert(strcmp(type.lexeme, "void") != 0);
+    assert(data.name.lexeme != NULL);
+    // fprintf(f, "%s %s =", type.lexeme, data.name.lexeme);
+    fprintf(f, "__lcl->%s=", data.name.lexeme);
+    generate_expression(data.right, f);
+    fprintf(f, ";\n");
+  }
+}
+
+void generate_funcall(ast_t curry, FILE* f) {
+  (void)curry;
+  (void)f;
+  assert(0 && "TODO: generate_funcall not implemented yet !\n");
+}
+
+void generate_function_body(closure_t closure, FILE* f) {
+  fprintf(f, "__lcl->__closure__ = 1;\n");
+  ast_t let = closure.reference;
+  assert(let->tag == ast_let_binding);
+  struct ast_let_binding data = let->data.ast_let_binding;
+  ast_array_t statements = un_nest(data.right);
+  // the last statement is the return statement
+  for (int i = 0; i < statements.length - 1; i++) {
+    ast_t statement = statements.data[i];
+    if (statement->tag == ast_let_binding)
+      generate_var_def(statement, f);
+    else if (statement->tag == ast_curry) {
+      generate_funcall(statement, f);
+    }
+  }
+  if (statements.length > 0) {
+    fprintf(f, "return ");
+    generate_expression(statements.data[statements.length - 1], f);
+    fprintf(f, ";\n");
+  }
+
+  free(statements.data);
 }

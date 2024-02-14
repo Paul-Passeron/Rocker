@@ -1,4 +1,4 @@
-CC=gcc
+CC=tcc
 CFLAGS=-Werror -Wall -Wextra -g
 SRC=src/
 BUILD=build/

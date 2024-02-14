@@ -24,3 +24,11 @@ let main : void -> int => {
     let () => fun2 _ in
     0
 }
+
+
+let other_function a : int -> void =>{
+    let inner : void -> void => {
+        print "Yay !\n"
+    } in
+    inner _
+}
