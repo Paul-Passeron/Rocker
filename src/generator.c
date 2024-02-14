@@ -71,7 +71,7 @@ typedef struct closure_t {
 } closure_t;
 */
 
-closure_t get_closure(ast_t let) {
+closure_t get_closure(ast_t let, char* outer_closure) {
   // a let binding is basically like so:
   // let name : type =>
   //  let ... in
@@ -90,6 +90,23 @@ closure_t get_closure(ast_t let) {
   res.name = data.name.lexeme;
   res.length = 0;
   memset(res.elems, 0, sizeof(res.elems));
+  // First, we add the outer closure
+  // As we onmy have the closure name, we create a fake token for a fake type
+  char added[] = "_closure";
+  char* closure_name = malloc(strlen(outer_closure) + strlen(added) + 1);
+  sprintf(closure_name, "%s%s", outer_closure, added);
+  token_t tok = {
+      .col = -1, .lexeme = closure_name, .line = -1, .type = TOK_IDENTIFIER};
+  token_array_t closure_type;
+  new_token_array(&closure_type);
+  token_array_push(&closure_type, tok);
+  token_t name = {
+      .col = -1, .lexeme = "outer_closure", .line = -1, .type = TOK_IDENTIFIER};
+  typed_arg outer_closure_arg;
+  outer_closure_arg.name = name;
+  outer_closure_arg.type = closure_type;
+  res.elems[res.length++] = outer_closure_arg;
+
   // We add the args of the let binding in the closure
   token_array_t type_sig = data.type_sig->data.ast_type.chain;
   for (int i = 0; i < data.args.length; i++) {
@@ -117,9 +134,10 @@ closure_t get_closure(ast_t let) {
         // for the moment, we don't save functions inside
         // closures are they are immutable and saved globally
         token_array_t type = elem_data.type_sig->data.ast_type.chain;
-        if (type.length == 1)
+        if (type.length == 1) {
           arg.type = type;
-        res.elems[res.length++] = arg;
+          res.elems[res.length++] = arg;
+        }
       }
     }
   }
@@ -158,24 +176,25 @@ fun_def fundef_from_let(ast_t bind) {
 
 void generate_prolog(FILE* f) {
   fprintf(f, "#include <stdio.h>\n\n");
-  fprintf(f, "typedef struct\n");
-  fprintf(f, "{\n");
-  fprintf(f, "    char *s;\n");
-  fprintf(f, "    int length;\n");
-  fprintf(f, "} string;\n\n");
-  fprintf(f, "void print(string s)\n");
-  fprintf(f, "{\n");
-  fprintf(f, "    for (int i = 0; i < s.length; i++)\n");
-  fprintf(f, "        putchar(s.s[i]);\n");
-  fprintf(f, "}\n");
-  fprintf(f, "\n");
+  fprintf(f, "typedef struct string{");
+  fprintf(f, "char *s;");
+  fprintf(f, "int length;");
+  fprintf(f, "}string;\n\n");
+  fprintf(f, "void print(string s)");
+  fprintf(f, "{");
+  fprintf(f, "for (int i = 0; i < s.length; i++)");
+  fprintf(f, "putchar(s.s[i]);");
+  fprintf(f, "}\n\n");
 }
 
 void generate_closure_def(closure_t closure, FILE* f) {
   // TODO: mangle closure struct names
   fprintf(f, "typedef struct %s_closure {\n", closure.name);
-  if (closure.length > 0)
-    assert(0 && "TODO: non-empty closure generation");
+
+  for (int i = 0; i < closure.length; i++) {
+    generate_type_name(closure.elems[i].type, f);
+    fprintf(f, " %s;\n", closure.elems[i].name.lexeme);
+  }
   fprintf(f, "  char __closure__;\n} %s_closure;\n\n", closure.name);
 }
 

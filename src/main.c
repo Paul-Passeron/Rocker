@@ -72,13 +72,22 @@ int main(int argc, char* argv[]) {
   if (print_tree)
     print_program(arr);
 
+  FILE* f = fopen(output, "wb");
+  generate_prolog(f);
+  fprintf(
+      f, "typedef struct global_closure{char __closure__;}global_closure;\n\n");
+
   for (int i = 0; i < arr.length; i++) {
     ast_t a = arr.data[i];
     if (a->tag == ast_let_binding) {
-      closure_t closure = get_closure(a);
+      closure_t closure = get_closure(a, "global");
+      // temporary forced global outer closure
       print_closure(closure);
+      generate_closure_def(closure, f);
     }
   }
+
+  fclose(f);
 
   (void)output;
   kill_compiler(c);

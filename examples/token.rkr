@@ -1,5 +1,7 @@
 let test a : int -> int => {
   let b : int => (a * 2) in
   let c : int => (a * b + a) in
+  let you_should_not_see_that arg : int -> int => {arg+2} in
+  let you_should_see_that : string => "Hello, World !\n" in
   c
 }
