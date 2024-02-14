@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "compiler.h"
+#include "generator.h"
 
 void usage(char* name) {
   printf("Usage:\n");
@@ -51,9 +52,10 @@ int main(int argc, char* argv[]) {
 
     } else if (input == NULL)
       input = arg;
-    else if (output == NULL)
+    else if (output == NULL) {
+      printf("Arg is : %s\n", arg);
       output = arg;
-    else {
+    } else {
       printf("Unexpected argument '%s' !\n", arg);
       usage(argv[0]);
       exit(1);
@@ -76,18 +78,10 @@ int main(int argc, char* argv[]) {
   generate_prolog(f);
   fprintf(
       f, "typedef struct global_closure{char __closure__;}global_closure;\n\n");
-
-  for (int i = 0; i < arr.length; i++) {
-    ast_t a = arr.data[i];
-    if (a->tag == ast_let_binding) {
-      closure_t closure = get_closure(a, "global");
-      // temporary forced global outer closure
-      print_closure(closure);
-      generate_closure_def(closure, f);
-      kill_closure(closure);
-    }
+  program_closures closures = get_every_closures(arr);
+  for (int i = 0; i < closures.length; i++) {
+    generate_closure_def(closures.data[i], f);
   }
-
   fclose(f);
 
   (void)output;

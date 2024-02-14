@@ -47,8 +47,12 @@ typedef struct doubles_table {
   int length;
 } doubles_table;
 
-int get_num_repeat(doubles_table d, char* name);
+typedef struct {
+  closure_t* data;
+  int length;
+} program_closures;
 
+int get_num_repeat(doubles_table d, char* name);
 void generate_closure_def(closure_t closure, FILE* f);
 void generate_type_name(token_array_t arr, FILE* f);
 void generate_function_signature(fun_def fun, FILE* f);
@@ -58,4 +62,6 @@ char* name_mangle(ast_t let_binding);
 closure_t get_closure(ast_t let, char* outer_closure);
 void print_closure(closure_t closure);
 void kill_closure(closure_t closure);
+program_closures get_every_closures(ast_array_t program);
+
 #endif  // GENERATOR_H
