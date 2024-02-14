@@ -1,11 +1,11 @@
-CC=clang
-CFLAGS=-Werror -Wall -Wextra
+CC=gcc
+CFLAGS=-Werror -Wall -Wextra -g
 SRC=src/
 BUILD=build/
 
 DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o $(BUILD)compiler.o
 
-all: main lines
+all: clean main lines
 main: $(DEP)
 	$(CC) $(CFLAGS) -o $@ $^
 

@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
       // temporary forced global outer closure
       print_closure(closure);
       generate_closure_def(closure, f);
+      kill_closure(closure);
     }
   }
 

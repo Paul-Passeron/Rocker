@@ -1,6 +1,0 @@
-Unknown flag '-leak-check=full'!
-Usage:
-	./main [flags] <input file> [output file]
-Possible flags:
-	-t:		Prints the ast
-	-m:		Prints the list of mangled names

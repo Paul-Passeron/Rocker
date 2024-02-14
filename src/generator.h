@@ -19,6 +19,7 @@
 typedef struct typed_arg {
   token_t name;
   token_array_t type;
+  int allocated;
 } typed_arg;
 
 typedef struct fun_def {
@@ -56,4 +57,5 @@ void generate_prolog(FILE* f);
 char* name_mangle(ast_t let_binding);
 closure_t get_closure(ast_t let, char* outer_closure);
 void print_closure(closure_t closure);
+void kill_closure(closure_t closure);
 #endif  // GENERATOR_H
