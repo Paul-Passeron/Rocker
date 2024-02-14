@@ -14,9 +14,9 @@ Rocker is meant to be a compiled functionnal language, with some similarities wi
 Rocker is not a lazily evaluated language
 
 ## Implementation details
-- The lexer was pretty straightforward, just matching strings known strings from longest to smallest
-- The parser is going to be a recursive descent parser following the grammar in 'grammar.bnf'
-- For the actual compilation: No idea at the moment
+- The lexer was pretty straightforward, just matching known strings from longest to smallest
+- The parser is a recursive descent parser following the grammar in 'grammar.bnf' with some tricks from Jonathan Blow
+- Compilation: Transpiled to C which is in turn compiled to native code 
 
 ## Example program:
 Syntax may change
