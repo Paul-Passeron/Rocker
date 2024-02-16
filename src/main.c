@@ -1,20 +1,11 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <assert.h>
-#include "token.h"
-#include "ast.h"
-#include "lexer.h"
-
-#ifndef ROCKER_ALLOC_IMPLEMENTATION
-#define ROCKER_ALLOC_IMPLEMENTATION
-#endif
-#ifndef COMPILER_GLOBAL
-#define COMPILER_GLOBAL
-#endif
 #include "../RockerAllocator/alloc.h"
-
+#include "lexer.h"
+#include "token.h"
 
 // #include "generator.h"
 
@@ -24,14 +15,6 @@ void usage(char* name) {
   printf("Possible flags:\n");
   printf("\t-t:\t\tPrints the ast\n");
   printf("\t-m:t\tPrints the list of mangled names\n");
-}
-
-void print_program(ast_array_t prog) {
-  for (int i = 0; i < prog.length; i++) {
-    printf("\n");
-    ast_t a = prog.data[i];
-    ast_print(a);
-  }
 }
 
 int main(int argc, char* argv[]) {
