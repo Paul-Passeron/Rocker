@@ -1,0 +1,3 @@
+[submodule "RockerAllocator"]
+	path = RockerAllocator
+	url = https://github.com/Paul-Passeron/RockerAllocator.git
