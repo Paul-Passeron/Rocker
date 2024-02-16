@@ -29,13 +29,13 @@ typedef enum token_type_t {
   TOK_CLOSE_BRACE,
   TOK_OPEN_PAREN,
   TOK_CLOSE_PAREN,
-  TOK_IN,
   TOK_IF,
   TOK_THEN,
   TOK_ELSE,
   TOK_REC,
   TOK_PRO,
   TOK_MATCH,
+  TOK_RETURN,
   TOK_STAR,
   TOK_MINUS,
   TOK_PLUS,
@@ -53,7 +53,7 @@ typedef enum token_type_t {
   TOK_EQUAL,
   TOK_DIFF,
   TOK_WILDCARD,
-
+  TOK_SUB,
   TOK_COUNT
 
 } token_type_t;
@@ -85,5 +85,6 @@ void free_token(token_t);
 typedef enum typdef_type_t { TYPEDEF_RECORD, TYPEDEF_PRODUCT } typdef_type_t;
 
 void token_array_push(token_array_t* arr, token_t tok);
-
+void print_token_array(token_array_t);
+void print_token(token_t);
 #endif  // TOKEN_H
