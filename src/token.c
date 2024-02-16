@@ -136,15 +136,18 @@ int is_type_typ_def(token_type_t t) {
 void token_array_push(token_array_t* arr, token_t tok) {
   if (arr->length >= arr->capacity) {
     arr->capacity *= 2;
-    new_compiler_scope();
+    // new_compiler_scope();
     // TODO: add reallo function in alloc.h
-    token_t* tmp = (token_t*)allocate_compiler(arr->length * sizeof(token_t));
-    memcpy(tmp, arr->data, arr->capacity / 2 * sizeof(token_t));
-    arr->data = allocate_compiler_persistent(arr->capacity * sizeof(token_t));
-    memcpy(arr->data, tmp, arr->capacity * sizeof(token_t));
+    // token_t* tmp = (token_t*)allocate_compiler(arr->length *
+    // sizeof(token_t)); memcpy(tmp, arr->data, arr->capacity / 2 *
+    // sizeof(token_t)); arr->data = allocate_compiler_persistent(arr->capacity
+    // * sizeof(token_t)); memcpy(arr->data, tmp, arr->capacity *
+    // sizeof(token_t));
+    arr->data = (token_t*)reallocate_compiler_persistent(
+        arr->data, arr->capacity * sizeof(token_t));
   }
   arr->data[arr->length++] = tok;
-  end_compiler_scope();
+  // end_compiler_scope();
 }
 
 void print_token_array(token_array_t arr) {
