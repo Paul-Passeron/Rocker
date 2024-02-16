@@ -7,16 +7,16 @@
 #ifndef AST_H
 #define AST_H
 
-/*****************************************************
- * Dynamic array guide:
- *
- *  typedef struct <type>_array_t
- *  {
- *      <type>_t *data;
- *      int length;
- *      int capacity;
- *  } <type>_array_t;
- *
- *****************************************************/
+#include "token.h"
+
+
+typedef struct ast_t ast_t;
+typedef struct ast_op ast_op;
+
+struct ast_op {
+  ast_t left;
+  ast_t right;
+}
+
 
 #endif  // AST_H
