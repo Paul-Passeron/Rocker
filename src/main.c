@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "compiler.h"
-#include "generator.h"
+// #include "generator.h"
 
 void usage(char* name) {
   printf("Usage:\n");
@@ -72,41 +72,6 @@ int main(int argc, char* argv[]) {
   ast_array_t arr = generate_ast_prog_file(&c, input);
   if (print_tree)
     print_program(arr);
-
-  FILE* f = fopen(output, "wb");
-  generate_prolog(f);
-  fprintf(
-      f, "typedef struct global_closure{char __closure__;}global_closure;\n\n");
-  program_closures closures = get_every_closures(arr);
-  for (int i = 0; i < closures.length; i++)
-    generate_closure_forward_def(closures.data[i], f);
-  for (int i = 0; i < closures.length; i++)
-    generate_function_ptr_type_def(closures.data[i], f);
-  for (int i = 0; i < closures.length; i++) {
-    fun_def fundef = fundef_from_let(closures.data[i].reference);
-    generate_function_signature(fundef, f, closures.data[i].name,
-                                closures.data[i].elems[0].type.data[0].lexeme);
-
-    fprintf(f, ";\n\n");
-  }
-  for (int i = 0; i < closures.length; i++) {
-    generate_closure_def(closures.data[i], f);
-  }
-  for (int i = 0; i < closures.length; i++) {
-    fun_def fundef = fundef_from_let(closures.data[i].reference);
-    generate_function_signature(fundef, f, closures.data[i].name,
-                                closures.data[i].elems[0].type.data[0].lexeme);
-
-    fprintf(f, "{\n");
-    generate_function_body(closures.data[i], f);
-    fprintf(f, "}\n\n");
-  }
-  for (int i = 0; i < closures.length; i++) {
-    kill_closure(closures.data[i]);
-  }
-  free(closures.data);
-
-  fclose(f);
 
   (void)output;
   kill_compiler(c);

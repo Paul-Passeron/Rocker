@@ -8,7 +8,7 @@
 #define COMPILER_H
 
 #include "ast.h"
-#include "generator.h"
+// #include "generator.h"
 #include "lexer.h"
 #include "parser.h"
 #include "token.h"
