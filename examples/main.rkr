@@ -1,4 +1,4 @@
-let main(a : int) : int => {
+let main() : int => {
   print("Hello, World !\n");
-  return 0;
+  return 1+2*3;
 }
