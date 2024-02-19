@@ -29,7 +29,7 @@ lexer_t new_lexer(char *filename) {
   return res;
 }
 
-static char delimeters[] = ",:-+*/%&|!=(){}^ \n\'\"";
+static char delimeters[] = ";,:-+*/%&|!=(){}^ \n\'\"";
 
 int is_delimeter(char c) {
   for (unsigned int i = 0; i < sizeof(delimeters); i++)
@@ -94,7 +94,8 @@ int length_of_delimiter(lexer_t l) {
     return 2;
   if (c1 == ':' || c1 == ',' || c1 == '/' || c1 == '%' || c1 == '*' ||
       c1 == '+' || c1 == '-' || c1 == '^' || c1 == '{' || c1 == '}' ||
-      c1 == '(' || c1 == ')' || c1 == '=' || c1 == '<' || c1 == '>')
+      c1 == '(' || c1 == ')' || c1 == '=' || c1 == '<' || c1 == '>' ||
+      c1 == ';')
     return 1;
 
   return -1;

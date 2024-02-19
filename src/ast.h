@@ -33,6 +33,7 @@ typedef struct ast_sub ast_sub;
 typedef struct ast_tuple ast_tuple;
 typedef struct ast_tupledef ast_tupledef;
 typedef struct ast_program ast_program;
+typedef struct ast_compound ast_compound;
 
 struct ast_op {
   token_type_t op;
@@ -51,7 +52,7 @@ struct ast_identifier {
 struct ast_fundef {
   token_t name;
   token_array_t args;
-  token_array_t types;
+  ast_array_t types;
   ast_t body;
 };
 
@@ -93,8 +94,13 @@ struct ast_tupledef {
 };
 
 struct ast_program {
-  ast_array_t prog; 
+  ast_array_t prog;
 };
+
+struct ast_compound {
+  ast_array_t stmts;
+};
+
 struct node_t {
   enum tag {
     op,
@@ -110,6 +116,7 @@ struct node_t {
     tuple,
     tupledef,
     program,
+    compound,
   } tag;
   union data {
     ast_op op;
@@ -124,6 +131,7 @@ struct node_t {
     ast_sub sub;
     ast_tuple tuple;
     ast_tupledef tupledef;
+    ast_compound compound;
     ast_program program;
   } data;
 };

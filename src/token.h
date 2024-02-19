@@ -54,6 +54,7 @@ typedef enum token_type_t {
   TOK_DIFF,
   TOK_WILDCARD,
   TOK_SUB,
+  TOK_SEMICOL,
   TOK_COUNT
 
 } token_type_t;

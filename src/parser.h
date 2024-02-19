@@ -21,5 +21,4 @@ token_type_t peek_type(parser_t p);
 token_t peek_token(parser_t p);
 void parse_program(parser_t *p);
 token_t consume_token(parser_t *p);
-ast_t parse_expression(parser_t *p);
 #endif // PARSER_H

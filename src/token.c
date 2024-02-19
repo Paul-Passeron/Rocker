@@ -9,7 +9,7 @@ static char *lexemes[TOK_COUNT] = {
     "",  "",   "",  "",   "let",  ":",    ",",   "->",  "=>",    "{",
     "}", "(",  ")", "if", "then", "else", "rec", "pro", "match", "return",
     "*", "-",  "+", "/",  "%",    "||",   "&&",  "|",   "^",     "&",
-    "<", "<=", ">", ">=", "=",    "!=",   "_",   "::"};
+    "<", "<=", ">", ">=", "=",    "!=",   "_",   "::",  ";"};
 
 static token_type_t keywords[] = {TOK_MATCH,    TOK_PRO,    TOK_REC,
                                   TOK_WILDCARD, TOK_RETURN, TOK_SUB};
@@ -20,7 +20,7 @@ static token_type_t operators[] = {
     TOK_LSSR,   TOK_LSSR_EQ, TOK_EQUAL,  TOK_DIFF};
 
 char *lexeme_of_type(token_type_t t) {
-  assert(TOK_COUNT == 38 &&
+  assert(TOK_COUNT == 39 &&
          "Exhaustive handling of token types in lexeme_of_type");
 
   switch (t) {
@@ -38,7 +38,7 @@ char *lexeme_of_type(token_type_t t) {
 }
 
 token_type_t type_of_lexeme(char *s) {
-  assert(TOK_COUNT == 38 &&
+  assert(TOK_COUNT == 39 &&
          "Exhaustive handling of token types in type_of_lexeme");
   for (int i = 4; i < TOK_COUNT; i++)
     if (strcmp(lexemes[i], s) == 0)
