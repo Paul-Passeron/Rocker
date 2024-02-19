@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "ast.h"
 #include "token.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,30 +10,35 @@ token_type_t peek_type(parser_t p) { return p.tokens.data[p.cursor].type; }
 token_t peek_token(parser_t p) { return p.tokens.data[p.cursor]; }
 
 token_t consume_token(parser_t *p) {
-  if (p->cursor <= 0)
+  if (p->cursor < 0)
     return (token_t){0};
   return p->tokens.data[p->cursor++];
 }
 
-parser_t new_parser(void) {
+parser_t new_parser(token_array_t tokens) {
   parser_t res;
   res.cursor = 0;
   res.prog = NULL;
-  res.tokens = new_token_array();
+  res.tokens = tokens;
   return res;
 }
 
 void expect(token_type_t a, token_type_t b) {
   if (a != b) {
-    printf("Expected %s but got: %s\n", lexeme_of_type(a), lexeme_of_type(b));
+    printf("Expected %s but got: %s\n", lexeme_of_type(b), lexeme_of_type(a));
+    exit(1);
   }
 }
 
 ast_t parse_expression(parser_t *p);
+ast_t parse_type(parser_t *p);
+ast_t parse_fundef(parser_t *p);
+ast_t parse_var_def(parser_t *p);
+ast_t parse_match(parser_t *p);
 
 ast_t parse_tuple(parser_t *p) {
   (void)p;
-  return NULL;
+  assert(0 && "TODO: not implemented yet !\n");
 }
 
 ast_t parse_ret(parser_t *p) {
@@ -65,6 +71,22 @@ ast_t parse_sub(parser_t *p) {
 }
 
 ast_t parse_statement(parser_t *p) {
+  token_type_t a = peek_type(*p);
+  if (a == TOK_LET) {
+    parser_t p2 = *p;
+    consume_token(&p2);
+    consume_token(&p2);
+    if (peek_type(p2) == TOK_OPEN_PAREN) // function def
+      return parse_fundef(p);
+    else // var def
+    {
+      ast_t vdef = parse_var_def(p);
+      return vdef;
+    }
+  } else if (a == TOK_RETURN) {
+    return parse_ret(p);
+  } else if (a == TOK_MATCH)
+    return parse_match(p);
   ast_t expr = parse_expression(p);
   expect(peek_type(*p), TOK_SEMICOL);
   consume_token(p);
@@ -102,16 +124,26 @@ ast_t parse_var_def(parser_t *p) {
   expect(peek_type(*p), TOK_LET);
   consume_token(p);
   token_t id = consume_token(p);
+
+  expect(peek_type(*p), TOK_COLON);
+  consume_token(p);
+
+  ast_t type = parse_type(p);
+
   expect(peek_type(*p), TOK_BIG_ARROW);
   consume_token(p);
-  ast_t expr = parse_expression(p);
-  expect(peek_type(*p), TOK_SEMICOL);
-  consume_token(p);
-  return new_ast((node_t){vardef, {.vardef = {.expr = expr, .name = id}}});
+
+  ast_t expr = parse_statement(p);
+
+  // expect(peek_type(*p), TOK_SEMICOL);
+  // consume_token(p);
+
+  return new_ast(
+      (node_t){vardef, {.vardef = {.expr = expr, .name = id, .type = type}}});
 }
 
 ast_t parse_type(parser_t *p) {
-  token_array_t tuple;
+  token_array_t tuple = new_token_array();
   while (peek_type(*p) == TOK_IDENTIFIER) {
     token_array_push(&tuple, consume_token(p));
     if (peek_type(*p) == TOK_STAR)
@@ -144,15 +176,35 @@ ast_t parse_fundef(parser_t *p) {
     expect(peek_type(*p), TOK_IDENTIFIER);
     token_t arg = consume_token(p);
     token_array_push(&args, arg);
+
     expect(peek_type(*p), TOK_COLON);
     consume_token(p);
     ast_t type = parse_type(p);
     push_ast_array(&types, type);
+
+    if (peek_type(*p) != TOK_COMMA)
+      break;
+    consume_token(p);
   }
+
+  expect(peek_type(*p), TOK_CLOSE_PAREN);
+  consume_token(p);
+
+  expect(peek_type(*p), TOK_COLON);
+  consume_token(p);
+
+  ast_t type = parse_type(p);
+
+  expect(peek_type(*p), TOK_BIG_ARROW);
+  consume_token(p);
+
   ast_t body = parse_compound(p);
-  return new_ast((node_t){
-      fundef,
-      {.fundef = {.args = args, .body = body, .name = id, .types = types}}});
+  return new_ast((node_t){fundef,
+                          {.fundef = {.args = args,
+                                      .body = body,
+                                      .name = id,
+                                      .types = types,
+                                      .ret_type = type}}});
 }
 
 int is_primary(parser_t p) {
@@ -168,8 +220,19 @@ int is_funcall(parser_t p) {
 }
 
 ast_t parse_funcall(parser_t *p) {
-  (void)p;
-  return NULL;
+  token_t id = consume_token(p);
+  expect(peek_type(*p), TOK_OPEN_PAREN);
+  consume_token(p);
+  ast_array_t args = new_ast_array();
+  while (peek_type(*p) != TOK_CLOSE_PAREN) {
+    push_ast_array(&args, parse_expression(p));
+    if (peek_type(*p) != TOK_COMMA)
+      break;
+    consume_token(p);
+  }
+  expect(peek_type(*p), TOK_CLOSE_PAREN);
+  consume_token(p);
+  return new_ast((node_t){funcall, {.funcall = {id, args}}});
 }
 
 ast_t parse_leaf(parser_t *p) {
@@ -188,10 +251,11 @@ ast_t parse_leaf(parser_t *p) {
 
 ast_t parse_primary(parser_t *p) {
   token_type_t type = peek_type(*p);
-  if (is_funcall(*p))
+  if (is_funcall(*p)) {
     return parse_funcall(p);
-  if (type == TOK_STR_LIT || type == TOK_CHR_LIT || type == TOK_NUM_LIT ||
-      type == TOK_WILDCARD) {
+  } else if (type == TOK_STR_LIT || type == TOK_CHR_LIT ||
+             type == TOK_NUM_LIT || type == TOK_WILDCARD ||
+             type == TOK_IDENTIFIER) {
     return parse_leaf(p);
   } else if (type == TOK_OPEN_PAREN) {
     (void)consume_token(p);
@@ -208,6 +272,7 @@ ast_t parse_primary(parser_t *p) {
   } else if (type == TOK_OPEN_BRACE) {
     return parse_compound(p);
   } else {
+    printf("Pb : %s\n", lexeme_of_type(type));
     printf("Could not parse as a primary !\n");
     exit(1);
   }
@@ -233,16 +298,7 @@ ast_t parse_expression(parser_t *p) {
     }
     consume_token(p);
     return res;
-  } else if (a == TOK_LET) {
-    parser_t p2 = *p;
-    consume_token(&p2);
-    consume_token(&p2);
-    if (peek_type(p2) == TOK_OPEN_PAREN) // function def
-      return parse_fundef(p);
-    else // var def
-      return parse_var_def(p);
-  } else if (a == TOK_MATCH)
-    return parse_match(p);
+  }
   return parse_expression_aux(p, -1); // for TCC
 }
 

@@ -11,8 +11,8 @@ static char *lexemes[TOK_COUNT] = {
     "*", "-",  "+", "/",  "%",    "||",   "&&",  "|",   "^",     "&",
     "<", "<=", ">", ">=", "=",    "!=",   "_",   "::",  ";"};
 
-static token_type_t keywords[] = {TOK_MATCH,    TOK_PRO,    TOK_REC,
-                                  TOK_WILDCARD, TOK_RETURN, TOK_SUB};
+static token_type_t keywords[] = {TOK_MATCH,  TOK_PRO, TOK_REC, TOK_WILDCARD,
+                                  TOK_RETURN, TOK_SUB, TOK_LET};
 
 static token_type_t operators[] = {
     TOK_STAR,   TOK_MINUS,   TOK_PLUS,   TOK_DIV,     TOK_MODULO, TOK_LOG_AND,

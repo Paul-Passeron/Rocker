@@ -1,15 +1,15 @@
-#include <assert.h>
+#include "../RockerAllocator/alloc.h"
+#include "lexer.h"
+#include "parser.h"
+#include "token.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "../RockerAllocator/alloc.h"
-#include "lexer.h"
-#include "token.h"
 
 // #include "generator.h"
 
-void usage(char* name) {
+void usage(char *name) {
   printf("Usage:\n");
   printf("\t%s [flags] <input file> [output file]\n", name);
   printf("Possible flags:\n");
@@ -17,18 +17,18 @@ void usage(char* name) {
   printf("\t-m:t\tPrints the list of mangled names\n");
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   init_compiler_stack();
   if (argc < 2) {
     usage(argv[0]);
     exit(1);
   }
-  char* input = NULL;
-  char* output = NULL;
+  char *input = NULL;
+  char *output = NULL;
   int print_tree = 0;
 
   for (int i = 1; i < argc; i++) {
-    char* arg = argv[i];
+    char *arg = argv[i];
     if (*arg == '-') {
       // This is a flag
       if (strlen(arg) == 1) {
@@ -64,8 +64,11 @@ int main(int argc, char* argv[]) {
   lexer_t l = new_lexer(input);
   token_array_t prog = lex_program(&l);
   print_token_array(prog);
+  parser_t p = new_parser(prog);
+  parse_program(&p);
+
   if (print_tree)
-    assert(0 && "TODO: reimplement parsing\n");
+    print_ast(p.prog);
   (void)output;
   kill_compiler_stack();
   return 0;

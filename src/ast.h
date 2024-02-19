@@ -54,6 +54,7 @@ struct ast_fundef {
   token_array_t args;
   ast_array_t types;
   ast_t body;
+  ast_t ret_type;
 };
 
 struct ast_funcall {
@@ -68,6 +69,7 @@ struct ast_ret {
 struct ast_vardef {
   token_t name;
   ast_t expr;
+  ast_t type;
 };
 
 struct ast_match {
@@ -140,5 +142,5 @@ ast_t new_ast(node_t node);
 ast_array_t new_ast_array(void);
 
 void push_ast_array(ast_array_t *arr, ast_t a);
-
+void print_ast(ast_t root);
 #endif // AST_H
