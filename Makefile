@@ -3,7 +3,7 @@ CFLAGS=-Wall -Wextra -g
 SRC=src/
 BUILD=build/
 
-DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o
+DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o
 
 all: clean main lines
 main: $(DEP)
@@ -13,8 +13,6 @@ $(BUILD)%.o: RockerAllocator/%.c
 
 $(BUILD)%.o: $(SRC)%.c 
 	$(CC) $(CFLAGS) -o $@ $^ -c
-
-
 
 clean:
 	rm -rf $(BUILD)*

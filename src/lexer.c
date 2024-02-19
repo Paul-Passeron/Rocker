@@ -1,16 +1,16 @@
 #include "lexer.h"
+#include "../RockerAllocator/alloc.h"
+#include "token.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../RockerAllocator/alloc.h"
-#include "token.h"
 
-lexer_t new_lexer(char* filename) {
+lexer_t new_lexer(char *filename) {
   lexer_t res;
   res.col = 1;
   res.line = 1;
   res.cursor = 0;
-  FILE* f = fopen(filename, "rb");
+  FILE *f = fopen(filename, "rb");
   if (f == NULL) {
     printf("Could not open file '%s': ", filename);
     fflush(stdout);
@@ -48,11 +48,9 @@ char lexer_peek(lexer_t l) {
   }
 }
 
-int is_whitespace(char c) {
-  return c == ' ' || c == '\n';
-}
+int is_whitespace(char c) { return c == ' ' || c == '\n'; }
 
-void lexer_consume(lexer_t* l) {
+void lexer_consume(lexer_t *l) {
   char c = lexer_peek(*l);
   if (!c)
     return;
@@ -102,9 +100,7 @@ int length_of_delimiter(lexer_t l) {
   return -1;
 }
 
-int is_char_num(char c) {
-  return c <= '9' && c >= '0';
-}
+int is_char_num(char c) { return c <= '9' && c >= '0'; }
 
 int length_of_num_lit(lexer_t l) {
   int cter = 0;
@@ -126,8 +122,8 @@ int length_of_delimited_literal(lexer_t l, char c) {
   return l.cursor - cursor + 1;
 }
 
-char* create_lexeme(lexer_t l, int length) {
-  char* s = allocate_compiler_persistent(length + 1);
+char *create_lexeme(lexer_t l, int length) {
+  char *s = allocate_compiler_persistent(length + 1);
   if (s == NULL) {
     printf("Could not allocate memory\n");
     exit(1);
@@ -170,12 +166,12 @@ int is_end_comment(lexer_t l, comment_type_t type) {
   return 0;
 }
 
-void lexer_consume_n(lexer_t* l, int n) {
+void lexer_consume_n(lexer_t *l, int n) {
   for (int i = 0; i < n; i++)
     lexer_consume(l);
 }
 
-token_t step_lexer(lexer_t* l) {
+token_t step_lexer(lexer_t *l) {
   token_t res = {0};
 
   // Possible cases:
@@ -190,13 +186,13 @@ token_t step_lexer(lexer_t* l) {
     int is_com_type = is_comment(*l);
 
     if (is_com_type) {
-      lexer_consume_n(l, 2);  // consume the initial comment 'declaration'
+      lexer_consume_n(l, 2); // consume the initial comment 'declaration'
       while (!is_end_comment(*l, is_com_type)) {
         lexer_consume(l);
       }
       if (is_com_type == COM_MULTI)
         lexer_consume(l);
-      lexer_consume(l);  // consume the matching end;
+      lexer_consume(l); // consume the matching end;
     }
     while (is_whitespace(lexer_peek(*l)))
       lexer_consume(l);
@@ -248,9 +244,10 @@ token_t step_lexer(lexer_t* l) {
   return res;
 }
 
-token_array_t lex_program(lexer_t* l) {
-  token_array_t arr;
-  new_token_array(&arr);
+token_array_t lex_program(lexer_t *l) {
+  if (l == NULL) // to make valgrind happy
+    exit(1);
+  token_array_t arr = new_token_array();
   while (lexer_peek(*l)) {
     token_t t = step_lexer(l);
     if (t.lexeme)
