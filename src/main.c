@@ -83,7 +83,8 @@ int main(int argc, char* argv[]) {
 
   // compile C file
   char command[1024];
-  sprintf(command, "gcc -static -o %s %s", output, cout);
+  sprintf(command, "gcc -static -o %s %s src/generation/fundefs.c", output,
+          cout);
   system(command);
 
   kill_compiler_stack();

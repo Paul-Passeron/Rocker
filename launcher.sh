@@ -15,3 +15,4 @@ else
   fi
 fi
 ./format.sh
+./output

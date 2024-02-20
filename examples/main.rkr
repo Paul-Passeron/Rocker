@@ -1,6 +1,4 @@
-let fun(s: string) : int => {
+let main() : int => {
   print("Hello, World !\n");
-  print("Hello, World !!!\n");
-  printf("%s", "Hello, World !!!\n");
   return 0;
 }
