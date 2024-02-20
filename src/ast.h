@@ -10,10 +10,10 @@
 #include "token.h"
 
 typedef struct node_t node_t;
-typedef node_t* ast_t;
+typedef node_t *ast_t;
 
 typedef struct ast_array_t {
-  ast_t* data;
+  ast_t *data;
   int length;
   int capacity;
 } ast_array_t;
@@ -34,6 +34,7 @@ typedef struct ast_tuple ast_tuple;
 typedef struct ast_tupledef ast_tupledef;
 typedef struct ast_program ast_program;
 typedef struct ast_compound ast_compound;
+typedef struct ast_ifstmt ast_ifstmt;
 
 struct ast_op {
   token_type_t op;
@@ -103,6 +104,12 @@ struct ast_compound {
   ast_array_t stmts;
 };
 
+struct ast_ifstmt {
+  ast_t expression;
+  ast_t body;
+  ast_t elsestmt;
+};
+
 struct node_t {
   enum tag {
     op,
@@ -119,6 +126,7 @@ struct node_t {
     tupledef,
     program,
     compound,
+    ifstmt
   } tag;
   union data {
     ast_op op;
@@ -135,12 +143,13 @@ struct node_t {
     ast_tupledef tupledef;
     ast_compound compound;
     ast_program program;
+    ast_ifstmt ifstmt;
   } data;
 };
 
 ast_t new_ast(node_t node);
 ast_array_t new_ast_array(void);
 
-void push_ast_array(ast_array_t* arr, ast_t a);
+void push_ast_array(ast_array_t *arr, ast_t a);
 void print_ast(ast_t root);
-#endif  // AST_H
+#endif // AST_H
