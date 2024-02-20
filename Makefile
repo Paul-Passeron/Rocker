@@ -3,7 +3,7 @@ CFLAGS=-Wall -Wextra -g
 SRC=src/
 BUILD=build/
 
-DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o
+DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o
 
 all: clean main lines
 main: $(DEP)

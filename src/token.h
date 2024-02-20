@@ -7,7 +7,7 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-#define INIT_TOK_ARR 64
+#define INIT_TOK_ARR 8
 
 /*****************************************************
  * Primary Token Type enumeration
@@ -59,21 +59,21 @@ typedef enum token_type_t {
 
 } token_type_t;
 
-char *lexeme_of_type(token_type_t);
-token_type_t type_of_lexeme(char *);
-int is_lexeme_keyword(char *s);
+char* lexeme_of_type(token_type_t);
+token_type_t type_of_lexeme(char*);
+int is_lexeme_keyword(char* s);
 int is_type_keyword(token_type_t t);
 int is_type_operator(token_type_t t);
 int is_type_typ_def(token_type_t t);
 typedef struct token_t {
   token_type_t type;
-  char *lexeme;
+  char* lexeme;
   int col;
   int line;
 } token_t;
 
 typedef struct token_array_t {
-  token_t *data;
+  token_t* data;
   int length;
   int capacity;
 } token_array_t;
@@ -85,7 +85,7 @@ void free_token(token_t);
 
 typedef enum typdef_type_t { TYPEDEF_RECORD, TYPEDEF_PRODUCT } typdef_type_t;
 
-void token_array_push(token_array_t *arr, token_t tok);
+void token_array_push(token_array_t* arr, token_t tok);
 void print_token_array(token_array_t);
 void print_token(token_t);
-#endif // TOKEN_H
+#endif  // TOKEN_H

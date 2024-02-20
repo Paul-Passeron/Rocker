@@ -10,15 +10,15 @@
 #include "token.h"
 
 typedef struct node_t node_t;
-typedef node_t *ast_t;
+typedef node_t* ast_t;
 
 typedef struct ast_array_t {
-  ast_t *data;
+  ast_t* data;
   int length;
   int capacity;
 } ast_array_t;
 
-#define INIT_AST_ARR 1024
+#define INIT_AST_ARR 8
 
 typedef struct ast_op ast_op;
 typedef struct ast_literal ast_literal;
@@ -141,6 +141,6 @@ struct node_t {
 ast_t new_ast(node_t node);
 ast_array_t new_ast_array(void);
 
-void push_ast_array(ast_array_t *arr, ast_t a);
+void push_ast_array(ast_array_t* arr, ast_t a);
 void print_ast(ast_t root);
-#endif // AST_H
+#endif  // AST_H

@@ -9,9 +9,9 @@ if [ $# -ge 2 ]; then
   ./main $1 $2 -t
 else
   if [ $# -eq 1 ]; then
-    ./main $1 output.c
-  else 
-    ./main $var output.c
+    ./main $1 output
+  else
+    ./main $var output
   fi
 fi
 ./format.sh
