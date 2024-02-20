@@ -4,7 +4,6 @@ set -xe
 clear
 var="examples/main.rkr"
 make
-echo "$#"
 if [ $# -ge 2 ]; then
   ./main $1 $2 -t
 else

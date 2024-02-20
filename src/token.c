@@ -1,7 +1,6 @@
 #include "token.h"
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "../RockerAllocator/alloc.h"
 
@@ -12,7 +11,8 @@ static char* lexemes[TOK_COUNT] = {
     "<", "<=", ">", ">=", "=",    "!=",   "_",   "::",  ";"};
 
 static token_type_t keywords[] = {TOK_MATCH,  TOK_PRO, TOK_REC, TOK_WILDCARD,
-                                  TOK_RETURN, TOK_SUB, TOK_LET};
+                                  TOK_RETURN, TOK_SUB, TOK_LET, TOK_IF,
+                                  TOK_THEN,   TOK_ELSE};
 
 static token_type_t operators[] = {
     TOK_STAR,   TOK_MINUS,   TOK_PLUS,   TOK_DIV,     TOK_MODULO, TOK_LOG_AND,
@@ -54,7 +54,7 @@ int is_type_keyword(token_type_t t) {
 }
 
 int is_type_operator(token_type_t t) {
-  for (unsigned int i = 0; i < sizeof(keywords) / sizeof(token_type_t); i++)
+  for (unsigned int i = 0; i < sizeof(operators) / sizeof(token_type_t); i++)
     if (t == operators[i])
       return 1;
   return 0;
@@ -70,18 +70,6 @@ token_array_t new_token_array(void) {
   res.length = 0;
   res.data = allocate_compiler_persistent(sizeof(token_t) * res.capacity);
   return res;
-}
-
-void free_token(token_t tok) {
-  if (tok.lexeme != NULL)
-    free(tok.lexeme);
-}
-
-void free_token_array(token_array_t arr) {
-  for (int i = 0; i < arr.length; i++)
-    free_token(arr.data[i]);
-  if (arr.data != NULL)
-    free(arr.data);
 }
 
 int get_precedence_aux(token_type_t t) {

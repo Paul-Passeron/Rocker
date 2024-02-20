@@ -29,7 +29,7 @@ lexer_t new_lexer(char* filename) {
   return res;
 }
 
-static char delimeters[] = ";,:-+*/%&|!=(){}^ \n\'\"";
+static char delimeters[] = "><;,:-+*/%&|!=(){}^ \n\'\"";
 
 int is_delimeter(char c) {
   for (unsigned int i = 0; i < sizeof(delimeters); i++)
@@ -207,6 +207,7 @@ token_t step_lexer(lexer_t* l) {
   }
   res.col = l->col;
   res.line = l->line;
+  res.filename = l->filename;
   // The case must fall through
   // Second case: Num Literal
   if (is_char_num(lexer_peek(*l))) {

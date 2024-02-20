@@ -1,12 +1,34 @@
-let square(n: int):int => {
-  return n *n;
+let fact(n: int): int=>{
+  if (n <= 1) then return 1;
+  return n * fact(n-1);
 }
 
-let main() : int => {
-  let msg : string => "Hello, World !\n";
-  let msg2 : string => msg;
-  print(msg);
-  print(msg2);
-  putchar(square(3) + '0');
+
+let print_num(n: int, b: int): void => {
+  let a : int => n / b;
+  if a then
+    print_num(a, b);
+  putchar(n%b + '0');
+}
+
+let print_decimal(n: int) : void => {
+  print_num(n, 10);
+}
+
+let print_facts_aux(goal: int, num: int): void => {
+  if num < goal then {
+    print_decimal(fact(num));
+    print("\n");
+    print_facts_aux(goal, num+1);
+  }
+}
+
+let print_facts(n: int) : void => {
+  print_facts_aux(n, 1);
+} 
+
+
+let main(): int => {
+  print_facts(10);
   return 0;
 }

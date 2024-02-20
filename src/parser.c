@@ -5,6 +5,11 @@
 #include "ast.h"
 #include "token.h"
 
+void print_error_prefix(parser_t p) {
+  token_t tok = peek_token(p);
+  printf("%s:%d:%d:", tok.filename, tok.line, tok.col);
+}
+
 token_type_t peek_type(parser_t p) {
   return p.tokens.data[p.cursor].type;
 }
@@ -27,8 +32,10 @@ parser_t new_parser(token_array_t tokens) {
   return res;
 }
 
-void expect(token_type_t a, token_type_t b) {
+void expect(parser_t p, token_type_t b) {
+  token_type_t a = peek_type(p);
   if (a != b) {
+    print_error_prefix(p);
     printf("Expected %s but got: %s\n", lexeme_of_type(b), lexeme_of_type(a));
     exit(1);
   }
@@ -39,17 +46,17 @@ ast_t parse_type(parser_t* p);
 ast_t parse_fundef(parser_t* p);
 ast_t parse_var_def(parser_t* p);
 ast_t parse_match(parser_t* p);
-
+ast_t parse_compound(parser_t* p);
 ast_t parse_tuple(parser_t* p) {
   (void)p;
   assert(0 && "TODO: not implemented yet !\n");
 }
 
 ast_t parse_ret(parser_t* p) {
-  expect(peek_type(*p), TOK_RETURN);
+  expect(*p, TOK_RETURN);
   consume_token(p);
   ast_t expr = parse_expression(p);
-  expect(peek_type(*p), TOK_SEMICOL);
+  expect(*p, TOK_SEMICOL);
   consume_token(p);
   return new_ast((node_t){ret, {.ret = {expr}}});
 }
@@ -69,14 +76,36 @@ ast_t parse_sub(parser_t* p) {
   if (peek_type(*p) == TOK_OPEN_PAREN) {
     consume_token(p);
     expr = parse_tuple(p);
-    expect(peek_type(*p), TOK_CLOSE_PAREN);
+    expect(*p, TOK_CLOSE_PAREN);
   }
   return new_ast((node_t){sub, {.sub = {.expr = expr, .path = path}}});
+}
+ast_t parse_statement(parser_t* p);
+
+ast_t parse_if(parser_t* p) {
+  consume_token(p);
+  ast_t condition = parse_expression(p);
+  expect(*p, TOK_THEN);
+  consume_token(p);
+  ast_t body = parse_statement(p);
+  ast_t else_body = NULL;
+  if (peek_type(*p) == TOK_ELSE) {
+    consume_token(p);
+    else_body = parse_statement(p);
+  }
+  return new_ast((node_t){ifstmt,
+                          {.ifstmt = {
+                               .body = body,
+                               .elsestmt = else_body,
+                               .expression = condition,
+                           }}});
 }
 
 ast_t parse_statement(parser_t* p) {
   token_type_t a = peek_type(*p);
-  if (a == TOK_LET) {
+  if (a == TOK_IF) {
+    return parse_if(p);
+  } else if (a == TOK_LET) {
     parser_t p2 = *p;
     consume_token(&p2);
     consume_token(&p2);
@@ -91,50 +120,55 @@ ast_t parse_statement(parser_t* p) {
     return parse_ret(p);
   } else if (a == TOK_MATCH)
     return parse_match(p);
-  ast_t expr = parse_expression(p);
-  expect(peek_type(*p), TOK_SEMICOL);
-  consume_token(p);
-  return expr;
+  else if (a == TOK_OPEN_BRACE) {
+    return parse_compound(p);
+  } else {
+    ast_t expr = parse_expression(p);
+    expect(*p, TOK_SEMICOL);
+    consume_token(p);
+    return expr;
+  }
+  return NULL;
 }
 
 ast_t parse_matchcase(parser_t* p) {
   ast_t expr = parse_expression(p);
-  expect(peek_type(*p), TOK_SMALL_ARROW);
+  expect(*p, TOK_SMALL_ARROW);
   ast_t stmt = parse_statement(p);
   return new_ast(
       (node_t){matchcase, {.matchcase = {.body = stmt, .expr = expr}}});
 }
 
 ast_t parse_match(parser_t* p) {
-  expect(peek_type(*p), TOK_MATCH);
+  expect(*p, TOK_MATCH);
   consume_token(p);
   ast_t to_match = parse_expression(p);
-  expect(peek_type(*p), TOK_BIG_ARROW);
+  expect(*p, TOK_BIG_ARROW);
   consume_token(p);
-  expect(peek_type(*p), TOK_OPEN_BRACE);
+  expect(*p, TOK_OPEN_BRACE);
   consume_token(p);
   ast_array_t cases = new_ast_array();
   while (peek_type(*p) == TOK_SMALL_ARROW) {
     consume_token(p);
     push_ast_array(&cases, parse_matchcase(p));
   }
-  expect(peek_type(*p), TOK_CLOSE_BRACE);
+  expect(*p, TOK_CLOSE_BRACE);
   consume_token(p);
   return new_ast(
       (node_t){match, {.match = {.cases = cases, .expr = to_match}}});
 }
 
 ast_t parse_var_def(parser_t* p) {
-  expect(peek_type(*p), TOK_LET);
+  expect(*p, TOK_LET);
   consume_token(p);
   token_t id = consume_token(p);
 
-  expect(peek_type(*p), TOK_COLON);
+  expect(*p, TOK_COLON);
   consume_token(p);
 
   ast_t type = parse_type(p);
 
-  expect(peek_type(*p), TOK_BIG_ARROW);
+  expect(*p, TOK_BIG_ARROW);
   consume_token(p);
 
   ast_t expr = parse_statement(p);
@@ -158,30 +192,30 @@ ast_t parse_type(parser_t* p) {
   return new_ast((node_t){tupledef, {.tupledef = {.signature = tuple}}});
 }
 ast_t parse_compound(parser_t* p) {
-  expect(peek_type(*p), TOK_OPEN_BRACE);
+  expect(*p, TOK_OPEN_BRACE);
   consume_token(p);
   ast_array_t stmts = new_ast_array();
   while (peek_type(*p) != TOK_CLOSE_BRACE)
     push_ast_array(&stmts, parse_statement(p));
-  expect(peek_type(*p), TOK_CLOSE_BRACE);
+  expect(*p, TOK_CLOSE_BRACE);
   consume_token(p);
   return new_ast((node_t){compound, {.compound = {stmts}}});
 }
 
 ast_t parse_fundef(parser_t* p) {
-  expect(peek_type(*p), TOK_LET);
+  expect(*p, TOK_LET);
   consume_token(p);
   token_t id = consume_token(p);
-  expect(peek_type(*p), TOK_OPEN_PAREN);
+  expect(*p, TOK_OPEN_PAREN);
   consume_token(p);
   token_array_t args = new_token_array();
   ast_array_t types = new_ast_array();
   while (peek_type(*p) != TOK_CLOSE_PAREN) {
-    expect(peek_type(*p), TOK_IDENTIFIER);
+    expect(*p, TOK_IDENTIFIER);
     token_t arg = consume_token(p);
     token_array_push(&args, arg);
 
-    expect(peek_type(*p), TOK_COLON);
+    expect(*p, TOK_COLON);
     consume_token(p);
     ast_t type = parse_type(p);
     push_ast_array(&types, type);
@@ -191,15 +225,15 @@ ast_t parse_fundef(parser_t* p) {
     consume_token(p);
   }
 
-  expect(peek_type(*p), TOK_CLOSE_PAREN);
+  expect(*p, TOK_CLOSE_PAREN);
   consume_token(p);
 
-  expect(peek_type(*p), TOK_COLON);
+  expect(*p, TOK_COLON);
   consume_token(p);
 
   ast_t type = parse_type(p);
 
-  expect(peek_type(*p), TOK_BIG_ARROW);
+  expect(*p, TOK_BIG_ARROW);
   consume_token(p);
 
   ast_t body = parse_compound(p);
@@ -225,7 +259,7 @@ int is_funcall(parser_t p) {
 
 ast_t parse_funcall(parser_t* p) {
   token_t id = consume_token(p);
-  expect(peek_type(*p), TOK_OPEN_PAREN);
+  expect(*p, TOK_OPEN_PAREN);
   consume_token(p);
   ast_array_t args = new_ast_array();
   while (peek_type(*p) != TOK_CLOSE_PAREN) {
@@ -234,7 +268,8 @@ ast_t parse_funcall(parser_t* p) {
       break;
     consume_token(p);
   }
-  expect(peek_type(*p), TOK_CLOSE_PAREN);
+
+  expect(*p, TOK_CLOSE_PAREN);
   consume_token(p);
   return new_ast((node_t){funcall, {.funcall = {id, args}}});
 }
@@ -265,6 +300,7 @@ ast_t parse_primary(parser_t* p) {
     (void)consume_token(p);
     ast_t res = parse_expression(p);
     type = peek_type(*p);
+
     if (type != TOK_CLOSE_PAREN) {
       printf("%s\n", peek_token(*p).lexeme);
       printf("TODO : Better error reporting\n");
@@ -292,14 +328,7 @@ ast_t parse_expression(parser_t* p) {
   if (a == TOK_OPEN_PAREN) {
     consume_token(p);
     ast_t res = parse_expression(p);
-    expect(peek_type(*p), TOK_CLOSE_PAREN);
-    consume_token(p);
-    while (peek_type(*p) != TOK_CLOSE_PAREN) {  // a bit weird
-      ast_t node = parse_increasing_precedence(p, res, -1);
-      if (node == res)
-        break;
-      res = node;
-    }
+    expect(*p, TOK_CLOSE_PAREN);
     consume_token(p);
     return res;
   }

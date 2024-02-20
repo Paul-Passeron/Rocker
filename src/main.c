@@ -12,10 +12,11 @@
 
 void usage(char* name) {
   printf("Usage:\n");
-  printf("\t%s [flags] <input file> [output file] [flags]\n", name);
-  printf("Possible flags:\n");
-  printf("\t-t:\t\tPrints the ast\n");
-  printf("\t-l:\t\tPrints the list of lexemes\n");
+  printf("\t%s <input file> [output file]\n", name);
+  // printf("\t%s [flags] <input file> [output file] [flags]\n", name);
+  // printf("Possible flags:\n");
+  // printf("\t-t:\t\tPrints the ast\n");
+  // printf("\t-l:\t\tPrints the list of lexemes\n");
 }
 
 int main(int argc, char* argv[]) {
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]) {
   }
   char* input = NULL;
   char* output = NULL;
-  int print_tree = 0;
+  // int print_tree = 0;
   int print_lexer = 0;
 
   for (int i = 1; i < argc; i++) {
@@ -37,9 +38,10 @@ int main(int argc, char* argv[]) {
         printf("Unexpected empty flag !\n");
         usage(argv[0]);
         exit(1);
-      } else if (*(arg + 1) == 't' && !print_tree)
-        print_tree = 1;
-      else if (*(arg + 1) == 'l' && !print_tree)
+      }
+      //  else if (*(arg + 1) == 't' && !print_tree)
+      //   print_tree = 1;
+      else if (*(arg + 1) == 'l' && !print_lexer)
         print_lexer = 1;
       else {
         printf("Unknown flag '%s'!\n", arg + 1);
@@ -67,13 +69,13 @@ int main(int argc, char* argv[]) {
 
   lexer_t l = new_lexer(input);
   token_array_t prog = lex_program(&l);
+  // if (print_lexer)
+  // print_token_array(prog);
   parser_t p = new_parser(prog);
   parse_program(&p);
 
-  if (print_lexer)
-    print_token_array(prog);
-  if (print_tree)
-    print_ast(p.prog);
+  // if (print_tree)
+  //   print_ast(p.prog);
 
   char* cout = allocate_compiler_persistent(strlen(output) + 3);
   sprintf(cout, "%s.c", output);

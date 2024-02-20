@@ -5,6 +5,8 @@
 #include "ast.h"
 #include "token.h"
 
+void generate_statement(generator_t* g, ast_t stmt);
+void generate_compound(generator_t* g, ast_t comp);
 generator_t new_generator(char* filename) {
   generator_t res;
   res.f = fopen(filename, "wb");
@@ -139,6 +141,19 @@ void generate_op(generator_t* g, ast_t expr) {
   // fprintf(f, ")");
 }
 
+void generate_if_statement(generator_t* g, ast_t stmt) {
+  FILE* f = g->f;
+  ast_ifstmt ifstmt = stmt->data.ifstmt;
+  fprintf(f, "if (");
+  generate_expression(g, ifstmt.expression);
+  fprintf(f, ")\n");
+  generate_statement(g, ifstmt.body);
+  if (ifstmt.elsestmt != NULL) {
+    fprintf(f, "else\n");
+    generate_statement(g, ifstmt.elsestmt);
+  }
+}
+
 void generate_expression(generator_t* g, ast_t expr) {
   FILE* f = g->f;
   if (expr->tag == literal) {
@@ -150,19 +165,24 @@ void generate_expression(generator_t* g, ast_t expr) {
               get_literal_string_length(tok));
     }
   } else if (expr->tag == identifier) {
+    //   // ast_t def = get_ref(lexeme, g->table);
+    //   // if (def == NULL) {
+    //   //   // TODO: error
+    //   //   printf("Unexpected identifier '%s'.\n", lexeme);
+    //   //   exit(1);
+    // }
     char* lexeme = expr->data.identifier.id.lexeme;
-    ast_t def = get_ref(lexeme, g->table);
-    if (def == NULL) {
-      // TODO: error
-      printf("Unexpected identifier '%s'.\n", lexeme);
-      exit(1);
-    }
     fprintf(f, "%s", lexeme);
   } else if (expr->tag == funcall) {
     generate_funcall(g, expr);
   } else if (expr->tag == op) {
     generate_op(g, expr);
+  } else if (expr->tag == ifstmt) {
+    generate_if_statement(g, expr);
+  } else if (expr->tag == compound) {
+    generate_compound(g, expr);
   } else {
+    printf("TAG is %d\n", expr->tag);
     assert(0 && "TODO");
   }
 }
@@ -195,17 +215,22 @@ void generate_statement(generator_t* g, ast_t stmt) {
     generate_match(g, stmt);
   } else if (stmt->tag == ret) {
     generate_return(g, stmt);
+  } else if (stmt->tag == compound) {
+    generate_compound(g, stmt);
   } else {
     generate_expression(g, stmt);
     fprintf(f, ";\n");
   }
 }
 void generate_compound(generator_t* g, ast_t comp) {
+  FILE* f = g->f;
+  fprintf(f, "{");
   ast_compound compound = comp->data.compound;
   new_nt_scope(&g->table);
   for (int i = 0; i < compound.stmts.length; i++)
     generate_statement(g, compound.stmts.data[i]);
   end_nt_scope(&g->table);
+  fprintf(f, "}");
 }
 
 void generate_fundef(generator_t* g, ast_t fun) {

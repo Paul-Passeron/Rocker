@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "ast.h"
 
-#define INIT_NT_CAP 8
+#define INIT_NT_CAP 64
 
 typedef enum nt_kind {
   NT_FUN,

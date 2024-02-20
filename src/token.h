@@ -7,7 +7,7 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-#define INIT_TOK_ARR 8
+#define INIT_TOK_ARR 64
 
 /*****************************************************
  * Primary Token Type enumeration
@@ -70,6 +70,7 @@ typedef struct token_t {
   char* lexeme;
   int col;
   int line;
+  char* filename;
 } token_t;
 
 typedef struct token_array_t {
@@ -79,9 +80,7 @@ typedef struct token_array_t {
 } token_array_t;
 
 token_array_t new_token_array(void);
-void free_token_array(token_array_t);
 int get_precedence(token_type_t t);
-void free_token(token_t);
 
 typedef enum typdef_type_t { TYPEDEF_RECORD, TYPEDEF_PRODUCT } typdef_type_t;
 
