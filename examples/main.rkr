@@ -1,5 +1,12 @@
+let square(n: int):int => {
+  return n *n;
+}
+
 let main() : int => {
   let msg : string => "Hello, World !\n";
+  let msg2 : string => msg;
   print(msg);
+  print(msg2);
+  putchar(square(3) + '0');
   return 0;
 }

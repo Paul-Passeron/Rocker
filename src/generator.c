@@ -129,6 +129,16 @@ int get_literal_string_length(token_t tok) {
   return calcEscapedLength(tok.lexeme);
 }
 
+void generate_op(generator_t* g, ast_t expr) {
+  ast_op op = expr->data.op;
+  FILE* f = g->f;
+  // fprintf(f, "(");
+  generate_expression(g, op.left);
+  fprintf(f, " %s ", lexeme_of_type(op.op));
+  generate_expression(g, op.right);
+  // fprintf(f, ")");
+}
+
 void generate_expression(generator_t* g, ast_t expr) {
   FILE* f = g->f;
   if (expr->tag == literal) {
@@ -150,6 +160,8 @@ void generate_expression(generator_t* g, ast_t expr) {
     fprintf(f, "%s", lexeme);
   } else if (expr->tag == funcall) {
     generate_funcall(g, expr);
+  } else if (expr->tag == op) {
+    generate_op(g, expr);
   } else {
     assert(0 && "TODO");
   }
