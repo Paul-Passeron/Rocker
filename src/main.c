@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
   char* cout = allocate_compiler_persistent(strlen(output) + 3);
   sprintf(cout, "%s.c", output);
   generator_t g = new_generator(cout);
-  transpile(g, p.prog);
+  transpile(&g, p.prog);
   kill_generator(g);
 
   // compile C file

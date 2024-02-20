@@ -90,10 +90,10 @@ void generate_type(FILE* f, ast_tupledef tuple) {
   fprintf(f, "%s", elems.data[0].lexeme);
 }
 
-void generate_expression(generator_t g, ast_t expr);
+void generate_expression(generator_t* g, ast_t expr);
 
-void generate_funcall(generator_t g, ast_t fun) {
-  FILE* f = g.f;
+void generate_funcall(generator_t* g, ast_t fun) {
+  FILE* f = g->f;
   ast_funcall funcall = fun->data.funcall;
   fprintf(f, "%s(", funcall.name.lexeme);
   for (int i = 0; i < funcall.args.length; i++) {
@@ -104,13 +104,33 @@ void generate_funcall(generator_t g, ast_t fun) {
   fprintf(f, ")");
 }
 
-int get_literal_string_length(token_t tok) {
-  // TODO: handle escape characters
-  return strlen(tok.lexeme) - 2;
+int calcEscapedLength(const char* str) {
+  int length = 0;
+  int i = 0;
+  while (str[i]) {
+    if (str[i] == '\\') {  // Check if it is an escape character
+      i++;  // Move to the next character to interpret the escape sequence
+      if (str[i] == 'n' || str[i] == 't' || str[i] == '\\' || str[i] == '"' ||
+          str[i] == '\'' || str[i] == 'r') {
+        length++;  // These are single character escape sequences
+      } else {
+        length +=
+            2;  // For unrecognized escape sequences, count both characters
+      }
+    } else {
+      length++;
+    }
+    i++;
+  }
+  return length - 1;
 }
 
-void generate_expression(generator_t g, ast_t expr) {
-  FILE* f = g.f;
+int get_literal_string_length(token_t tok) {
+  return calcEscapedLength(tok.lexeme);
+}
+
+void generate_expression(generator_t* g, ast_t expr) {
+  FILE* f = g->f;
   if (expr->tag == literal) {
     token_t tok = expr->data.literal.lit;
     if (tok.type != TOK_STR_LIT)
@@ -121,7 +141,7 @@ void generate_expression(generator_t g, ast_t expr) {
     }
   } else if (expr->tag == identifier) {
     char* lexeme = expr->data.identifier.id.lexeme;
-    ast_t def = get_ref(lexeme, g.table);
+    ast_t def = get_ref(lexeme, g->table);
     if (def == NULL) {
       // TODO: error
       printf("Unexpected identifier '%s'.\n", lexeme);
@@ -135,26 +155,27 @@ void generate_expression(generator_t g, ast_t expr) {
   }
 }
 
-void generate_vardef(generator_t g, ast_t var) {
-  FILE* f = g.f;
+void generate_vardef(generator_t* g, ast_t var) {
+  FILE* f = g->f;
   ast_vardef vardef = var->data.vardef;
-  push_nt(&g.table, vardef.name.lexeme, NT_VAR, var);
+  push_nt(&g->table, vardef.name.lexeme, NT_VAR, var);
   generate_type(f, vardef.type->data.tupledef);
-  fprintf(f, " = ");
+  fprintf(f, " %s = ", vardef.name.lexeme);
   generate_expression(g, vardef.expr);
+  fprintf(f, ";\n");
 }
 
-void generate_match(generator_t g, ast_t match);
+void generate_match(generator_t* g, ast_t match);
 
-void generate_return(generator_t g, ast_t ret_ast) {
-  FILE* f = g.f;
+void generate_return(generator_t* g, ast_t ret_ast) {
+  FILE* f = g->f;
   fprintf(f, "return ");
   generate_expression(g, ret_ast->data.ret.expr);
   fprintf(f, ";\n");
 }
 
-void generate_statement(generator_t g, ast_t stmt) {
-  FILE* f = g.f;
+void generate_statement(generator_t* g, ast_t stmt) {
+  FILE* f = g->f;
   if (stmt->tag == vardef) {
     generate_vardef(g, stmt);
   } else if (stmt->tag == match) {
@@ -167,24 +188,24 @@ void generate_statement(generator_t g, ast_t stmt) {
     fprintf(f, ";\n");
   }
 }
-void generate_compound(generator_t g, ast_t comp) {
+void generate_compound(generator_t* g, ast_t comp) {
   ast_compound compound = comp->data.compound;
-  new_nt_scope(&g.table);
+  new_nt_scope(&g->table);
   for (int i = 0; i < compound.stmts.length; i++)
     generate_statement(g, compound.stmts.data[i]);
-  end_nt_scope(&g.table);
+  end_nt_scope(&g->table);
 }
 
-void generate_fundef(generator_t g, ast_t fun) {
+void generate_fundef(generator_t* g, ast_t fun) {
   // add to name table
-  FILE* f = g.f;
+  FILE* f = g->f;
   ast_fundef fundef = fun->data.fundef;
-  new_nt_scope(&g.table);
-  push_nt(&g.table, fundef.name.lexeme, NT_FUN, fun);
+  new_nt_scope(&g->table);
+  push_nt(&g->table, fundef.name.lexeme, NT_FUN, fun);
   generate_type(f, fundef.ret_type->data.tupledef);
   fprintf(f, " %s(", fundef.name.lexeme);
   for (int i = 0; i < fundef.args.length; i++) {
-    push_nt(&g.table, fundef.args.data[i].lexeme, NT_VAR, fun);
+    push_nt(&g->table, fundef.args.data[i].lexeme, NT_VAR, fun);
     if (i > 0)
       fprintf(f, ", ");
     generate_type(f, fundef.types.data[i]->data.tupledef);
@@ -195,11 +216,11 @@ void generate_fundef(generator_t g, ast_t fun) {
   generate_compound(g, fundef.body);
   fprintf(f, "}\n");
 
-  end_nt_scope(&g.table);
+  end_nt_scope(&g->table);
 }
 
-void transpile(generator_t g, ast_t program) {
-  FILE* f = g.f;
+void transpile(generator_t* g, ast_t program) {
+  FILE* f = g->f;
   ast_array_t stmts = program->data.program.prog;
   (void)stmts;
   fprintf(f, "#include \"./src/generation/fundefs.h\"\n");

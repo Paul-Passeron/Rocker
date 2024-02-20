@@ -1,4 +1,5 @@
 let main() : int => {
-  print("Hello, World !\n");
+  let msg : string => "Hello, World !\n";
+  print(msg);
   return 0;
 }

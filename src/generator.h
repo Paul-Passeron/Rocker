@@ -42,6 +42,6 @@ void new_nt_scope(name_table_t* table);
 void end_nt_scope(name_table_t* table);
 void push_nt(name_table_t* table, char* name, nt_kind kind, ast_t ref);
 
-void transpile(generator_t g, ast_t program);
+void transpile(generator_t* g, ast_t program);
 
 #endif  // GENERATOR_H
