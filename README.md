@@ -58,5 +58,17 @@ let print_list (list: pro_int_list_t): void => {
     -> None => {}
   }
 }
-
 ```
+
+## TODO
+- [x] Simple rec and pro type generation
+- [x] Simple Hello World example compiling and working
+- [x] Simple recursion example compiling and working
+- [ ] Allow assignments
+- [ ] Accessing fields of record types
+- [ ] Get type of an expression (for match cases)
+- [ ] Generation of match expressions
+- [ ] Handle tuple types
+- [ ] Typechecking
+- [ ] Add loops (while and for, maybe foreach for array types)
+- [ ] Maybe add a dynamic array type -> Figure out syntax for pushing / poping

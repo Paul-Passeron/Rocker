@@ -1,8 +1,17 @@
-let fact(n: int): int=>{
-  if (n <= 1) then return 1;
+pro Number => {
+  Int: int,
+  Float: float,
+}
+let fact(n: int): int => {
+  if n <= 1 then return 1;
   return n * fact(n-1);
 }
 
+
+let fib(n: int): int => {
+  if n <= 1 then return 1;
+  return fib(n-1) + fib(n-2);
+}
 
 let print_num(n: int, b: int): void => {
   let a : int => n / b;
@@ -11,7 +20,7 @@ let print_num(n: int, b: int): void => {
   putchar(n%b + '0');
 }
 
-let print_decimal(n: int) : void => {
+let print_decimal(n: int): void => {
   print_num(n, 10);
 }
 
@@ -23,12 +32,29 @@ let print_facts_aux(goal: int, num: int): void => {
   }
 }
 
-let print_facts(n: int) : void => {
+let print_facts(n: int): void => {
   print_facts_aux(n, 1);
+} 
+
+let print_Number(n: Number): void => {
+  // TODO
+}
+
+
+let print_fibs_aux(goal: int, num: int): void => {
+  if num < goal then {
+    print_decimal(fib(num));
+    print("\n");
+    print_fibs_aux(goal, num+1);
+  }
+}
+
+let print_fibs(n: int): void => {
+  print_fibs_aux(n, 1);
 } 
 
 
 let main(): int => {
-  print_facts(10);
+  print_fibs(20);
   return 0;
 }

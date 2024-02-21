@@ -35,6 +35,8 @@ typedef struct ast_tupledef ast_tupledef;
 typedef struct ast_program ast_program;
 typedef struct ast_compound ast_compound;
 typedef struct ast_ifstmt ast_ifstmt;
+typedef struct ast_tdef ast_tdef;
+typedef struct ast_cons ast_cons;
 
 struct ast_op {
   token_type_t op;
@@ -110,6 +112,22 @@ struct ast_ifstmt {
   ast_t elsestmt;
 };
 
+typedef enum tdef_type_t {
+  TDEF_REC,
+  TDEF_PRO,
+} tdef_type_t;
+
+struct ast_tdef {
+  token_t name;
+  tdef_type_t t;
+  ast_array_t constructors;
+};
+
+struct ast_cons {
+  token_t name;
+  ast_t type;
+};
+
 struct node_t {
   enum tag {
     op,
@@ -126,7 +144,9 @@ struct node_t {
     tupledef,
     program,
     compound,
-    ifstmt
+    ifstmt,
+    tdef,
+    cons,
   } tag;
   union data {
     ast_op op;
@@ -144,6 +164,8 @@ struct node_t {
     ast_compound compound;
     ast_program program;
     ast_ifstmt ifstmt;
+    ast_tdef tdef;
+    ast_cons cons;
   } data;
 };
 

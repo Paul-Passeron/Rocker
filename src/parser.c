@@ -1,5 +1,4 @@
 #include "parser.h"
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
@@ -47,9 +46,49 @@ ast_t parse_fundef(parser_t* p);
 ast_t parse_var_def(parser_t* p);
 ast_t parse_match(parser_t* p);
 ast_t parse_compound(parser_t* p);
+
 ast_t parse_tuple(parser_t* p) {
-  (void)p;
-  assert(0 && "TODO: not implemented yet !\n");
+  expect(*p, TOK_IDENTIFIER);
+  token_array_t tuple = new_token_array();
+  token_array_push(&tuple, consume_token(p));
+  while (peek_type(*p) == TOK_STAR) {
+    consume_token(p);
+    expect(*p, TOK_IDENTIFIER);
+    token_array_push(&tuple, consume_token(p));
+  }
+  return new_ast((node_t){tupledef, {.tupledef = {tuple}}});
+}
+
+ast_t parse_cons(parser_t* p) {
+  // Name : type [,]
+  token_t name = consume_token(p);
+  expect(*p, TOK_COLON);
+  consume_token(p);
+  ast_t type = parse_type(p);
+  if (peek_type(*p) == TOK_COMMA)
+    consume_token(p);
+  return new_ast((node_t){cons, {.cons = {name, type}}});
+}
+
+ast_t parse_tdef(parser_t* p) {
+  tdef_type_t type = -1;
+  if (peek_type(*p) == TOK_REC)
+    type = TDEF_REC;
+  else if (peek_type(*p) == TOK_PRO)
+    type = TDEF_PRO;
+  else
+    expect(*p, TOK_REC);  // Error reporting purposes
+  consume_token(p);
+  token_t name = consume_token(p);
+  expect(*p, TOK_BIG_ARROW);
+  consume_token(p);
+  expect(*p, TOK_OPEN_BRACE);
+  consume_token(p);
+  ast_array_t conss = new_ast_array();
+  while (peek_type(*p) != TOK_CLOSE_BRACE)
+    push_ast_array(&conss, parse_cons(p));
+  consume_token(p);
+  return new_ast((node_t){tdef, {.tdef = {name, type, conss}}});
 }
 
 ast_t parse_ret(parser_t* p) {
@@ -105,6 +144,8 @@ ast_t parse_statement(parser_t* p) {
   token_type_t a = peek_type(*p);
   if (a == TOK_IF) {
     return parse_if(p);
+  } else if (a == TOK_PRO || a == TOK_REC) {
+    return parse_tdef(p);
   } else if (a == TOK_LET) {
     parser_t p2 = *p;
     consume_token(&p2);
