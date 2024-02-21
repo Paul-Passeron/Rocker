@@ -1,0 +1,17 @@
+// putchar is a builtin function that
+// prints the given ascii character
+// to the standard output
+
+// function that prints the integer n
+// in base 10 to the standard output
+let print_int(n: int): void => {
+  let a: int => n / 10;                         // defining variable a that will be used in the recursive call
+  if a then print_int(a);                       // if a is non-zero, recursively calling the function print_int
+  putchar(n%10 + '0');                          // Actually printing the character 
+}
+
+let main(): int => {
+  print_int(1234567890);                        // printing the integer 1234567890
+  print("\n");                                  // printing a new line character
+  return 0;                                     // returning 0 exit-code because everything went well !
+}
