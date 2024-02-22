@@ -1,6 +1,7 @@
 
 // returns the factorial n! of
-// integer n where n! = n * (n-1) * ... * 1
+// integer n where
+// n! = n * (n-1) * ... * 1
 let fact(n: int): int => {
   if n <= 1 then return 1;                      // Because fact(0) = fact(1) = 1
   return n*fact(n-1);                           // Because fact(n) = n * fact(n-1)

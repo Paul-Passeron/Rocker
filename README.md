@@ -72,3 +72,4 @@ let print_list (list: pro_int_list_t): void => {
 - [ ] Typechecking
 - [ ] Add loops (while and for, maybe foreach for array types)
 - [ ] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
+- [ ] Add including files support

@@ -1,0 +1,31 @@
+let print_int(n: int): void => {
+  let a: int => n / 10;                         
+  if a then print_int(a);                       
+  putchar(n%10 + '0');                          
+}
+
+let fizz_buzz_aux(a: int): void => {
+  if a <= 100 then
+  {
+    if a%3 = 0 && a%5 = 0 then 
+      print("Fizzbuzz\n");
+    else if a % 3 = 0 then
+      print("Fizz\n");
+    else if a%5 = 0  then
+      print("Buzz\n");
+    else {
+      print_int(a);
+      print("\n");
+    }
+    fizz_buzz_aux(a+1);
+  }
+}
+
+let Fizzbuzz(): void => {
+  fizz_buzz_aux(1);
+}
+
+let main(): int => {
+  Fizzbuzz();
+  return 0;
+}

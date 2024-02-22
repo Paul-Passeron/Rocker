@@ -1,0 +1,21 @@
+let print_int(n: int): void => {
+  let a: int => n / 10;                         
+  if a then print_int(a);                       
+  putchar(n%10 + '0');                          
+}
+
+// Actual solution
+let inverse_int_aux(n: int, r: int): int =>{
+  if n = 0 then return r;
+  return inverse_int_aux(n/10, r * 10 + n%10);
+}
+
+let inverse_int(n: int): int => {
+  return inverse_int_aux(n, 0);
+}
+
+let main(): int => {
+  print_int(inverse_int(123456));
+  print("\n");
+  return 0;
+}

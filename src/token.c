@@ -1,10 +1,10 @@
 #include "token.h"
+#include "../RockerAllocator/alloc.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "../RockerAllocator/alloc.h"
 
-static char* lexemes[TOK_COUNT] = {
+static char *lexemes[TOK_COUNT] = {
     "",  "",   "",  "",   "let",  ":",    ",",   "->",  "=>",    "{",
     "}", "(",  ")", "if", "then", "else", "rec", "pro", "match", "return",
     "*", "-",  "+", "/",  "%",    "||",   "&&",  "|",   "^",     "&",
@@ -19,25 +19,25 @@ static token_type_t operators[] = {
     TOK_LOG_OR, TOK_BIT_AND, TOK_BIT_OR, TOK_BIT_XOR, TOK_GRTR,   TOK_GRTR_EQ,
     TOK_LSSR,   TOK_LSSR_EQ, TOK_EQUAL,  TOK_DIFF};
 
-char* lexeme_of_type(token_type_t t) {
+char *lexeme_of_type(token_type_t t) {
   assert(TOK_COUNT == 39 &&
          "Exhaustive handling of token types in lexeme_of_type");
 
   switch (t) {
-    case TOK_IDENTIFIER:
-      return "<identifier>";
-    case TOK_CHR_LIT:
-      return "<char literal>";
-    case TOK_STR_LIT:
-      return "<string literal>";
-    case TOK_NUM_LIT:
-      return "<numeric literal>";
-    default:
-      return lexemes[t];
+  case TOK_IDENTIFIER:
+    return "<identifier>";
+  case TOK_CHR_LIT:
+    return "<char literal>";
+  case TOK_STR_LIT:
+    return "<string literal>";
+  case TOK_NUM_LIT:
+    return "<numeric literal>";
+  default:
+    return lexemes[t];
   }
 }
 
-token_type_t type_of_lexeme(char* s) {
+token_type_t type_of_lexeme(char *s) {
   assert(TOK_COUNT == 39 &&
          "Exhaustive handling of token types in type_of_lexeme");
   for (int i = 4; i < TOK_COUNT; i++)
@@ -60,9 +60,7 @@ int is_type_operator(token_type_t t) {
   return 0;
 }
 
-int is_lexeme_keyword(char* s) {
-  return is_type_keyword(type_of_lexeme(s));
-}
+int is_lexeme_keyword(char *s) { return is_type_keyword(type_of_lexeme(s)); }
 
 token_array_t new_token_array(void) {
   token_array_t res;
@@ -74,40 +72,40 @@ token_array_t new_token_array(void) {
 
 int get_precedence_aux(token_type_t t) {
   switch (t) {
-    case TOK_STAR:
-      return 2;
-    case TOK_DIV:
-      return 2;
-    case TOK_MODULO:
-      return 2;
-    case TOK_PLUS:
-      return 4;
-    case TOK_MINUS:
-      return 3;
-    case TOK_GRTR:
-      return 6;
-    case TOK_LSSR:
-      return 6;
-    case TOK_LSSR_EQ:
-      return 6;
-    case TOK_GRTR_EQ:
-      return 6;
-    case TOK_EQUAL:
-      return 7;
-    case TOK_DIFF:
-      return 7;
-    case TOK_BIT_AND:
-      return 8;
-    case TOK_BIT_XOR:
-      return 9;
-    case TOK_BIT_OR:
-      return 10;
-    case TOK_LOG_AND:
-      return 11;
-    case TOK_LOG_OR:
-      return 12;
-    default:
-      return -1;
+  case TOK_STAR:
+    return 2;
+  case TOK_DIV:
+    return 2;
+  case TOK_MODULO:
+    return 2;
+  case TOK_PLUS:
+    return 4;
+  case TOK_MINUS:
+    return 3;
+  case TOK_GRTR:
+    return 6;
+  case TOK_LSSR:
+    return 6;
+  case TOK_LSSR_EQ:
+    return 6;
+  case TOK_GRTR_EQ:
+    return 6;
+  case TOK_EQUAL:
+    return 7;
+  case TOK_DIFF:
+    return 7;
+  case TOK_BIT_AND:
+    return 8;
+  case TOK_BIT_XOR:
+    return 9;
+  case TOK_BIT_OR:
+    return 10;
+  case TOK_LOG_AND:
+    return 11;
+  case TOK_LOG_OR:
+    return 12;
+  default:
+    return -1;
   }
 }
 int get_precedence(token_type_t t) {
@@ -119,14 +117,12 @@ int get_precedence(token_type_t t) {
   return 13 - res;
 }
 
-int is_type_typ_def(token_type_t t) {
-  return t == TOK_PRO || t == TOK_REC;
-}
+int is_type_typ_def(token_type_t t) { return t == TOK_PRO || t == TOK_REC; }
 
-void token_array_push(token_array_t* arr, token_t tok) {
+void token_array_push(token_array_t *arr, token_t tok) {
   if (arr->length >= arr->capacity) {
     arr->capacity *= 2;
-    arr->data = (token_t*)reallocate_compiler_persistent(
+    arr->data = (token_t *)reallocate_compiler_persistent(
         arr->data, arr->capacity * sizeof(token_t));
   }
   arr->data[arr->length++] = tok;

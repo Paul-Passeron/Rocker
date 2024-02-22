@@ -1,0 +1,21 @@
+// returns the factorial n! of
+// integer n where
+// n! = n * (n-1) * ... * 1
+let fib(n: int): int => {
+  if n <= 1 then return 1;
+  return fib(n-1)+fib(n-2);
+}
+
+
+// as seen in print_int.rkr
+let print_int(n: int): void => {
+  let a: int => n / 10;
+  if a then print_int(a);
+  putchar(n%10 + '0');
+}
+
+let main(): int => {
+  print_int(fib(7));
+  print("\n");
+  return 0;
+}
