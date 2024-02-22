@@ -87,14 +87,12 @@ int get_literal_string_length(token_t tok) {
 void generate_op(generator_t *g, ast_t expr) {
   ast_op op = expr->data.op;
   FILE *f = g->f;
-  // fprintf(f, "(");
   generate_expression(g, op.left);
   if (op.op == TOK_EQUAL)
     fprintf(f, " == ");
   else
     fprintf(f, " %s ", lexeme_of_type(op.op));
   generate_expression(g, op.right);
-  // fprintf(f, ")");
 }
 
 void generate_if_statement(generator_t *g, ast_t stmt) {
