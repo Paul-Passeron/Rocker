@@ -1,0 +1,16 @@
+rec int_node => {
+  Value: int,
+  Next: int_linked_list
+}
+pro int_linked_list => {
+  Tail: void,
+  Node: int_node
+}
+
+let not_main(): int => {
+  return 10;
+}
+let main(): int => {
+  print("Hey !\n");
+  return 0;
+}

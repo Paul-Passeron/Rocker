@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "token.h"
+#include "typechecker.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -74,20 +75,30 @@ int main(int argc, char *argv[]) {
   parser_t p = new_parser(prog);
   parse_program(&p);
 
+  // type checking
+  int typecheck = tc_program(p.prog);
+  if (!typecheck) {
+    printf("The program does not type checks\n");
+  }
   // if (print_tree)
   //   print_ast(p.prog);
+  else {
 
-  char *cout = allocate_compiler_persistent(strlen(output) + 3);
-  sprintf(cout, "%s.c", output);
-  generator_t g = new_generator(cout);
-  transpile(&g, p.prog);
-  kill_generator(g);
+    char *cout = allocate_compiler_persistent(strlen(output) + 3);
+    sprintf(cout, "%s.c", output);
+    generator_t g = new_generator(cout);
+    transpile(&g, p.prog);
+    kill_generator(g);
 
-  // compile C file
-  char command[1024];
-  sprintf(command, "gcc -static -o %s %s src/generation/fundefs.c", output,
-          cout);
-  system(command);
+    // compile C file
+    char command[1024];
+    sprintf(
+        command,
+        "gcc -static -o %s %s src/generation/fundefs.c RockerAllocator/alloc.c",
+        output, cout);
+    printf("[CMD] %s\n", command);
+    system(command);
+  }
 
   kill_compiler_stack();
   return 0;

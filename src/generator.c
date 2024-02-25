@@ -213,16 +213,54 @@ void generate_fundef(generator_t *g, ast_t fun) {
     fprintf(f, "%s", fundef.args.data[i].lexeme);
   }
   fprintf(f, ")\n");
-  generate_compound(g, fundef.body);
+  if (strcmp(fundef.name.lexeme, "main") == 0) {
+    fprintf(f, "{\n");
+    fprintf(f, "init_compiler_stack();\n");
+    generate_compound(g, fundef.body);
+    fprintf(f, "kill_compiler_stack();\n");
+    fprintf(f, "}\n");
+
+  } else {
+    generate_compound(g, fundef.body);
+  }
   end_nt_scope(&g->table);
 }
+
+int is_builtin_typename(char *name) {
+  if (strcmp(name, "bool") == 0)
+    return 1;
+  if (strcmp(name, "int") == 0)
+    return 1;
+  if (strcmp(name, "string") == 0)
+    return 1;
+  if (strcmp(name, "void") == 0)
+    return 1;
+  return 0;
+}
+
+void generate_forward_defs(generator_t *g, ast_t program) {
+  FILE *f = g->f;
+  ast_array_t stmts = program->data.program.prog;
+  for (int i = 0; i < stmts.length; i++) {
+    ast_t stmt = stmts.data[i];
+    if (stmt->tag == tdef) {
+      struct ast_tdef tdef = stmt->data.tdef;
+      char *name = tdef.name.lexeme;
+      if (is_builtin_typename(name))
+        fprintf(f, "typedef struct %s %s;\n", name, name);
+      else
+        fprintf(f, "typedef struct %s *%s;\n", name, name);
+    }
+  }
+}
+
 void generate_tdef(generator_t *g, ast_t tdef_ast) {
   FILE *f = g->f;
   struct ast_tdef tdef = tdef_ast->data.tdef;
   char *name = tdef.name.lexeme;
-  fprintf(f, "typedef struct %s %s;\n", name, name);
+  // fprintf(f, "typedef struct %s %s;\n", name, name);
+  fprintf(f, "struct %s{\n", name);
   if (tdef.t == TDEF_PRO) {
-    fprintf(f, "struct %s{\n", name);
     fprintf(f, "enum {\n");
     for (int i = 0; i < tdef.constructors.length; i++) {
       ast_cons cons = tdef.constructors.data[i]->data.cons;
@@ -234,21 +272,37 @@ void generate_tdef(generator_t *g, ast_t tdef_ast) {
     fprintf(f, "union {\n");
     for (int i = 0; i < tdef.constructors.length; i++) {
       ast_cons cons = tdef.constructors.data[i]->data.cons;
-      generate_type(f, cons.type->data.tupledef);
-      fprintf(f, " %s;", cons.name.lexeme);
+      ast_tupledef tuple = cons.type->data.tupledef;
+      if (strcmp(tuple.signature.data[0].lexeme, "void") != 0) {
+        generate_type(f, cons.type->data.tupledef);
+        fprintf(f, " %s;", cons.name.lexeme);
+      }
     }
     fprintf(f, "} data;");
-    fprintf(f, "};\n");
+  } else {
+    for (int i = 0; i < tdef.constructors.length; i++) {
+      ast_cons cons = tdef.constructors.data[i]->data.cons;
+      ast_tupledef tuple = cons.type->data.tupledef;
+      if (strcmp(tuple.signature.data[0].lexeme, "void") != 0) {
+        generate_type(f, cons.type->data.tupledef);
+        fprintf(f, " %s;", cons.name.lexeme);
+      }
+    }
   }
+  fprintf(f, "};\n");
+
   return;
 }
 
 void transpile(generator_t *g, ast_t program) {
   FILE *f = g->f;
   ast_array_t stmts = program->data.program.prog;
-  (void)stmts;
   fprintf(f, "#include \"./src/generation/fundefs.h\"\n");
+  fprintf(f, "#include \"./src/generation/fundefs_internal.h\"\n");
   fprintf(f, "#include \"./src/generation/typedefs.h\"\n");
+  fprintf(f, "#include \"./RockerAllocator/alloc.h\"\n");
+  generate_forward_defs(g, program);
+
   for (int i = 0; i < stmts.length; i++) {
     ast_t stmt = stmts.data[i];
     generate_statement(g, stmt);

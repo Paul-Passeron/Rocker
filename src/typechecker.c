@@ -83,6 +83,7 @@ int are_types_compatibles(typechecker_t tc, rocker_type_t t1,
 int tc_program(ast_t program) {
   ast_program prog = program->data.program;
   typechecker_t tc;
+  tc.current_function = NULL;
 
   // Creating the initial name table !
   tc.nt = new_name_table();
@@ -126,5 +127,5 @@ int tc_program(ast_t program) {
   }
 
   end_nt_scope(&tc.nt);
-  return 0;
+  return 1;
 }

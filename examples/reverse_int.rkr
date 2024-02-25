@@ -15,7 +15,10 @@ let inverse_int(n: int): int => {
 }
 
 let main(): int => {
-  print_int(inverse_int(123456));
+  let a:int => 123456;
+  print_int(a);
+  print("\n");
+  print_int(inverse_int(a));
   print("\n");
   return 0;
 }

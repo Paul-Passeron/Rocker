@@ -4,7 +4,7 @@
 // to the standard output.
 
 let main(): int => {
-  let msg: string => "Hello, World !1\n"; // storing a variable msg of type string that holds our Hello World message
+  let msg : string => "Hello, World !1\n"; // storing a variable msg of type string that holds our Hello World message
   print(msg);                             // printing the message msg
   print("Hello, World !2\n");             // printing Hello World from a string literal
   return 0;                               // returning 0 because everything went well !

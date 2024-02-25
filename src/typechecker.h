@@ -12,6 +12,7 @@
 
 typedef struct typechecker_t {
   name_table_t nt;
+  ast_t current_function;
 } typechecker_t;
 
 typedef struct rocker_type_t {

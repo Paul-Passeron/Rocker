@@ -1,9 +1,9 @@
-#ifndef ROCKER_FUNDEFS_INTERNAL
-#define ROCKER_FUNDEFS_INTERNAL
+#ifndef ROCKER_FUNDEFS
+#define ROCKER_FUNDEFS
 
-#include <stdio.h>
 #include "typedefs.h"
+#include <stdio.h>
 
 void print(string s);
 
-#endif  // ROCKER_FUNDEFS_INTERNAL
+#endif // ROCKER_FUNDEFS

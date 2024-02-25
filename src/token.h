@@ -83,7 +83,6 @@ token_array_t new_token_array(void);
 int get_precedence(token_type_t t);
 
 typedef enum typdef_type_t { TYPEDEF_RECORD, TYPEDEF_PRODUCT } typdef_type_t;
-
 void token_array_push(token_array_t *arr, token_t tok);
 void print_token_array(token_array_t);
 void print_token(token_t);
