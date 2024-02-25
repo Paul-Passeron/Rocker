@@ -7,9 +7,16 @@ pro int_linked_list => {
   Node: int_node
 }
 
-let not_main(): int => {
-  return 10;
-}
+
+let append(l: int_linked_list, val: int): int_linked_list => {
+  let node: int_node => {
+    Value => val,
+    Next => l,
+  };
+  let res: int_linked_list => Node::(node);
+  return res;
+} 
+
 let main(): int => {
   print("Hey !\n");
   return 0;

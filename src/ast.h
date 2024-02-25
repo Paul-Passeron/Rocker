@@ -10,10 +10,10 @@
 #include "token.h"
 
 typedef struct node_t node_t;
-typedef node_t *ast_t;
+typedef node_t* ast_t;
 
 typedef struct ast_array_t {
-  ast_t *data;
+  ast_t* data;
   int length;
   int capacity;
 } ast_array_t;
@@ -37,6 +37,7 @@ typedef struct ast_compound ast_compound;
 typedef struct ast_ifstmt ast_ifstmt;
 typedef struct ast_tdef ast_tdef;
 typedef struct ast_cons ast_cons;
+typedef struct ast_record_expr ast_record_expr;
 
 struct ast_op {
   token_type_t op;
@@ -71,6 +72,7 @@ struct ast_ret {
 
 struct ast_vardef {
   token_t name;
+  int is_rec;
   ast_t expr;
   ast_t type;
 };
@@ -128,6 +130,11 @@ struct ast_cons {
   ast_t type;
 };
 
+struct ast_record_expr {
+  token_array_t names;
+  ast_array_t exprs;
+};
+
 struct node_t {
   enum tag {
     op,
@@ -147,6 +154,7 @@ struct node_t {
     ifstmt,
     tdef,
     cons,
+    record_expr,
   } tag;
   union data {
     ast_op op;
@@ -166,12 +174,13 @@ struct node_t {
     ast_ifstmt ifstmt;
     ast_tdef tdef;
     ast_cons cons;
+    ast_record_expr record_expr;
   } data;
 };
 
 ast_t new_ast(node_t node);
 ast_array_t new_ast_array(void);
 
-void push_ast_array(ast_array_t *arr, ast_t a);
+void push_ast_array(ast_array_t* arr, ast_t a);
 void print_ast(ast_t root);
-#endif // AST_H
+#endif  // AST_H

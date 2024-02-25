@@ -27,11 +27,11 @@ typedef struct rocker_type_t {
   union {
     int builtin;
     struct {
-      char *name;
+      char* name;
     } user_defined_type;
   } data;
 } rocker_type_t;
 
 int tc_program(ast_t program);
 
-#endif // TYPECHECKER_H
+#endif  // TYPECHECKER_H

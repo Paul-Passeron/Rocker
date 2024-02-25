@@ -19,6 +19,6 @@ typedef struct parser_t {
 parser_t new_parser(token_array_t l);
 token_type_t peek_type(parser_t p);
 token_t peek_token(parser_t p);
-void parse_program(parser_t *p);
-token_t consume_token(parser_t *p);
-#endif // PARSER_H
+void parse_program(parser_t* p);
+token_t consume_token(parser_t* p);
+#endif  // PARSER_H

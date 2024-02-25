@@ -1,11 +1,11 @@
 #include "typechecker.h"
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 #include "generator.h"
 #include "name_table.h"
 #include "token.h"
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 
 rocker_type_t get_error_type(void) {
   return (rocker_type_t){error_type, {.builtin = 1}};
@@ -16,7 +16,7 @@ rocker_type_t type_of_tupledef(typechecker_t tc, ast_tupledef t) {
     assert(0 && "TODO: handle tuples in typechecking");
   if (t.signature.length == 0)
     return get_error_type();
-  char *type_name = t.signature.data[0].lexeme;
+  char* type_name = t.signature.data[0].lexeme;
   // Is it builtin ?
   if (strcmp(type_name, "int") == 0)
     return (rocker_type_t){builtin_int, {.builtin = 1}};
@@ -40,14 +40,14 @@ rocker_type_t get_type_of_expr(typechecker_t tc, ast_t expr) {
   if (expr->tag == literal) {
     token_type_t t = expr->data.literal.lit.type;
     switch (t) {
-    case TOK_STR_LIT:
-      return (rocker_type_t){builtin_string, {.builtin = 1}};
-    case TOK_CHR_LIT:
-      return (rocker_type_t){builtin_char, {.builtin = 1}};
-    case TOK_NUM_LIT:
-      return (rocker_type_t){builtin_int, {.builtin = 1}};
-    default:
-      return get_error_type();
+      case TOK_STR_LIT:
+        return (rocker_type_t){builtin_string, {.builtin = 1}};
+      case TOK_CHR_LIT:
+        return (rocker_type_t){builtin_char, {.builtin = 1}};
+      case TOK_NUM_LIT:
+        return (rocker_type_t){builtin_int, {.builtin = 1}};
+      default:
+        return get_error_type();
     }
   } else if (expr->tag == funcall) {
     ast_t fundef = get_ref(expr->data.funcall.name.lexeme, tc.nt);
@@ -58,7 +58,8 @@ rocker_type_t get_type_of_expr(typechecker_t tc, ast_t expr) {
   }
   return get_error_type();
 }
-int are_types_compatibles(typechecker_t tc, rocker_type_t t1,
+int are_types_compatibles(typechecker_t tc,
+                          rocker_type_t t1,
                           rocker_type_t t2) {
   // for the moment we won't handle non-builtin types
   if (t1.tag == error_type || t2.tag == error_type)
@@ -97,18 +98,18 @@ int tc_program(ast_t program) {
     ast_t stmt = prog.prog.data[i];
     if (stmt->tag == tdef) {
       // add it to the name_table
-      char *name = stmt->data.tdef.name.lexeme;
+      char* name = stmt->data.tdef.name.lexeme;
       nt_kind kind = NT_USER_TYPE;
       push_nt(&tc.nt, name, kind, stmt);
     }
     if (stmt->tag == vardef) {
       // global variable that we add to the name table !
-      char *name = stmt->data.vardef.name.lexeme;
+      char* name = stmt->data.vardef.name.lexeme;
       nt_kind kind = NT_VAR;
       push_nt(&tc.nt, name, kind, stmt);
     }
     if (stmt->tag == fundef) {
-      char *name = stmt->data.fundef.name.lexeme;
+      char* name = stmt->data.fundef.name.lexeme;
       nt_kind kind = NT_FUN;
       push_nt(&tc.nt, name, kind, stmt);
     }
