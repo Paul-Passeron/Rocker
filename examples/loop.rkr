@@ -1,0 +1,16 @@
+
+let print_int(n: int): void => {
+  let a: int => n / 10;
+  if a then print_int(a);
+  putchar(n%10 + '0');
+}
+
+let main(): int => {
+  let n: int => 4;
+  loop i: 0 -> n - 1 => {
+    print("Hello, World ");
+    print_int(i);
+    print("\n");
+  }
+  return 0;
+}

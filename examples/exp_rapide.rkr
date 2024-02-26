@@ -1,0 +1,25 @@
+let exp_rapide(x: int, n: int): int => {
+  if n = 0 then return 1;
+  if n = 1 then return x;
+  if n % 2 = 0 then return  exp_rapide(x*x, n/2);
+  let new_n: int => n-1;
+  return x * exp_rapide(x*x, new_n/2);
+
+}
+
+let print_int(n: int): void => {
+  let a: int => n / 10;
+  if a then print_int(a);
+  putchar(n%10 + '0');
+}
+
+let main(): int => {
+  loop i: 0 -> 10 => {
+    print("2^");
+    print_int(i);
+    print(" = ");
+    print_int(exp_rapide(2, i));
+    print("\n");
+  }
+  return 0;
+}

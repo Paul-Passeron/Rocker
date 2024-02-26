@@ -16,7 +16,11 @@ let print_int(n: int): void => {
 }
 
 let main(): int => {
-  print_int(fact(7));                           // printing the factorial of 7 (5040)
-  print("\n");                                  // printing a new line character
-  return 0;                                     // so that it's nicer to look at 
+  loop i: 1 -> 10 => {
+    print_int(i);
+    print(": ");
+    print_int(fact(i));
+    print("\n");
+  }
+  return 0;
 }

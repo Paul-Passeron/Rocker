@@ -14,8 +14,13 @@ let print_int(n: int): void => {
   putchar(n%10 + '0');
 }
 
+
 let main(): int => {
-  print_int(fib(7));
-  print("\n");
+  loop i: 1 -> 10 => {
+    print_int(i);
+    print(": ");
+    print_int(fib(i));
+    print("\n");
+  }
   return 0;
 }
