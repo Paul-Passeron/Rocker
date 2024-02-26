@@ -1,0 +1,56 @@
+// Implementation of stack as a linked list
+
+rec stack => {
+  top: int,
+  next: stack
+}
+
+let push(s: stack, e: int): stack => {
+  let res: stack => {
+    top => e,
+    next => s
+  };
+  return res;
+}
+
+let pop(s: stack): int => {
+  if s != NULL then {
+    let res: int => s::top;
+    s => s::next;
+    return res;
+  }
+  print("Cannot pop an empty stack !\n");
+  exit(1);
+}
+let print_int(n: int): void => {
+  let a: int => n / 10;
+  if a then print_int(a);
+  putchar(n%10 + '0');
+}
+
+
+let print_stack(s: stack): void => {
+  if s != NULL then {
+      print_int(s::top);
+      print(" ");
+      print_stack(s::next);
+  }
+}
+
+let new_stack(): stack =>{
+  return NULL;
+}
+
+
+let main(): int => {
+  let s : stack => new_stack();
+  
+  
+  loop i: 0 -> 10 => {
+    s => push(s, i);
+  }
+  
+  print_stack(s);
+  print("\n");
+  return 0;
+}

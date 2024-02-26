@@ -1,0 +1,71 @@
+rec tree => {
+  Val: int,
+  left: tree,
+  right: tree,
+}
+
+let print_int(n: int): void => {
+  let a: int => n / 10;
+  if a then print_int(a);
+  putchar(n%10 + '0');
+}
+
+let print_tabs(n: int) : void => {
+  loop i: 1 -> n => {
+    print("|  ");
+  }
+}
+
+
+let print_tree_aux(t: tree, depth: int) : void => {
+  print_tabs(depth);
+  print_int(t::Val);
+  print("\n");
+  if(t::left != NULL) then
+    print_tree_aux(t::left, depth+1);
+  if(t::right != NULL) then
+    print_tree_aux(t::right, depth+1);
+}
+let print_tree(t: tree): void => {
+  print_tree_aux(t, 0);
+}
+
+let main(): int => {
+  let node1: tree => {
+    Val => 1,
+    left => NULL,
+    right => NULL
+  };
+  let node2: tree => {
+    Val => 7,
+    left => NULL,
+    right => NULL
+  };
+  let node3: tree => {
+    Val => 3,
+    left => node1,
+    right => node2,
+  };
+  let node4: tree => {
+    Val => 8,
+    left => NULL,
+    right => NULL
+  };
+  let node5: tree => {
+    Val => 13,
+    left => NULL,
+    right => NULL
+  };
+  let node6: tree => {
+    Val => 65,
+    left => node4,
+    right => node5,
+  };
+  let node7 : tree => {
+    Val => 0,
+    left => node6,
+    right => node3,
+  };
+  print_tree(node7);
+  return 0;
+}

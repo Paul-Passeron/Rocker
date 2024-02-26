@@ -46,6 +46,41 @@ void expect(parser_t p, token_type_t b) {
   }
 }
 
+int is_assign(parser_t p) {
+  int scope = 0;
+  token_type_t current = consume_token(&p).type;
+  while (scope >= 0 && current != TOK_BIG_ARROW) {
+    if (current == TOK_OPEN_BRACE || current == TOK_OPEN_BRACE)
+      scope++;
+    else if (current == TOK_CLOSE_BRACE || current == TOK_CLOSE_BRACE)
+      scope--;
+    else if (current == TOK_COMMA)
+      break;
+    else if (current == TOK_SEMICOL)
+      break;
+    else if (current == TOK_COLON)
+      break;
+    else if (current == TOK_SMALL_ARROW)
+      break;
+    else if (current == TOK_LOOP)
+      break;
+    current = consume_token(&p).type;
+  }
+  return current == TOK_BIG_ARROW;
+}
+
+ast_t parse_assign(parser_t *p) {
+  expect(*p, TOK_IDENTIFIER);
+  ast_t target = parse_expression(p);
+  expect(*p, TOK_BIG_ARROW);
+  consume_token(p);
+  ast_t expr = parse_expression(p);
+  expect(*p, TOK_SEMICOL);
+  consume_token(p);
+  return new_ast(
+      (node_t){assign, {.assign = {.expr = expr, .target = target}}});
+}
+
 ast_t parse_tuple(parser_t *p) {
   expect(*p, TOK_IDENTIFIER);
   token_array_t tuple = new_token_array();
@@ -142,6 +177,8 @@ ast_t parse_statement(parser_t *p) {
     return parse_if(p);
   else if (a == TOK_PRO || a == TOK_REC)
     return parse_tdef(p);
+  else if (is_assign(*p))
+    return parse_assign(p);
   else if (a == TOK_LOOP)
     return parse_loop(p);
   else if (a == TOK_LET) {
@@ -210,7 +247,7 @@ ast_t parse_loop(parser_t *p) {
   ast_t end = parse_expression(p);
   expect(*p, TOK_BIG_ARROW);
   consume_token(p);
-  ast_t stmt = parse_statement(p);
+  ast_t stmt = parse_compound(p);
   return new_ast((node_t){loop, {.loop = {var_name, begin, end, stmt}}});
 }
 
@@ -405,7 +442,7 @@ ast_t parse_primary(parser_t *p) {
     (void)consume_token(p);
     return res;
   } else if (type == TOK_OPEN_BRACE) {
-    return parse_compound(p);
+    return parse_record_expression(p);
   } else {
     printf("Pb : %s\n", lexeme_of_type(type));
     printf("Could not parse as a primary !\n");
@@ -419,6 +456,7 @@ ast_t parse_increasing_precedence(parser_t *p, ast_t left, int min_prec);
 ast_t parse_expression_aux(parser_t *p, int min_precedence);
 
 ast_t parse_expression(parser_t *p) {
+
   token_type_t a = peek_type(*p);
 
   if (a == TOK_OPEN_PAREN) {
@@ -427,6 +465,9 @@ ast_t parse_expression(parser_t *p) {
     expect(*p, TOK_CLOSE_PAREN);
     consume_token(p);
     return res;
+  } else if (a == TOK_OPEN_BRACE) {
+    consume_token(p);
+    return parse_record_expression(p);
   }
   return parse_expression_aux(p, -1); // for TCC
 }

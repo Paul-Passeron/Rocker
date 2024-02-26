@@ -11,6 +11,8 @@ void generate_compound(generator_t *g, ast_t comp);
 void generate_tdef(generator_t *g, ast_t tdef_ast);
 void generate_fundef(generator_t *g, ast_t fun);
 int is_builtin_typename(char *name);
+void generate_sub_as_expression(generator_t *g, ast_t expr);
+void generate_assignement(generator_t *g, ast_t assignment);
 
 generator_t new_generator(char *filename) {
   generator_t res;
@@ -116,7 +118,7 @@ void generate_sub(generator_t *g, ast_t sub_ast, int is_rec) {
   ast_sub sub = sub_ast->data.sub;
   assert(sub.path.length == 1 && "TODO; implement nested subs");
   if (is_rec) {
-    assert(0 && "TODO: implement rec generating subs");
+    generate_sub_as_expression(g, sub_ast);
   } else {
     // We check if the expr is a wildcard
     int is_wild = 0;
@@ -162,7 +164,7 @@ void generate_expression(generator_t *g, ast_t expr) {
       fprintf(f, "%s", tok.lexeme);
     else
       fprintf(f, "(string){.data = %s, .length = %d}", tok.lexeme,
-              get_literal_string_length(tok));
+              get_literal_string_length(tok) - 1);
   } else if (expr->tag == identifier) {
     char *lexeme = expr->data.identifier.id.lexeme;
     fprintf(f, "%s", lexeme);
@@ -178,10 +180,20 @@ void generate_expression(generator_t *g, ast_t expr) {
     generate_loop(g, expr);
   else if (expr->tag == sub)
     generate_sub_as_expression(g, expr);
+  else if (expr->tag == assign)
+    generate_assignement(g, expr);
   else {
     printf("TAG is %d\n", expr->tag);
     assert(0 && "TODO");
   }
+}
+
+void generate_assignement(generator_t *g, ast_t assignment) {
+  FILE *f = g->f;
+  ast_assign assign = assignment->data.assign;
+  generate_expression(g, assign.target);
+  fprintf(f, " = ");
+  generate_expression(g, assign.expr);
 }
 
 void generate_vardef(generator_t *g, ast_t var) {
@@ -189,7 +201,18 @@ void generate_vardef(generator_t *g, ast_t var) {
   ast_vardef vardef = var->data.vardef;
   push_nt(&g->table, vardef.name.lexeme, NT_VAR, var);
   char *type_name = vardef.type->data.tupledef.signature.data[0].lexeme;
-  if (!is_builtin_typename(type_name)) {
+  if (is_builtin_typename(type_name)) {
+    generate_type(f, vardef.type->data.tupledef);
+    fprintf(f, " %s = ", vardef.name.lexeme);
+    // Temporary, we'll need to store the constructors in the name table, with
+    // a flag saying if it's void or not
+    if (vardef.expr->tag == sub)
+      generate_sub_as_expression(g, vardef.expr);
+    else
+      generate_expression(g, vardef.expr);
+    fprintf(f, ";\n");
+  } else if (!is_builtin_typename(type_name) &&
+             vardef.expr->tag == record_expr) {
     fprintf(f, "struct ");
     generate_type(f, vardef.type->data.tupledef);
     fprintf(f, " tmp_%s = ", vardef.name.lexeme);
@@ -207,6 +230,7 @@ void generate_vardef(generator_t *g, ast_t var) {
           generate_expression(g, expr);
       }
       fprintf(f, "};");
+
     } else {
       if (vardef.expr->tag == sub) {
         generate_sub(g, vardef.expr, vardef.is_rec);
@@ -222,10 +246,11 @@ void generate_vardef(generator_t *g, ast_t var) {
     fprintf(f, "));\n");
     fprintf(f, "*%s = tmp_%s;\n", vardef.name.lexeme, vardef.name.lexeme);
   } else {
+
     generate_type(f, vardef.type->data.tupledef);
     fprintf(f, " %s = ", vardef.name.lexeme);
-    // Temporary, we'll need to store the constructors in the name table, with a
-    // flag saying if it's void or not
+    // Temporary, we'll need to store the constructors in the name table, with
+    // a flag saying if it's void or not
     if (vardef.expr->tag == sub)
       generate_sub(g, vardef.expr, vardef.is_rec);
     else

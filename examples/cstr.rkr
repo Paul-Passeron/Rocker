@@ -1,0 +1,6 @@
+
+
+let main(): int => {
+    printf(cstr("Test%d\n"), 10);
+    return 0;
+}

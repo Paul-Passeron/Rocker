@@ -39,3 +39,4 @@ let main() : int => {
 - [ ] Add loops (while, maybe foreach for array types)
 - [ ] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
 - [ ] Add including files support
+- [ ] Self-Hosting

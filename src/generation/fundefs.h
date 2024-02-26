@@ -5,5 +5,7 @@
 #include "typedefs.h"
 
 void print(string s);
+char *cstr(string s);
+
 
 #endif  // ROCKER_FUNDEFS
