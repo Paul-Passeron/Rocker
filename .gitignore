@@ -1,5 +1,6 @@
 build
+main
 *.vscode
 *.json
-
+out*
 *_old.c

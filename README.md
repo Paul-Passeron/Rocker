@@ -23,41 +23,6 @@ let main() : int => {
   print "Hello from Rocker!\n";
   return 0;
 }
-
-// Recursive function definition and simple case of pattern matching
-let factorial (n: int) : int => {
-  match n => {
-    -> 0 => return 1;
-    -> 1 => return 1;
-    -> _ => return n * fact(n-1);
-  }
-}
-
-// record type definition (struct)
-rec rec_int_list_t => {
-  Val: int,
-  Next: int_list_t,
-}
-
-// product type definition
-pro pro_int_list_t => {
-  Cons : int * pro_int_list_t,
-  None,
-}
-
-
-// Pattern matching user defined types
-
-let print_list (list: pro_int_list_t): void => {
-  match list => {
-    -> Cons::(a, rest) => {
-      print_int a;
-      print " ";
-      print_list(rest);
-    }
-    -> None => {}
-  }
-}
 ```
 
 ## TODO
@@ -70,6 +35,7 @@ let print_list (list: pro_int_list_t): void => {
 - [ ] Get type of an expression (for match cases)
 - [ ] Generation of match expressions
 - [ ] Typechecking
-- [ ] Add loops (while and for, maybe foreach for array types)
+- [x] Add integer for loo^s 
+- [ ] Add loops (while, maybe foreach for array types)
 - [ ] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
 - [ ] Add including files support

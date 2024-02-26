@@ -1,0 +1,21 @@
+rec my_type => {
+  A: int,
+  B: int,
+}
+
+let print_int(n: int): void => {
+  let a: int => n / 10;
+  if a then print_int(a);
+  putchar(n%10 + '0');
+}
+
+
+let main(): int => {
+  let var: my_type => {
+    A => 7,
+    B => 5421,
+  };
+  print_int(var::B);
+  print("\n");
+  return 0;
+}

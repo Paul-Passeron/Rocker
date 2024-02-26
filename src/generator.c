@@ -146,6 +146,14 @@ void generate_loop(generator_t *g, ast_t loop_ast) {
   end_nt_scope(&g->table);
 }
 
+void generate_sub_as_expression(generator_t *g, ast_t expr) {
+  FILE *f = g->f;
+  ast_sub sub = expr->data.sub;
+  assert(sub.path.length == 1 && "SUB AS EXPRESSION LENGTH LIMIT\n");
+  fprintf(f, "%s->", sub.path.data[0].lexeme);
+  generate_expression(g, sub.expr);
+}
+
 void generate_expression(generator_t *g, ast_t expr) {
   FILE *f = g->f;
   if (expr->tag == literal) {
@@ -168,6 +176,8 @@ void generate_expression(generator_t *g, ast_t expr) {
     generate_compound(g, expr);
   else if (expr->tag == loop)
     generate_loop(g, expr);
+  else if (expr->tag == sub)
+    generate_sub_as_expression(g, expr);
   else {
     printf("TAG is %d\n", expr->tag);
     assert(0 && "TODO");
