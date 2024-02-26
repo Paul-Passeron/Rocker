@@ -1,0 +1,11 @@
+let main(): int => {
+    let filename :string => "test.txt";
+    let contents :string => read_file(filename);
+    let len :int => get_string_length(contents);
+    loop i: 0 -> len => {
+        let c: char => get_nth_char(contents, i);
+        printf(string_to_cstr("GOT: %c\n"), c);
+    }
+    print("\n");
+    return 0;
+}

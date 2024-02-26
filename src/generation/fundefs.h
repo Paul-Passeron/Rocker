@@ -5,7 +5,12 @@
 #include "typedefs.h"
 
 void print(string s);
-char *cstr(string s);
-
-
+char* string_to_cstr(string s);
+char get_nth_char(string s, int n);
+string append_string(string s, char c);
+string concat_string(string s1, string s2);
+int get_string_length(string s);
+void set_nth_char(string s, int n, char c);
+string read_file(string filename);
+string new_string(string s);
 #endif  // ROCKER_FUNDEFS

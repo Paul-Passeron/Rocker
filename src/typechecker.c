@@ -92,7 +92,7 @@ int tc_program(ast_t program) {
   push_nt(&tc.nt, "int", NT_BUILTIN_TYPE, program);
   push_nt(&tc.nt, "char", NT_BUILTIN_TYPE, program);
   push_nt(&tc.nt, "string", NT_BUILTIN_TYPE, program);
-  push_nt(&tc.nt, "bool", NT_BUILTIN_TYPE, program);
+  push_nt(&tc.nt, "boolean", NT_BUILTIN_TYPE, program);
   new_nt_scope(&tc.nt);
   for (int i = 0; i < prog.prog.length; i++) {
     ast_t stmt = prog.prog.data[i];

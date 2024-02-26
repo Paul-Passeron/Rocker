@@ -1,20 +1,20 @@
 #include "generator.h"
+#include <assert.h>
+#include <string.h>
 #include "../RockerAllocator/alloc.h"
 #include "ast.h"
 #include "name_table.h"
 #include "token.h"
-#include <assert.h>
-#include <string.h>
 
-void generate_statement(generator_t *g, ast_t stmt);
-void generate_compound(generator_t *g, ast_t comp);
-void generate_tdef(generator_t *g, ast_t tdef_ast);
-void generate_fundef(generator_t *g, ast_t fun);
-int is_builtin_typename(char *name);
-void generate_sub_as_expression(generator_t *g, ast_t expr);
-void generate_assignement(generator_t *g, ast_t assignment);
+void generate_statement(generator_t* g, ast_t stmt);
+void generate_compound(generator_t* g, ast_t comp);
+void generate_tdef(generator_t* g, ast_t tdef_ast);
+void generate_fundef(generator_t* g, ast_t fun);
+int is_builtin_typename(char* name);
+void generate_sub_as_expression(generator_t* g, ast_t expr);
+void generate_assignement(generator_t* g, ast_t assignment);
 
-generator_t new_generator(char *filename) {
+generator_t new_generator(char* filename) {
   generator_t res;
   res.f = fopen(filename, "wb");
   if (res.f == NULL)
@@ -35,12 +35,12 @@ name_table_t new_name_table(void) {
   res.scope = 0;
   res.refs = new_ast_array();
   res.kinds = allocate_compiler_persistent(sizeof(nt_kind) * res.capacity);
-  res.names = allocate_compiler_persistent(sizeof(char *) * res.capacity);
+  res.names = allocate_compiler_persistent(sizeof(char*) * res.capacity);
   res.scopes = allocate_compiler_persistent(sizeof(int) * res.capacity);
   return res;
 }
 
-void generate_type(FILE *f, ast_tupledef tuple) {
+void generate_type(FILE* f, ast_tupledef tuple) {
   token_array_t elems = tuple.signature;
   if (elems.length > 1) {
     assert(0 && "TODO: actually handle tuples in geenrate_type");
@@ -51,10 +51,10 @@ void generate_type(FILE *f, ast_tupledef tuple) {
   fprintf(f, "%s", elems.data[0].lexeme);
 }
 
-void generate_expression(generator_t *g, ast_t expr);
+void generate_expression(generator_t* g, ast_t expr);
 
-void generate_funcall(generator_t *g, ast_t fun) {
-  FILE *f = g->f;
+void generate_funcall(generator_t* g, ast_t fun) {
+  FILE* f = g->f;
   ast_funcall funcall = fun->data.funcall;
   fprintf(f, "%s(", funcall.name.lexeme);
   for (int i = 0; i < funcall.args.length; i++) {
@@ -65,17 +65,18 @@ void generate_funcall(generator_t *g, ast_t fun) {
   fprintf(f, ")");
 }
 
-int calcEscapedLength(const char *str) {
+int calcEscapedLength(const char* str) {
   int length = 0;
   int i = 0;
   while (str[i]) {
-    if (str[i] == '\\') { // Check if it is an escape character
-      i++; // Move to the next character to interpret the escape sequence
+    if (str[i] == '\\') {  // Check if it is an escape character
+      i++;  // Move to the next character to interpret the escape sequence
       if (str[i] == 'n' || str[i] == 't' || str[i] == '\\' || str[i] == '"' ||
           str[i] == '\'' || str[i] == 'r') {
-        length++; // These are single character escape sequences
+        length++;  // These are single character escape sequences
       } else {
-        length += 2; // For unrecognized escape sequences, count both characters
+        length +=
+            2;  // For unrecognized escape sequences, count both characters
       }
     } else {
       length++;
@@ -89,9 +90,9 @@ int get_literal_string_length(token_t tok) {
   return calcEscapedLength(tok.lexeme);
 }
 
-void generate_op(generator_t *g, ast_t expr) {
+void generate_op(generator_t* g, ast_t expr) {
   ast_op op = expr->data.op;
-  FILE *f = g->f;
+  FILE* f = g->f;
   generate_expression(g, op.left);
   if (op.op == TOK_EQUAL)
     fprintf(f, " == ");
@@ -100,8 +101,8 @@ void generate_op(generator_t *g, ast_t expr) {
   generate_expression(g, op.right);
 }
 
-void generate_if_statement(generator_t *g, ast_t stmt) {
-  FILE *f = g->f;
+void generate_if_statement(generator_t* g, ast_t stmt) {
+  FILE* f = g->f;
   ast_ifstmt ifstmt = stmt->data.ifstmt;
   fprintf(f, "if (");
   generate_expression(g, ifstmt.expression);
@@ -113,8 +114,8 @@ void generate_if_statement(generator_t *g, ast_t stmt) {
   }
 }
 
-void generate_sub(generator_t *g, ast_t sub_ast, int is_rec) {
-  FILE *f = g->f;
+void generate_sub(generator_t* g, ast_t sub_ast, int is_rec) {
+  FILE* f = g->f;
   ast_sub sub = sub_ast->data.sub;
   assert(sub.path.length == 1 && "TODO; implement nested subs");
   if (is_rec) {
@@ -134,8 +135,8 @@ void generate_sub(generator_t *g, ast_t sub_ast, int is_rec) {
   }
 }
 
-void generate_loop(generator_t *g, ast_t loop_ast) {
-  FILE *f = g->f;
+void generate_loop(generator_t* g, ast_t loop_ast) {
+  FILE* f = g->f;
   ast_loop loop = loop_ast->data.loop;
   new_nt_scope(&g->table);
   push_nt(&g->table, loop.variable.lexeme, NT_VAR, loop_ast);
@@ -148,25 +149,25 @@ void generate_loop(generator_t *g, ast_t loop_ast) {
   end_nt_scope(&g->table);
 }
 
-void generate_sub_as_expression(generator_t *g, ast_t expr) {
-  FILE *f = g->f;
+void generate_sub_as_expression(generator_t* g, ast_t expr) {
+  FILE* f = g->f;
   ast_sub sub = expr->data.sub;
   assert(sub.path.length == 1 && "SUB AS EXPRESSION LENGTH LIMIT\n");
   fprintf(f, "%s->", sub.path.data[0].lexeme);
   generate_expression(g, sub.expr);
 }
 
-void generate_expression(generator_t *g, ast_t expr) {
-  FILE *f = g->f;
+void generate_expression(generator_t* g, ast_t expr) {
+  FILE* f = g->f;
   if (expr->tag == literal) {
     token_t tok = expr->data.literal.lit;
     if (tok.type != TOK_STR_LIT)
       fprintf(f, "%s", tok.lexeme);
     else
-      fprintf(f, "(string){.data = %s, .length = %d}", tok.lexeme,
+      fprintf(f, "new_string((string){.data = %s, .length = %d})", tok.lexeme,
               get_literal_string_length(tok) - 1);
   } else if (expr->tag == identifier) {
-    char *lexeme = expr->data.identifier.id.lexeme;
+    char* lexeme = expr->data.identifier.id.lexeme;
     fprintf(f, "%s", lexeme);
   } else if (expr->tag == funcall)
     generate_funcall(g, expr);
@@ -188,19 +189,19 @@ void generate_expression(generator_t *g, ast_t expr) {
   }
 }
 
-void generate_assignement(generator_t *g, ast_t assignment) {
-  FILE *f = g->f;
+void generate_assignement(generator_t* g, ast_t assignment) {
+  FILE* f = g->f;
   ast_assign assign = assignment->data.assign;
   generate_expression(g, assign.target);
   fprintf(f, " = ");
   generate_expression(g, assign.expr);
 }
 
-void generate_vardef(generator_t *g, ast_t var) {
-  FILE *f = g->f;
+void generate_vardef(generator_t* g, ast_t var) {
+  FILE* f = g->f;
   ast_vardef vardef = var->data.vardef;
   push_nt(&g->table, vardef.name.lexeme, NT_VAR, var);
-  char *type_name = vardef.type->data.tupledef.signature.data[0].lexeme;
+  char* type_name = vardef.type->data.tupledef.signature.data[0].lexeme;
   if (is_builtin_typename(type_name)) {
     generate_type(f, vardef.type->data.tupledef);
     fprintf(f, " %s = ", vardef.name.lexeme);
@@ -225,7 +226,7 @@ void generate_vardef(generator_t *g, ast_t var) {
         ast_t expr = rec.exprs.data[i];
         fprintf(f, ".%s = ", rec.names.data[i].lexeme);
         if (expr->tag == sub)
-          generate_sub(g, expr, vardef.is_rec);
+          generate_sub_as_expression(g, expr);
         else
           generate_expression(g, expr);
       }
@@ -233,7 +234,7 @@ void generate_vardef(generator_t *g, ast_t var) {
 
     } else {
       if (vardef.expr->tag == sub) {
-        generate_sub(g, vardef.expr, vardef.is_rec);
+        generate_sub_as_expression(g, vardef.expr);
       } else {
         generate_expression(g, vardef.expr);
       }
@@ -246,33 +247,32 @@ void generate_vardef(generator_t *g, ast_t var) {
     fprintf(f, "));\n");
     fprintf(f, "*%s = tmp_%s;\n", vardef.name.lexeme, vardef.name.lexeme);
   } else {
-
     generate_type(f, vardef.type->data.tupledef);
     fprintf(f, " %s = ", vardef.name.lexeme);
     // Temporary, we'll need to store the constructors in the name table, with
     // a flag saying if it's void or not
     if (vardef.expr->tag == sub)
-      generate_sub(g, vardef.expr, vardef.is_rec);
+      generate_sub_as_expression(g, vardef.expr);
     else
       generate_expression(g, vardef.expr);
     fprintf(f, ";\n");
   }
 }
 
-void generate_match(generator_t *g, ast_t match) {
+void generate_match(generator_t* g, ast_t match) {
   (void)g;
   (void)match;
 }
 
-void generate_return(generator_t *g, ast_t ret_ast) {
-  FILE *f = g->f;
+void generate_return(generator_t* g, ast_t ret_ast) {
+  FILE* f = g->f;
   fprintf(f, "return ");
   generate_expression(g, ret_ast->data.ret.expr);
   fprintf(f, ";\n");
 }
 
-void generate_statement(generator_t *g, ast_t stmt) {
-  FILE *f = g->f;
+void generate_statement(generator_t* g, ast_t stmt) {
+  FILE* f = g->f;
   if (stmt->tag == vardef) {
     generate_vardef(g, stmt);
   } else if (stmt->tag == match) {
@@ -293,8 +293,8 @@ void generate_statement(generator_t *g, ast_t stmt) {
     fprintf(f, ";\n");
   }
 }
-void generate_compound(generator_t *g, ast_t comp) {
-  FILE *f = g->f;
+void generate_compound(generator_t* g, ast_t comp) {
+  FILE* f = g->f;
   fprintf(f, "{");
   ast_compound compound = comp->data.compound;
   new_nt_scope(&g->table);
@@ -304,9 +304,9 @@ void generate_compound(generator_t *g, ast_t comp) {
   fprintf(f, "}");
 }
 
-void generate_fundef(generator_t *g, ast_t fun) {
+void generate_fundef(generator_t* g, ast_t fun) {
   // add to name table
-  FILE *f = g->f;
+  FILE* f = g->f;
   ast_fundef fundef = fun->data.fundef;
   new_nt_scope(&g->table);
   push_nt(&g->table, fundef.name.lexeme, NT_FUN, fun);
@@ -334,7 +334,7 @@ void generate_fundef(generator_t *g, ast_t fun) {
   end_nt_scope(&g->table);
 }
 
-int is_builtin_typename(char *name) {
+int is_builtin_typename(char* name) {
   if (strcmp(name, "bool") == 0)
     return 1;
   if (strcmp(name, "int") == 0)
@@ -346,14 +346,14 @@ int is_builtin_typename(char *name) {
   return 0;
 }
 
-void generate_forward_defs(generator_t *g, ast_t program) {
-  FILE *f = g->f;
+void generate_forward_defs(generator_t* g, ast_t program) {
+  FILE* f = g->f;
   ast_array_t stmts = program->data.program.prog;
   for (int i = 0; i < stmts.length; i++) {
     ast_t stmt = stmts.data[i];
     if (stmt->tag == tdef) {
       struct ast_tdef tdef = stmt->data.tdef;
-      char *name = tdef.name.lexeme;
+      char* name = tdef.name.lexeme;
       if (is_builtin_typename(name))
         fprintf(f, "typedef struct %s %s;\n", name, name);
       else
@@ -362,10 +362,10 @@ void generate_forward_defs(generator_t *g, ast_t program) {
   }
 }
 
-void generate_tdef(generator_t *g, ast_t tdef_ast) {
-  FILE *f = g->f;
+void generate_tdef(generator_t* g, ast_t tdef_ast) {
+  FILE* f = g->f;
   struct ast_tdef tdef = tdef_ast->data.tdef;
-  char *name = tdef.name.lexeme;
+  char* name = tdef.name.lexeme;
   // fprintf(f, "typedef struct %s %s;\n", name, name);
   fprintf(f, "struct %s{\n", name);
   if (tdef.t == TDEF_PRO) {
@@ -402,8 +402,8 @@ void generate_tdef(generator_t *g, ast_t tdef_ast) {
   return;
 }
 
-void transpile(generator_t *g, ast_t program) {
-  FILE *f = g->f;
+void transpile(generator_t* g, ast_t program) {
+  FILE* f = g->f;
   ast_array_t stmts = program->data.program.prog;
   fprintf(f, "#include \"./src/generation/fundefs.h\"\n");
   fprintf(f, "#include \"./src/generation/fundefs_internal.h\"\n");

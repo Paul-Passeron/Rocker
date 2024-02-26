@@ -15,4 +15,8 @@ typedef struct __internal_dynamic_array_t {
   size_t elem_size;
 } __internal_dynamic_array_t;
 
+typedef char boolean;
+#define true 1;
+#define false 0;
+
 #endif  // ROCKER_TYPEDEFS_INTERNAL

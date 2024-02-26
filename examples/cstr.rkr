@@ -1,6 +1,4 @@
-
-
 let main(): int => {
-    printf(cstr("Test%d\n"), 10);
+    printf(string_to_cstr("Test%d\n"), 10);
     return 0;
 }
