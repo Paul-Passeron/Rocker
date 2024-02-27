@@ -168,13 +168,13 @@ void generate_while_loop(generator_t *g, ast_t loop) {
 void generate_enum_tdef(generator_t *g, ast_t expr) {
   FILE *f = g->f;
   ast_enum_tdef enum_tdef = expr->data.enum_tdef;
-  fprintf(f, "typedef enum {\n");
+  fprintf(f, "enum %s {\n", enum_tdef.name.lexeme);
   for (int i = 0; i < enum_tdef.items.length; i++) {
     if (i > 0)
       fprintf(f, ",\n");
     fprintf(f, "%s", enum_tdef.items.data[i].lexeme);
   }
-  fprintf(f, "}%s;\n", enum_tdef.name.lexeme);
+  fprintf(f, "};\n");
 }
 
 void generate_expression(generator_t *g, ast_t expr) {
@@ -382,10 +382,12 @@ void generate_forward_defs(generator_t *g, ast_t program) {
     if (stmt->tag == tdef) {
       struct ast_tdef tdef = stmt->data.tdef;
       char *name = tdef.name.lexeme;
-      if (is_builtin_typename(name))
-        fprintf(f, "typedef struct %s %s;\n", name, name);
-      else
-        fprintf(f, "typedef struct %s *%s;\n", name, name);
+      fprintf(f, "typedef struct %s *%s;\n", name, name);
+    }
+    if (stmt->tag == enum_tdef) {
+      struct ast_tdef tdef = stmt->data.tdef;
+      char *name = tdef.name.lexeme;
+      fprintf(f, "typedef enum %s %s;\n", name, name);
     }
   }
 

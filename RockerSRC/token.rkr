@@ -10,108 +10,63 @@ include "RockerSRC/stdlib.rkr"
 // TOKEN FUNCTIONS
 //-----------------------------------------------------------------------------
 
-let TOK_IDENTIFIER: int => 0;
-let TOK_CHR_LIT: int => 0;
-let TOK_STR_LIT: int => 0;
-let TOK_NUM_LIT: int => 0;
-let TOK_LET: int => 0;
-let TOK_COLON: int => 0;
-let TOK_COMMA: int => 0;
-let TOK_SMALL_ARROW: int => 0;
-let TOK_BIG_ARROW: int => 0;
-let TOK_OPEN_BRACE: int => 0;
-let TOK_CLOSE_BRACE: int => 0;
-let TOK_OPEN_PAREN: int => 0;
-let TOK_CLOSE_PAREN: int => 0;
-let TOK_IF: int => 0;
-let TOK_THEN: int => 0;
-let TOK_ELSE: int => 0;
-let TOK_REC: int => 0;
-let TOK_PRO: int => 0;
-let TOK_MATCH: int => 0;
-let TOK_RETURN: int => 0;
-let TOK_STAR: int => 0;
-let TOK_MINUS: int => 0;
-let TOK_PLUS: int => 0;
-let TOK_DIV: int => 0;
-let TOK_MODULO: int => 0;
-let TOK_LOG_OR: int => 0;
-let TOK_LOG_AND: int => 0;
-let TOK_BIT_OR: int => 0;
-let TOK_BIT_XOR: int => 0;
-let TOK_BIT_AND: int => 0;
-let TOK_LSSR: int => 0;
-let TOK_LSSR_EQ: int => 0;
-let TOK_GRTR: int => 0;
-let TOK_GRTR_EQ: int => 0;
-let TOK_EQUAL: int => 0;
-let TOK_DIFF: int => 0;
-let TOK_WILDCARD: int => 0;
-let TOK_SUB: int => 0;
-let TOK_SEMICOL: int => 0;
-let TOK_LOOP: int => 0;
-let TOK_WHILE: int => 0;
-let TOK_DO: int => 0;
-let TOK_INCLUDE: int => 0;
-let TOK_COUNT: int => 0;
+enum token_type => {
+    TOK_IDENTIFIER,
+    TOK_CHR_LIT,
+    TOK_STR_LIT,
+    TOK_NUM_LIT,
+    TOK_LET,
+    TOK_COLON,
+    TOK_COMMA,
+    TOK_SMALL_ARROW,
+    TOK_BIG_ARROW,
+    TOK_OPEN_BRACE,
+    TOK_CLOSE_BRACE,
+    TOK_OPEN_PAREN,
+    TOK_CLOSE_PAREN,
+    TOK_IF,
+    TOK_THEN,
+    TOK_ELSE,
+    TOK_REC,
+    TOK_PRO,
+    TOK_MATCH,
+    TOK_RETURN,
+    TOK_STAR,
+    TOK_MINUS,
+    TOK_PLUS,
+    TOK_DIV,
+    TOK_MODULO,
+    TOK_LOG_OR,
+    TOK_LOG_AND,
+    TOK_BIT_OR,
+    TOK_BIT_XOR,
+    TOK_BIT_AND,
+    TOK_LSSR,
+    TOK_LSSR_EQ,
+    TOK_GRTR,
+    TOK_GRTR_EQ,
+    TOK_EQUAL,
+    TOK_DIFF,
+    TOK_WILDCARD,
+    TOK_SUB,
+    TOK_SEMICOL,
+    TOK_LOOP,
+    TOK_WHILE,
+    TOK_DO,
+    TOK_INCLUDE,
+    TOK_COUNT,
+}
 
 
 rec token => {
-    Type: int,
+    Type: token_type,
     Lexeme: string,
     Col: int,
     Line: int,
     Filename: string 
 }
 
-let init_types(): void => {
-    TOK_IDENTIFIER  => reset_counter();
-    TOK_CHR_LIT     => incr_counter();
-    TOK_STR_LIT     => incr_counter();
-    TOK_NUM_LIT     => incr_counter();
-    TOK_LET         => incr_counter();
-    TOK_COLON       => incr_counter();
-    TOK_COMMA       => incr_counter();
-    TOK_SMALL_ARROW => incr_counter();
-    TOK_BIG_ARROW   => incr_counter();
-    TOK_OPEN_BRACE  => incr_counter();
-    TOK_CLOSE_BRACE => incr_counter();
-    TOK_OPEN_PAREN  => incr_counter();
-    TOK_CLOSE_PAREN => incr_counter();
-    TOK_IF          => incr_counter();
-    TOK_THEN        => incr_counter();
-    TOK_ELSE        => incr_counter();
-    TOK_REC         => incr_counter();
-    TOK_PRO         => incr_counter();
-    TOK_MATCH       => incr_counter();
-    TOK_RETURN      => incr_counter();
-    TOK_STAR        => incr_counter();
-    TOK_MINUS       => incr_counter();
-    TOK_PLUS        => incr_counter();
-    TOK_DIV         => incr_counter();
-    TOK_MODULO      => incr_counter();
-    TOK_LOG_OR      => incr_counter();
-    TOK_LOG_AND     => incr_counter();
-    TOK_BIT_OR      => incr_counter();
-    TOK_BIT_XOR     => incr_counter();
-    TOK_BIT_AND     => incr_counter();
-    TOK_LSSR        => incr_counter();
-    TOK_LSSR_EQ     => incr_counter();
-    TOK_GRTR        => incr_counter();
-    TOK_GRTR_EQ     => incr_counter();
-    TOK_EQUAL       => incr_counter();
-    TOK_DIFF        => incr_counter();
-    TOK_WILDCARD    => incr_counter();
-    TOK_SUB         => incr_counter();
-    TOK_SEMICOL     => incr_counter();
-    TOK_LOOP        => incr_counter();
-    TOK_WHILE       => incr_counter();
-    TOK_DO          => incr_counter();
-    TOK_INCLUDE     => incr_counter();
-    TOK_COUNT       => incr_counter();
-}
-
-let lexeme_of_type(type: int): string => {
+let lexeme_of_type(type: token_type): string => {
          if type = TOK_IDENTIFIER  then return "TOK_IDENTIFIER";
     else if type = TOK_CHR_LIT     then return "TOK_CHR_LIT";
     else if type = TOK_STR_LIT     then return "TOK_STR_LIT";
@@ -158,7 +113,7 @@ let lexeme_of_type(type: int): string => {
 }
 
 
-let type_of_lexeme(lexeme: string): int => {
+let type_of_lexeme(lexeme: string): token_type => {
     if str_eq(lexeme, "let")                 then return TOK_LET;
     if str_eq(lexeme, ":")                   then return TOK_COLON;
     if str_eq(lexeme, ",")                   then return TOK_COMMA;

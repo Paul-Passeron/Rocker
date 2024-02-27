@@ -15,19 +15,15 @@ rec file => {
     Mode: int,
 }
 
-let READ_MODE: int => 0;
-let WRITE_MODE: int => 0;
-let CLOSED: int => 0;
 
-
-// Very very temporary
-let init_file_modes(): void => {
-    READ_MODE => reset_counter();
-    WRITE_MODE => incr_counter();
-    CLOSED => incr_counter();
+enum file_mode => {
+    READ_MODE,
+    WRITE_MODE,
+    CLOSED
 }
 
-let open_file(filename: string, mode: int): file => {
+
+let open_file(filename: string, mode: file_mode): file => {
     let res: file => {
         Filename => filename,
         Data => "",
@@ -95,26 +91,3 @@ let create_string(src: string, offset: int,  length: int): string => {
 }
 //-----------------------------------------------------------------------------
 
-
-//-----------------------------------------------------------------------------
-// ENUMERATION PLACEHOLDERS
-//-----------------------------------------------------------------------------
-
-let counter: int => 0;
-
-let incr_counter(): int => {
-    counter => counter + 1;
-    return counter;
-}
-
-let set_counter(i: int): int => {
-    counter => i;
-    return counter;
-}
-
-let reset_counter(): int => {
-    counter => 0;
-    return counter;
-}
-
-//-----------------------------------------------------------------------------

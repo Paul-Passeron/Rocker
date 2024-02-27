@@ -65,15 +65,9 @@ let print_list_types(l: token_list) : void => {
 // MAIN FUNCTION
 //-----------------------------------------------------------------------------
 
-let init(): void => {
-    init_types();
-    init_file_modes();
-    init_comment_type();
-}
 
 
 let main(): int => {
-    init();
     let l: lexer => new_lexer("RockerSRC/main.rkr");
     lex_program(l);
     print_int(get_list_length(l::Toks));

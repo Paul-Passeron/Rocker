@@ -158,15 +158,14 @@ let length_of_delimited_literal(l: lexer, c: char): int => {
     return res;
 }
 
-let COM_SINGLE: int => 0;
-let COM_MULTI: int => 0;
-
-let init_comment_type(): void => {
-    COM_SINGLE => set_counter(1);
-    COM_MULTI => incr_counter();
+enum comment_type => {
+    NOT_COM,
+    COM_SINGLE,
+    COM_MULTI
 }
 
-let is_comment(l: lexer): int => {
+
+let is_comment(l: lexer): comment_type => {
     let cursor: int => l::Cursor;
     let c: char => lexer_peek(l);
     if c != '/' then return 0;
@@ -181,7 +180,7 @@ let is_comment(l: lexer): int => {
         return COM_MULTI;
     }
     l::Cursor => cursor;
-    return 0;
+    return NOT_COM;
 }
 
 let is_end_comment(l: lexer, type: int): boolean => {
