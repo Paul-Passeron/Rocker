@@ -1,3 +1,17 @@
+//-----------------------------------------------------------------------------
+//  ROCKER COMPILER
+//  MIT License
+//  Copyright (c) 2024 Paul Passeron
+//-----------------------------------------------------------------------------
+
+// Compiler of Rocker programming 
+// language written in itself !
+
+
+//-----------------------------------------------------------------------------
+// ENUMERATION PLACEHOLDERS
+//-----------------------------------------------------------------------------
+
 let counter: int => 0;
 
 let incr_counter(): int => {
@@ -9,7 +23,12 @@ let reset_counter(): int => {
     counter => 0;
     return counter;
 }
+//-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+// TOKEN FUNCTIONS
+//-----------------------------------------------------------------------------
 
 let TOK_IDENTIFIER: int => 0;
 let TOK_CHR_LIT: int => 0;
@@ -106,52 +125,94 @@ let init_types(): void => {
     TOK_COUNT => incr_counter();
 }
 
-
 let lexeme_of_type(type: int): string => {
-         if (type = TOK_IDENTIFIER)  then return "TOK_IDENTIFIER";
-    else if (type = TOK_CHR_LIT)     then return "TOK_CHR_LIT";
-    else if (type = TOK_STR_LIT)     then return "TOK_STR_LIT";
-    else if (type = TOK_NUM_LIT)     then return "TOK_NUM_LIT";
-    else if (type = TOK_LET)         then return "TOK_LET";
-    else if (type = TOK_COLON)       then return "TOK_COLON";
-    else if (type = TOK_COMMA)       then return "TOK_COMMA";
-    else if (type = TOK_SMALL_ARROW) then return "TOK_SMALL_ARROW";
-    else if (type = TOK_BIG_ARROW)   then return "TOK_BIG_ARROW";
-    else if (type = TOK_OPEN_BRACE)  then return "TOK_OPEN_BRACE";
-    else if (type = TOK_CLOSE_BRACE) then return "TOK_CLOSE_BRACE";
-    else if (type = TOK_OPEN_PAREN)  then return "TOK_OPEN_PAREN";
-    else if (type = TOK_CLOSE_PAREN) then return "TOK_CLOSE_PAREN";
-    else if (type = TOK_IF)          then return "TOK_IF";
-    else if (type = TOK_THEN)        then return "TOK_THEN";
-    else if (type = TOK_ELSE)        then return "TOK_ELSE";
-    else if (type = TOK_REC)         then return "TOK_REC";
-    else if (type = TOK_PRO)         then return "TOK_PRO";
-    else if (type = TOK_MATCH)       then return "TOK_MATCH";
-    else if (type = TOK_RETURN)      then return "TOK_RETURN";
-    else if (type = TOK_STAR)        then return "TOK_STAR";
-    else if (type = TOK_MINUS)       then return "TOK_MINUS";
-    else if (type = TOK_PLUS)        then return "TOK_PLUS";
-    else if (type = TOK_DIV)         then return "TOK_DIV";
-    else if (type = TOK_MODULO)      then return "TOK_MODULO";
-    else if (type = TOK_LOG_OR)      then return "TOK_LOG_OR";
-    else if (type = TOK_LOG_AND)     then return "TOK_LOG_AND";
-    else if (type = TOK_BIT_OR)      then return "TOK_BIT_OR";
-    else if (type = TOK_BIT_XOR)     then return "TOK_BIT_XOR";
-    else if (type = TOK_BIT_AND)     then return "TOK_BIT_AND";
-    else if (type = TOK_LSSR)        then return "TOK_LSSR";
-    else if (type = TOK_LSSR_EQ)     then return "TOK_LSSR_EQ";
-    else if (type = TOK_GRTR)        then return "TOK_GRTR";
-    else if (type = TOK_GRTR_EQ)     then return "TOK_GRTR_EQ";
-    else if (type = TOK_EQUAL)       then return "TOK_EQUAL";
-    else if (type = TOK_DIFF)        then return "TOK_DIFF";
-    else if (type = TOK_WILDCARD)    then return "TOK_WILDCARD";
-    else if (type = TOK_SUB)         then return "TOK_SUB";
-    else if (type = TOK_SEMICOL)     then return "TOK_SEMICOL";
-    else if (type = TOK_LOOP)        then return "TOK_LOOP";
+         if type = TOK_IDENTIFIER  then return "TOK_IDENTIFIER";
+    else if type = TOK_CHR_LIT     then return "TOK_CHR_LIT";
+    else if type = TOK_STR_LIT     then return "TOK_STR_LIT";
+    else if type = TOK_NUM_LIT     then return "TOK_NUM_LIT";
+    else if type = TOK_LET         then return "TOK_LET";
+    else if type = TOK_COLON       then return "TOK_COLON";
+    else if type = TOK_COMMA       then return "TOK_COMMA";
+    else if type = TOK_SMALL_ARROW then return "TOK_SMALL_ARROW";
+    else if type = TOK_BIG_ARROW   then return "TOK_BIG_ARROW";
+    else if type = TOK_OPEN_BRACE  then return "TOK_OPEN_BRACE";
+    else if type = TOK_CLOSE_BRACE then return "TOK_CLOSE_BRACE";
+    else if type = TOK_OPEN_PAREN  then return "TOK_OPEN_PAREN";
+    else if type = TOK_CLOSE_PAREN then return "TOK_CLOSE_PAREN";
+    else if type = TOK_IF          then return "TOK_IF";
+    else if type = TOK_THEN        then return "TOK_THEN";
+    else if type = TOK_ELSE        then return "TOK_ELSE";
+    else if type = TOK_REC         then return "TOK_REC";
+    else if type = TOK_PRO         then return "TOK_PRO";
+    else if type = TOK_MATCH       then return "TOK_MATCH";
+    else if type = TOK_RETURN      then return "TOK_RETURN";
+    else if type = TOK_STAR        then return "TOK_STAR";
+    else if type = TOK_MINUS       then return "TOK_MINUS";
+    else if type = TOK_PLUS        then return "TOK_PLUS";
+    else if type = TOK_DIV         then return "TOK_DIV";
+    else if type = TOK_MODULO      then return "TOK_MODULO";
+    else if type = TOK_LOG_OR      then return "TOK_LOG_OR";
+    else if type = TOK_LOG_AND     then return "TOK_LOG_AND";
+    else if type = TOK_BIT_OR      then return "TOK_BIT_OR";
+    else if type = TOK_BIT_XOR     then return "TOK_BIT_XOR";
+    else if type = TOK_BIT_AND     then return "TOK_BIT_AND";
+    else if type = TOK_LSSR        then return "TOK_LSSR";
+    else if type = TOK_LSSR_EQ     then return "TOK_LSSR_EQ";
+    else if type = TOK_GRTR        then return "TOK_GRTR";
+    else if type = TOK_GRTR_EQ     then return "TOK_GRTR_EQ";
+    else if type = TOK_EQUAL       then return "TOK_EQUAL";
+    else if type = TOK_DIFF        then return "TOK_DIFF";
+    else if type = TOK_WILDCARD    then return "TOK_WILDCARD";
+    else if type = TOK_SUB         then return "TOK_SUB";
+    else if type = TOK_SEMICOL     then return "TOK_SEMICOL";
+    else if type = TOK_LOOP        then return "TOK_LOOP";
     else                                  return "ERROR";
 }
 
+let is_type_keyword(type: int): boolean => {
+    if type = TOK_MATCH then return true; 
+    if type = TOK_PRO then return true; 
+    if type = TOK_REC then return true; 
+    if type = TOK_WILDCARD then return true; 
+    if type = TOK_RETURN then return true; 
+    if type = TOK_SUB then return true; 
+    if type = TOK_LET then return true; 
+    if type = TOK_IF then return true; 
+    if type = TOK_THEN then return true; 
+    if type = TOK_ELSE then return true; 
+    if type = TOK_LOOP then return true; 
+    return false;
+}
 
+let is_type_operator(type: int): boolean => {
+    if type = TOK_STAR then return true;
+    if type = TOK_MINUS then return true;
+    if type = TOK_PLUS then return true;
+    if type = TOK_DIV then return true;
+    if type = TOK_MODULO then return true;
+    if type = TOK_LOG_OR then return true;
+    if type = TOK_LOG_AND then return true;
+    if type = TOK_BIT_OR then return true;
+    if type = TOK_BIT_XOR then return true;
+    if type = TOK_BIT_AND then return true;
+    if type = TOK_LSSR then return true;
+    if type = TOK_LSSR_EQ then return true;
+    if type = TOK_GRTR then return true;
+    if type = TOK_GRTR_EQ then return true;
+    if type = TOK_EQUAL then return true;
+    if type = TOK_DIFF then return true;
+    return false;
+
+}
+
+
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+// TOKEN LIST FUNCTIONS
+//-----------------------------------------------------------------------------
 rec token_list => {
     Head: token,
     Tail: token_list
@@ -186,17 +247,6 @@ let get_nth_token(l: token_list, n: int) : token => {
     return get_nth_token_aux(l, get_list_length(l) - n - 1);
 }
 
-let empty_tok(t: int): token => {
-    let res: token => {
-        Type => t,
-        Lexeme => "",
-        Col => 0,
-        Line => 0,
-        Filename => "" 
-    };
-    return res;
-}
-
 let print_list_types(l: token_list) : void => {
     let len: int => get_list_length(l);
     loop i: 0 -> len-1 => {
@@ -206,6 +256,12 @@ let print_list_types(l: token_list) : void => {
         print("\n");
     }
 }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// LEXER FUNCTIONS
+//-----------------------------------------------------------------------------
 
 
 rec lexer => {
@@ -230,6 +286,32 @@ let new_lexer(filename: string): lexer => {
     }; return res;
 }
 
+let is_lexer_done(l: lexer): boolean => {
+    implemented("is_lexer_done");
+}
+
+let step_lexer(l: lexer): void => {
+   implemented("step_lexer");
+}
+
+let lex_program(l: lexer): void => {
+    implemented("lex_program");
+}
+
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// UTILS FUNCTIONS
+//-----------------------------------------------------------------------------
+
+let implemented(s: string): void => {
+    print("TODO: ");
+    print(s);
+    print(" is not yet implemented\n");
+    exit(1);
+}
+
 
 let compiler_assert(b: boolean): void => {
     if b = 0 then {
@@ -247,12 +329,78 @@ let create_lexeme(src: string, offset: int,  length: int): string => {
     return res;
 }
 
+let is_whitespace(c: char): boolean => {
+    if c = ' ' then return true;
+    if c = '\n' then return true;
+    if c = '\t' then return true;
+}
+
+let is_delimeter(c: char): boolean => {
+    let delimeters: string => "><;,:-+*/%&|!=(){}^ \n\'\"";
+    let len: int => get_string_length(delimeters);
+    loop i: 0 -> len - 1 => {
+        if get_nth_char(delimeters, i) = c then 
+            return true;
+    }
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// FILE HANDLING
+//-----------------------------------------------------------------------------
+
+rec file => {
+    Filename: string,
+    Data: string,
+}
+
+let READ_MODE: int => 0;
+let WRITE_MODE: int => 0;
+
+let init_file_modes(): void => {
+    READ_MODE => reset_counter();
+    WRITE_MODE => incr_counter();
+}
+
+let open_file(filename: string, mode: int): file => {
+    let res: file => {
+        Filename => filename,
+        Data => ""
+    }; 
+    if mode = READ_MODE then  
+        res::Data => read_file(filename);
+    return res;
+}
+
+let close_file(f: file): void => {
+    write_string_to_file(f::Data, f::Filename);
+    f::Data => "";
+    f::Filename => "";
+}
+
+let print_to_file(f: file, s: string): void => {
+    f::Data => concat_string(f::Data, s);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// MAIN FUNCTION
+//-----------------------------------------------------------------------------
+
+let init(): void => {
+    init_types();
+    init_file_modes();
+}
 
 
 let main(): int => {
-    init_types();
+    init();
     let l: lexer => new_lexer("examples/fact.rkr");
-
+    lex_program(l);
     return 0;
 }
 
+//-----------------------------------------------------------------------------

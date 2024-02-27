@@ -49,7 +49,7 @@ char lexer_peek(lexer_t l) {
 }
 
 int is_whitespace(char c) {
-  return c == ' ' || c == '\n';
+  return c == ' ' || c == '\n' || c == '\t';
 }
 
 void lexer_consume(lexer_t* l) {
@@ -122,8 +122,14 @@ int length_of_delimited_literal(lexer_t l, char c) {
   if (c1 != c)
     return 0;
   lexer_consume(&l);
-  while (lexer_peek(l) != c)
+  int pass = 0;
+  while (lexer_peek(l) != c || pass) {
+    if (pass)
+      pass = 0;
+    else if (lexer_peek(l) == '\\')
+      pass = 1;
     lexer_consume(&l);
+  }
   return l.cursor - cursor + 1;
 }
 

@@ -326,10 +326,11 @@ void generate_fundef(generator_t* g, ast_t fun) {
     fprintf(f, "init_compiler_stack();\n");
     generate_compound(g, fundef.body);
     fprintf(f, "kill_compiler_stack();\n");
-    fprintf(f, "}\n");
+    fprintf(f, "}\n\n");
 
   } else {
     generate_compound(g, fundef.body);
+    fprintf(f, "\n\n");
   }
   end_nt_scope(&g->table);
 }
@@ -358,6 +359,23 @@ void generate_forward_defs(generator_t* g, ast_t program) {
         fprintf(f, "typedef struct %s %s;\n", name, name);
       else
         fprintf(f, "typedef struct %s *%s;\n", name, name);
+    }
+  }
+
+  for (int i = 0; i < stmts.length; i++) {
+    ast_t stmt = stmts.data[i];
+    if (stmt->tag == fundef) {
+      ast_fundef fundef = stmt->data.fundef;
+      generate_type(f, fundef.ret_type->data.tupledef);
+      fprintf(f, " %s(", fundef.name.lexeme);
+      for (int i = 0; i < fundef.args.length; i++) {
+        if (i > 0)
+          fprintf(f, ", ");
+        generate_type(f, fundef.types.data[i]->data.tupledef);
+        fprintf(f, " ");
+        fprintf(f, "%s", fundef.args.data[i].lexeme);
+      }
+      fprintf(f, ");\n\n");
     }
   }
 }

@@ -52,9 +52,11 @@ void set_nth_char(string s, int n, char c) {
 }
 
 string read_file(string filename) {
-  FILE* f = fopen(string_to_cstr(filename), "rb");
+  FILE* f = fopen(string_to_cstr(filename), "r");
   if (f == NULL) {
-    printf("Unable to open file \"%s\"", string_to_cstr(filename));
+    printf("Unable to open file \"%s\" for reading: ",
+           string_to_cstr(filename));
+    perror("");
     exit(1);
   }
   fseek(f, 0, SEEK_END);
@@ -73,4 +75,17 @@ string new_string(string s) {
   res.length = s.length;
   memcpy(res.data, s.data, s.length + 1);
   return res;
+}
+
+void write_string_to_file(string s, string filename) {
+  char* fname = string_to_cstr(filename);
+  FILE* f = fopen(fname, "wb");
+  if (f == NULL) {
+    printf("Unable to open file \"%s\" for writing: ",
+           string_to_cstr(filename));
+    perror("");
+    exit(1);
+  }
+  fprintf(f, "%s", s.data);
+  fclose(f);
 }

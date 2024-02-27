@@ -13,4 +13,6 @@ int get_string_length(string s);
 void set_nth_char(string s, int n, char c);
 string read_file(string filename);
 string new_string(string s);
+void write_string_to_file(string s, string filename);
+
 #endif  // ROCKER_FUNDEFS

@@ -70,8 +70,8 @@ int main(int argc, char* argv[]) {
 
   lexer_t l = new_lexer(input);
   token_array_t prog = lex_program(&l);
-  // if (print_lexer)
-  // print_token_array(prog);
+  if (print_lexer)
+    print_token_array(prog);
   parser_t p = new_parser(prog);
   parse_program(&p);
 
