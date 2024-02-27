@@ -91,10 +91,10 @@ int main(int argc, char* argv[]) {
 
     // compile C file
     char command[1024];
-    sprintf(
-        command,
-        "gcc -static -o %s %s src/generation/fundefs.c RockerAllocator/alloc.c",
-        output, cout);
+    sprintf(command,
+            "gcc -static -g -o %s %s src/generation/fundefs.c "
+            "RockerAllocator/alloc.c",
+            output, cout);
     printf("[CMD] %s\n", command);
     system(command);
   }

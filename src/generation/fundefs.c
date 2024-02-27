@@ -28,7 +28,6 @@ string append_string(string s, char c) {
   tmp[s.length] = c;
   tmp[s.length + 1] = 0;
   s.length++;
-  s.data = reallocate_compiler_persistent(s.data, s.length + 2);
   return (string){.data = tmp, .length = s.length};
 }
 

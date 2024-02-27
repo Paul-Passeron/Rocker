@@ -54,6 +54,8 @@ void expect(parser_t p, token_type_t b) {
 int is_assign(parser_t p) {
   int scope = 0;
   token_type_t current = consume_token(&p).type;
+  if (current == TOK_OPEN_BRACE || current == TOK_CLOSE_BRACE)
+    return 0;
   while (scope >= 0 && current != TOK_BIG_ARROW) {
     if (current == TOK_OPEN_BRACE || current == TOK_OPEN_BRACE)
       scope++;
@@ -133,6 +135,10 @@ ast_t parse_tdef(parser_t* p) {
 ast_t parse_ret(parser_t* p) {
   expect(*p, TOK_RETURN);
   consume_token(p);
+  if (peek_type(*p) == TOK_SEMICOL) {
+    consume_token(p);
+    return new_ast((node_t){ret, {.ret = {NULL}}});
+  }
   ast_t expr = parse_expression(p);
   expect(*p, TOK_SEMICOL);
   consume_token(p);
@@ -264,7 +270,7 @@ ast_t parse_while_loop(parser_t* p) {
   ast_t condition = parse_expression(p);
   expect(*p, TOK_DO);
   consume_token(p);
-  ast_t statement = parse_compound(p);
+  ast_t statement = parse_statement(p);
   return new_ast((node_t){
       while_loop,
       {.while_loop = {.statement = statement, .condition = condition}}});

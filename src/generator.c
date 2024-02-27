@@ -163,7 +163,7 @@ void generate_while_loop(generator_t* g, ast_t loop) {
   fprintf(f, "while (");
   generate_expression(g, while_loop.condition);
   fprintf(f, ")\n");
-  generate_compound(g, while_loop.statement);
+  generate_statement(g, while_loop.statement);
 }
 
 void generate_expression(generator_t* g, ast_t expr) {
@@ -278,7 +278,8 @@ void generate_match(generator_t* g, ast_t match) {
 void generate_return(generator_t* g, ast_t ret_ast) {
   FILE* f = g->f;
   fprintf(f, "return ");
-  generate_expression(g, ret_ast->data.ret.expr);
+  if (ret_ast->data.ret.expr != NULL)
+    generate_expression(g, ret_ast->data.ret.expr);
   fprintf(f, ";\n");
 }
 
