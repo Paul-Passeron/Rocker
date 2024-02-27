@@ -30,13 +30,15 @@ let main() : int => {
 - [x] Simple Hello World example compiling and working
 - [x] Simple recursion example compiling and working
 - [ ] Deprecate Tuples (using record types because all types are forward-declared)
-- [ ] Allow assignments
-- [ ] Accessing fields of record types / pattern matching product types
+- [x] Allow assignments
+- [x] Accessing fields of record types
+- [ ]  pattern matching product types
 - [ ] Get type of an expression (for match cases)
 - [ ] Generation of match expressions
 - [ ] Typechecking
-- [x] Add integer for loo^s 
-- [ ] Add loops (while, maybe foreach for array types)
+- [x] Add integer for loops 
+- [x] Add while loops 
+- [ ] Add foreach loop for array types
 - [ ] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
 - [ ] Add including files support
 - [ ] Self-Hosting
