@@ -1,8 +1,14 @@
 #include "parser.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "../RockerAllocator/alloc.h"
 #include "ast.h"
+#include "lexer.h"
 #include "token.h"
+
+char* includes[1024];
+int includes_num = 0;
 
 ast_t parse_expression(parser_t* p);
 ast_t parse_type(parser_t* p);
@@ -519,9 +525,44 @@ ast_t parse_increasing_precedence(parser_t* p, ast_t left, int min_prec) {
   return new_ast((node_t){op, {.op = {next.type, left, right}}});
 }
 
+int has_been_included(char* filename) {
+  for (int i = 0; i < includes_num; i++)
+    if (strcmp(filename, includes[i]) == 0)
+      return 1;
+  return 0;
+}
+
 void parse_program(parser_t* p) {
   ast_array_t prog = new_ast_array();
-  while (p->cursor < p->tokens.length)
+  while (p->cursor < p->tokens.length) {
+    if (peek_type(*p) == TOK_INCLUDE) {
+      consume_token(p);
+      expect(*p, TOK_STR_LIT);
+      char* filename = consume_token(p).lexeme;
+      char* buffer = allocate_compiler_persistent(strlen(filename) - 1);
+      memcpy(buffer, filename + 1, strlen(filename) - 2);
+      buffer[strlen(filename) - 1] = 0;
+      if (!has_been_included(buffer)) {
+        if (includes_num >= 1024) {
+          printf("Include limit reached !\n");
+          exit(1);
+        }
+        includes[includes_num++] = buffer;
+
+        lexer_t l = new_lexer(buffer);
+        token_array_t toks = lex_program(&l);
+        token_array_t new_toks = new_token_array();
+        for (int i = 0; i < p->cursor; i++)
+          token_array_push(&new_toks, p->tokens.data[i]);
+        for (int i = 0; i < toks.length; i++)
+          token_array_push(&new_toks, toks.data[i]);
+        for (int i = p->cursor; i < p->tokens.length; i++)
+          token_array_push(&new_toks, p->tokens.data[i]);
+        p->tokens = new_toks;
+      }
+      continue;
+    }
     push_ast_array(&prog, parse_statement(p));
+  }
   p->prog = new_ast((node_t){program, {.program = {prog}}});
 }

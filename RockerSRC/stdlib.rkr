@@ -1,0 +1,115 @@
+
+//-----------------------------------------------------------------------------
+// FILE HANDLING
+//-----------------------------------------------------------------------------
+
+rec file => {
+    Filename: string,
+    Data: string,
+    Mode: int,
+}
+
+let READ_MODE: int => 0;
+let WRITE_MODE: int => 0;
+let CLOSED: int => 0;
+
+let init_file_modes(): void => {
+    READ_MODE => reset_counter();
+    WRITE_MODE => incr_counter();
+    CLOSED => incr_counter();
+
+}
+
+let open_file(filename: string, mode: int): file => {
+    let res: file => {
+        Filename => filename,
+        Data => "",
+        Mode => mode
+    }; 
+    if mode = READ_MODE then  
+        res::Data => read_file(filename);
+    else if mode != WRITE_MODE then
+    {
+        print("Could not open file \'");
+        print(filename);
+        print("\': Invalid mode specified\n");
+        exit(1);
+    }
+    return res;
+}
+
+let close_file(f: file): void => {
+    write_string_to_file(f::Data, f::Filename);
+    f::Data => "";
+    f::Filename => "";
+}
+
+let print_to_file(f: file, s: string): void => {
+    f::Data => concat_string(f::Data, s);
+}
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+// UTILS FUNCTIONS
+//-----------------------------------------------------------------------------
+
+let implemented(s: string): void => {
+    print("TODO: ");
+    print(s);
+    print(" is not yet implemented\n");
+    exit(1);
+}
+
+
+let compiler_assert(b: boolean): void => {
+    if b = 0 then {
+        print("Assertion failed\n");
+        exit(1);
+    }
+}
+
+let print_int(n: int): void => {
+  let a: int => n / 10;
+  if a then print_int(a);
+  putchar(n%10 + '0');
+}
+
+
+let create_string(src: string, offset: int,  length: int): string => {
+    let res: string => "";
+    loop i: 0 -> length - 1 => {
+        let c: char => get_nth_char(src, offset + i);
+        res => append_string(res, c);
+    }
+    return res;
+}
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+// ENUMERATION PLACEHOLDERS
+//-----------------------------------------------------------------------------
+
+let counter: int => 0;
+
+let incr_counter(): int => {
+    counter => counter + 1;
+    return counter;
+}
+
+let set_counter(i: int): int => {
+    counter => i;
+    return counter;
+}
+
+let reset_counter(): int => {
+    counter => 0;
+    return counter;
+}
+
+//-----------------------------------------------------------------------------

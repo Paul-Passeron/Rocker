@@ -1,0 +1,266 @@
+include "RockerSRC/token.rkr"
+include "RockerSRC/stdlib.rkr"
+
+//-----------------------------------------------------------------------------
+// UTILS FUNCTIONS
+//-----------------------------------------------------------------------------
+
+let is_whitespace(c: char): boolean => {
+    if c = ' ' then return true;
+    if c = '\n' then return true;
+    if c = '\t' then return true;
+    return false;
+}
+
+
+let is_delimeter(c: char): boolean => {
+    let delimeters: string => "><;,:-+*/%&|!=(){}^ \n\'\"0123456789";
+    let len: int => get_string_length(delimeters);
+    loop i: 0 -> len - 1 => {
+        if get_nth_char(delimeters, i) = c then 
+            return true;
+    }
+    return false;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+// LEXER FUNCTIONS
+//-----------------------------------------------------------------------------
+
+
+rec lexer => {
+    Data: string,
+    Cursor: int,
+    Col: int,
+    Line: int,
+    Filename: string,
+    Toks: token_list
+}
+
+
+let new_lexer(filename: string): lexer => {
+    let data: string => read_file(filename);
+    let res: lexer => {
+        Data => data,
+        Cursor => 0,
+        Col => 1,
+        Line => 1,
+        Filename => filename,
+        Toks => NULL
+    }; return res;
+}
+
+
+let lexer_peek(l: lexer): char => {
+
+
+    if l::Cursor < get_string_length(l::Data) then 
+        return get_nth_char(l::Data, l::Cursor);
+    return 0;
+}
+
+
+let lexer_consume(l: lexer): void => {
+    let c: char => lexer_peek(l);
+    l::Cursor => l::Cursor+1;
+    if c = '\n' then {
+        l::Col => 1;
+        l::Line => l::Line + 1;
+    }
+    else if c != 0 then 
+        l::Col => l::Col + 1;
+}
+
+let length_until_next_delimeter(l: lexer): int => {
+    let i: int => 0;
+    let cursor: int => l::Cursor;
+    while is_delimeter(lexer_peek(l)) = false do {
+        i => i + 1;
+        lexer_consume(l);
+    }
+    l::Cursor => cursor;
+    return i;
+}
+
+let length_of_delimeter(l: lexer): int => {
+    let c1: char => lexer_peek(l);
+    l::Cursor => l::Cursor + 1;
+    let c2: char => lexer_peek(l);
+    l::Cursor => l::Cursor - 1;
+    let s: string => "";
+    s => append_string(s, c1);
+    s => append_string(s, c2);
+    if str_eq(s, "->") then return 2;
+    if str_eq(s, "=>") then return 2;
+    if str_eq(s, "&&") then return 2;
+    if str_eq(s, "||") then return 2;
+    if str_eq(s, ">=") then return 2;
+    if str_eq(s, "<=") then return 2;
+    if str_eq(s, "!=") then return 2;
+    if str_eq(s, "::") then return 2;
+    if c1 = ':' then return 1;
+    if c1 = ',' then return 1;
+    if c1 = '/' then return 1;
+    if c1 = '%' then return 1;
+    if c1 = '*' then return 1;
+    if c1 = '+' then return 1; 
+    if c1 = '-' then return 1;
+    if c1 = '^' then return 1;
+    if c1 = '{' then return 1;
+    if c1 = '}' then return 1;
+    if c1 = '(' then return 1; 
+    if c1 = ')' then return 1;
+    if c1 = '=' then return 1;
+    if c1 = '<' then return 1;
+    if c1 = '>' then return 1;
+    if c1 = ';' then return 1;  
+    return 0;
+}
+
+let is_char_num(c: char): boolean => {
+    return c <= '9' && c >= '0';
+}
+
+let length_of_num_lit(l: lexer): int  => {
+    let cur: int => l::Cursor;
+    let cter:int  => 0;
+    while is_char_num(lexer_peek(l)) do {
+        l::Cursor => l::Cursor + 1;
+        cter => cter + 1;
+    }
+    l::Cursor => cur;
+    return cter;
+}
+
+
+let length_of_delimited_literal(l: lexer, c: char): int => {
+    let cursor: int => l::Cursor;
+    let c1: char => lexer_peek(l);
+    if c1 != c then return 0;
+    l::Cursor => l::Cursor + 1;
+    let pass: boolean => false;
+    while lexer_peek(l) != c || pass do {
+        if pass then pass => false;
+        else if lexer_peek(l) = '\\' then pass => true;
+        l::Cursor => l::Cursor+1;
+    }
+    let res: int => l::Cursor - cursor + 1;
+    l::Cursor => cursor;
+    return res;
+}
+
+let COM_SINGLE: int => 0;
+let COM_MULTI: int => 0;
+
+let init_comment_type(): void => {
+    COM_SINGLE => set_counter(1);
+    COM_MULTI => incr_counter();
+}
+
+let is_comment(l: lexer): int => {
+    let cursor: int => l::Cursor;
+    let c: char => lexer_peek(l);
+    if c != '/' then return 0;
+    l::Cursor => l::Cursor + 1;
+    c => lexer_peek(l);
+    if c = '/' then {
+        l::Cursor => cursor;
+        return COM_SINGLE;
+    }
+    if c = '*' then {
+        l::Cursor => cursor;
+        return COM_MULTI;
+    }
+    l::Cursor => cursor;
+    return 0;
+}
+
+let is_end_comment(l: lexer, type: int): boolean => {
+    if type = 0 then return 0;
+    if type = COM_SINGLE then return lexer_peek(l) = '\n';
+    let s: string => "";
+    append_string(s, lexer_peek(l));
+    l::Cursor => l::Cursor + 1;
+    append_string(s, lexer_peek(l));
+    let res: boolean => str_eq(s, "*/");
+    l::Cursor => l::Cursor - 1;
+    return res;
+}
+
+let lexer_consume_n(l: lexer, n: int): void => {
+    loop i: 1 -> n => {
+        lexer_consume(l);
+    }
+}
+
+
+let create_lexeme(l: lexer, length: int): string => {
+    return create_string(l::Data, l::Cursor, length);
+}
+
+let step_lexer(l: lexer): void => {
+    let res: token => {
+        Filename => l::Filename,
+        Col => l::Col,
+        Line => l::Line,
+    };
+    while is_comment(l) || is_whitespace(lexer_peek(l)) do {
+        let com_type: int => is_comment(l);
+        if com_type then {
+            lexer_consume_n(l, 2);
+            while is_end_comment(l, com_type) = false do
+                lexer_consume(l);
+            if com_type = COM_MULTI then
+                lexer_consume(l);
+            lexer_consume(l);
+        }
+        while is_whitespace(lexer_peek(l)) do lexer_consume(l);
+    }
+    if lexer_peek(l) = 0 then return;
+    res::Col => l::Col;
+    res::Line => l::Line;
+    if is_char_num(lexer_peek(l)) then {
+        let length: int => length_of_num_lit(l);
+        res::Lexeme => create_lexeme(l, length);
+        res::Type => TOK_NUM_LIT;
+        lexer_consume_n(l, length);
+    }
+    else if lexer_peek(l) = '\'' then {
+        let length: int => length_of_delimited_literal(l, '\'');
+        res::Lexeme => create_lexeme(l, length);
+        res::Type => TOK_CHR_LIT;
+        lexer_consume_n(l, length);
+    }
+    else if lexer_peek(l) = '\"' then {
+        let length: int => length_of_delimited_literal(l, '\"');
+        res::Lexeme => create_lexeme(l, length);
+        res::Type => TOK_STR_LIT;
+        lexer_consume_n(l, length);
+    }
+    else if is_delimeter(lexer_peek(l)) then {
+        let length: int => length_of_delimeter(l);
+        res::Lexeme => create_lexeme(l, length);
+        res::Type => type_of_lexeme(res::Lexeme);
+        lexer_consume_n(l, length);
+    }
+    else {
+        let length: int => length_until_next_delimeter(l);
+        res::Lexeme => create_lexeme(l, length);
+        if is_lexeme_keyword(res::Lexeme) then
+            res::Type => type_of_lexeme(res::Lexeme);
+        else
+            res::Type => TOK_IDENTIFIER;
+        lexer_consume_n(l, length);
+    }
+    l::Toks => append_token(l::Toks, res);
+}
+
+let lex_program(l: lexer): void => {
+    while lexer_peek(l) do
+        step_lexer(l);
+}
+
+//-----------------------------------------------------------------------------

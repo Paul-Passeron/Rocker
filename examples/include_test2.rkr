@@ -1,0 +1,6 @@
+include "examples/include_test1.rkr"
+
+let main(): int => {
+    a();
+    return 0;
+}

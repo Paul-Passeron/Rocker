@@ -32,7 +32,7 @@ let main() : int => {
 - [ ] Deprecate Tuples (using record types because all types are forward-declared)
 - [x] Allow assignments
 - [x] Accessing fields of record types
-- [ ]  pattern matching product types
+- [ ] Pattern matching product types
 - [ ] Get type of an expression (for match cases)
 - [ ] Generation of match expressions
 - [ ] Typechecking
@@ -40,5 +40,6 @@ let main() : int => {
 - [x] Add while loops 
 - [ ] Add foreach loop for array types
 - [ ] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
-- [ ] Add including files support
+- [x] Add including files support
+- [ ] Improve including files support
 - [ ] Self-Hosting
