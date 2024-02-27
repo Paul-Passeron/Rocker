@@ -13,6 +13,7 @@ ast_t parse_loop(parser_t* p);
 ast_t parse_compound(parser_t* p);
 int is_sub(parser_t p);
 ast_t parse_statement(parser_t* p);
+ast_t parse_while_loop(parser_t* p);
 
 void print_error_prefix(parser_t p) {
   token_t tok = peek_token(p);
@@ -181,6 +182,8 @@ ast_t parse_statement(parser_t* p) {
     return parse_if(p);
   else if (a == TOK_PRO || a == TOK_REC)
     return parse_tdef(p);
+  else if (a == TOK_WHILE)
+    return parse_while_loop(p);
   else if (is_assign(*p))
     return parse_assign(p);
   else if (a == TOK_LOOP)
@@ -253,6 +256,18 @@ ast_t parse_loop(parser_t* p) {
   consume_token(p);
   ast_t stmt = parse_compound(p);
   return new_ast((node_t){loop, {.loop = {var_name, begin, end, stmt}}});
+}
+
+ast_t parse_while_loop(parser_t* p) {
+  expect(*p, TOK_WHILE);
+  consume_token(p);
+  ast_t condition = parse_expression(p);
+  expect(*p, TOK_DO);
+  consume_token(p);
+  ast_t statement = parse_compound(p);
+  return new_ast((node_t){
+      while_loop,
+      {.while_loop = {.statement = statement, .condition = condition}}});
 }
 
 ast_t parse_record_expression(parser_t* p) {

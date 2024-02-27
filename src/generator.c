@@ -157,6 +157,15 @@ void generate_sub_as_expression(generator_t* g, ast_t expr) {
   generate_expression(g, sub.expr);
 }
 
+void generate_while_loop(generator_t* g, ast_t loop) {
+  FILE* f = g->f;
+  ast_while_loop while_loop = loop->data.while_loop;
+  fprintf(f, "while (");
+  generate_expression(g, while_loop.condition);
+  fprintf(f, ")\n");
+  generate_compound(g, while_loop.statement);
+}
+
 void generate_expression(generator_t* g, ast_t expr) {
   FILE* f = g->f;
   if (expr->tag == literal) {
@@ -183,6 +192,8 @@ void generate_expression(generator_t* g, ast_t expr) {
     generate_sub_as_expression(g, expr);
   else if (expr->tag == assign)
     generate_assignement(g, expr);
+  else if (expr->tag == while_loop)
+    generate_while_loop(g, expr);
   else {
     printf("TAG is %d\n", expr->tag);
     assert(0 && "TODO");

@@ -40,6 +40,7 @@ typedef struct ast_cons ast_cons;
 typedef struct ast_record_expr ast_record_expr;
 typedef struct ast_loop ast_loop;
 typedef struct ast_assign ast_assign;
+typedef struct ast_while_loop ast_while_loop;
 
 struct ast_op {
   token_type_t op;
@@ -149,6 +150,11 @@ struct ast_assign {
   ast_t expr;
 };
 
+struct ast_while_loop {
+  ast_t condition;
+  ast_t statement;
+};
+
 struct node_t {
   enum tag {
     op,
@@ -171,6 +177,7 @@ struct node_t {
     record_expr,
     loop,
     assign,
+    while_loop,
   } tag;
   union data {
     ast_op op;
@@ -193,6 +200,7 @@ struct node_t {
     ast_record_expr record_expr;
     ast_loop loop;
     ast_assign assign;
+    ast_while_loop while_loop;
   } data;
 };
 

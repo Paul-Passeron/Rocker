@@ -16,7 +16,7 @@ typedef struct __internal_dynamic_array_t {
 } __internal_dynamic_array_t;
 
 typedef char boolean;
-#define true 1;
-#define false 0;
+#define true 1
+#define false 0
 
 #endif  // ROCKER_TYPEDEFS_INTERNAL

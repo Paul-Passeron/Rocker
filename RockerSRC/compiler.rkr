@@ -335,6 +335,7 @@ let is_whitespace(c: char): boolean => {
     if c = '\t' then return true;
 }
 
+
 let is_delimeter(c: char): boolean => {
     let delimeters: string => "><;,:-+*/%&|!=(){}^ \n\'\"";
     let len: int => get_string_length(delimeters);
@@ -343,6 +344,89 @@ let is_delimeter(c: char): boolean => {
             return true;
     }
     return false;
+}
+
+
+let lexer_peek(l: lexer): char => {
+    if l::Cursor < get_string_length(l::Data) then return get_nth_char(l::Data, l::Cursor);
+    print("Invalid use of lexer !\n");
+    exit(1);
+}
+
+let new_lexer_line(l: lexer): void => {
+    l::Col => 1;
+    l::Line => l::Line + 1;
+}
+
+let lexer_consume(l: lexer): void => {
+    let c: char => lexer_peek(l);
+    l::Cursor => l::Cursor+1;
+    if c = '\n' then new_lexer_line(l);
+    else if c != 0 then 
+        l::Col => l::Col + 1;
+}
+
+let length_until_next_delimeter(l: lexer): int => {
+    let i: int => 0;
+    while is_delimeter(lexer_peek(l)) = false do {
+        i => i + 1;
+        lexer_consume(l);
+    }
+    return i;
+}
+
+let length_of_delimeter(l: lexer): int => {
+    let c1: char => lexer_peek(l);
+    l::Cursor => l::Cursor + 1;
+    let c2: char => lexer_peek(l);
+    l::Cursor => l::Cursor - 1;
+    let s: string => "";
+    append_string(s, c1);
+    append_string(s, c2);
+    if str_eq(s, "->") then return 2;
+    if str_eq(s, "=>") then return 2;
+    if str_eq(s, "&&") then return 2;
+    if str_eq(s, "||") then return 2;
+    if str_eq(s, ">=") then return 2;
+    if str_eq(s, "<=") then return 2;
+    if str_eq(s, "!=") then return 2;
+    if str_eq(s, "::") then return 2;
+    if c1 = ':' then return 1;
+    if c1 = ',' then return 1;
+    if c1 = '/' then return 1;
+    if c1 = '%' then return 1;
+    if c1 = '*' then return 1;
+    if c1 = '+' then return 1; 
+    if c1 = '-' then return 1;
+    if c1 = '^' then return 1;
+    if c1 = '{' then return 1;
+    if c1 = '}' then return 1;
+    if c1 = '(' then return 1; 
+    if c1 = ')' then return 1;
+    if c1 = '=' then return 1;
+    if c1 = '<' then return 1;
+    if c1 = '>' then return 1;
+    if c1 = ';' then return 1;  
+    return 0;
+}
+
+let is_char_num(c: char): boolean => {
+    return c <= '9' && c >= '0';
+}
+
+let length_of_num_lit(l: lexer): int  => {
+    let cur: int => l::Cursor;
+    while is_char_num(lexer_peek(l)) do {
+        l::Cursor => l::Cursor + 1;
+    }
+    let res: int => l::Cursor - cur;
+    l::Cursor => cur;
+    return res;
+}
+
+
+let length_of_delimited_literal(l: lexer, c: char): int => {
+    
 }
 
 //-----------------------------------------------------------------------------

@@ -89,3 +89,9 @@ void write_string_to_file(string s, string filename) {
   fprintf(f, "%s", s.data);
   fclose(f);
 }
+
+int str_eq(string s1, string s2) {
+  char* b1 = string_to_cstr(s1);
+  char* b2 = string_to_cstr(s2);
+  return strcmp(b1, b2) == 0;
+}

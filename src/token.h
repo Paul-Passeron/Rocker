@@ -56,6 +56,8 @@ typedef enum token_type_t {
   TOK_SUB,
   TOK_SEMICOL,
   TOK_LOOP,
+  TOK_WHILE,
+  TOK_DO,
   TOK_COUNT
 
 } token_type_t;
