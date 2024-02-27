@@ -205,8 +205,7 @@ void generate_expression(generator_t *g, ast_t expr) {
     generate_assignement(g, expr);
   else if (expr->tag == while_loop)
     generate_while_loop(g, expr);
-  else if (expr->tag == enum_tdef)
-    generate_enum_tdef(g, expr);
+
   else {
     printf("TAG is %d\n", expr->tag);
     assert(0 && "TODO");
@@ -313,7 +312,10 @@ void generate_statement(generator_t *g, ast_t stmt) {
     generate_tdef(g, stmt);
   } else if (stmt->tag == fundef) {
     generate_fundef(g, stmt);
-  } else {
+
+  } else if (stmt->tag == enum_tdef)
+    generate_enum_tdef(g, stmt);
+  else {
     generate_expression(g, stmt);
     fprintf(f, ";\n");
   }
