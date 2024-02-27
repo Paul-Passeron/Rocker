@@ -3,13 +3,17 @@
 
 #include "typedefs.h"
 
-#define __INTERNAL_DYNAMIC_ARRAY_CAP 2
+#define __INTERNAL_DYNAMIC_ARRAY_CAP 64
 
 __internal_dynamic_array_t __internal_make_array(size_t size);
-int __internal_push_array(__internal_dynamic_array_t* arr, void* elem);
-void* __internal_pop_array(__internal_dynamic_array_t* arr);
-void __internal_insert(__internal_dynamic_array_t* arr,
-                       size_t index,
-                       void* elem);
+int __internal_push_array(__internal_dynamic_array_t arr, void *elem);
+void *__internal_pop_array(__internal_dynamic_array_t arr);
+void __internal_insert(__internal_dynamic_array_t arr, size_t index,
+                       void *elem);
+void *__internal_get_elem(__internal_dynamic_array_t arr, size_t index);
+void __internal_set_elem(__internal_dynamic_array_t arr, size_t index,
+                         void *elem);
 
-#endif  // ROCKER_FUNDEFS_INTERNAL
+size_t get_length(__internal_dynamic_array_t arr);
+
+#endif // ROCKER_FUNDEFS_INTERNAL

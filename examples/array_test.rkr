@@ -1,0 +1,31 @@
+let print_int(n: int): void => {
+  let a: int => n / 10;
+  if a then print_int(a);
+  putchar(n%10 + '0');
+}
+
+let test(): void => {
+    let arr : int [] => [];
+    loop i: 0 -> 10 => {
+      append(arr, i);
+    }
+    loop i: 0 -> get_length(arr) -1 => {
+      let n: int =>get(arr, i); 
+      print_int(n);
+      print(" ");
+    }
+    print("\n");
+}
+
+let main(): int => {
+  test();
+  let strings: string[] => [];
+  append(strings, "Hey !\n");
+  append(strings, "How are you ?\n");
+  append(strings, "What ???\n");
+  loop i: 0 -> get_length(strings) - 1 => {
+    let s:  string => get(strings, i);
+    print(s);
+  }
+  return 0;
+}

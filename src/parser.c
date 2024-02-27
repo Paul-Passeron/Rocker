@@ -20,6 +20,7 @@ ast_t parse_compound(parser_t *p);
 int is_sub(parser_t p);
 ast_t parse_statement(parser_t *p);
 ast_t parse_while_loop(parser_t *p);
+ast_t parse_leaf(parser_t *p);
 
 void print_error_prefix(parser_t p) {
   token_t tok = peek_token(p);
@@ -90,17 +91,17 @@ ast_t parse_assign(parser_t *p) {
       (node_t){assign, {.assign = {.expr = expr, .target = target}}});
 }
 
-ast_t parse_tuple(parser_t *p) {
-  expect(*p, TOK_IDENTIFIER);
-  token_array_t tuple = new_token_array();
-  token_array_push(&tuple, consume_token(p));
-  while (peek_type(*p) == TOK_STAR) {
-    consume_token(p);
-    expect(*p, TOK_IDENTIFIER);
-    token_array_push(&tuple, consume_token(p));
-  }
-  return new_ast((node_t){tupledef, {.tupledef = {tuple}}});
-}
+// ast_t parse_tuple(parser_t *p) {
+//   expect(*p, TOK_IDENTIFIER);
+//   token_array_t tuple = new_token_array();
+//   token_array_push(&tuple, consume_token(p));
+//   while (peek_type(*p) == TOK_STAR) {
+//     consume_token(p);
+//     expect(*p, TOK_IDENTIFIER);
+//     token_array_push(&tuple, consume_token(p));
+//   }
+//   return new_ast((node_t){tupledef, {.tupledef = {tuple}}});
+// }
 
 ast_t parse_cons(parser_t *p) {
   // Name : type [,]
@@ -344,6 +345,9 @@ ast_t parse_var_def(parser_t *p) {
     expr = parse_record_expression(p);
     expect(*p, TOK_CLOSE_BRACE);
     consume_token(p);
+  } else if (peek_type(*p) == TOK_ARR_DECL) {
+    expr = new_ast((node_t){literal, {.literal = {consume_token(p)}}});
+
   } else
     expr = parse_expression(p);
   expect(*p, TOK_SEMICOL);
@@ -354,16 +358,16 @@ ast_t parse_var_def(parser_t *p) {
 }
 
 ast_t parse_type(parser_t *p) {
-  token_array_t tuple = new_token_array();
-  while (peek_type(*p) == TOK_IDENTIFIER) {
-    token_array_push(&tuple, consume_token(p));
-    if (peek_type(*p) == TOK_STAR)
-      consume_token(p);
-    else
-      break;
+  expect(*p, TOK_IDENTIFIER);
+  token_t name = consume_token(p);
+  int is_array = 0;
+  if (peek_type(*p) == TOK_ARR_DECL) {
+    consume_token(p);
+    is_array = 1;
   }
-  return new_ast((node_t){tupledef, {.tupledef = {.signature = tuple}}});
+  return new_ast((node_t){type, {.type = {name, is_array}}});
 }
+
 ast_t parse_compound(parser_t *p) {
   expect(*p, TOK_OPEN_BRACE);
   consume_token(p);
@@ -422,7 +426,7 @@ int is_primary(parser_t p) {
   token_type_t t = peek_type(p);
   return t == TOK_OPEN_BRACE || t == TOK_OPEN_PAREN || t == TOK_IDENTIFIER ||
          t == TOK_STR_LIT || t == TOK_CHR_LIT || t == TOK_NUM_LIT ||
-         t == TOK_WILDCARD;
+         t == TOK_WILDCARD || t == TOK_ARR_DECL;
 }
 
 int is_funcall(parser_t p) {
@@ -454,7 +458,8 @@ ast_t parse_leaf(parser_t *p) {
   if (t.type == TOK_IDENTIFIER)
     return new_ast((node_t){identifier, {.identifier = {t}}});
   else if (t.type == TOK_NUM_LIT || t.type == TOK_STR_LIT ||
-           t.type == TOK_CHR_LIT || t.type == TOK_WILDCARD)
+           t.type == TOK_CHR_LIT || t.type == TOK_WILDCARD ||
+           t.type == TOK_ARR_DECL)
     return new_ast((node_t){literal, {.literal = {t}}});
   printf("Expected leaf\n");
   exit(1);
@@ -477,7 +482,7 @@ ast_t parse_primary(parser_t *p) {
     return parse_sub(p);
   } else if (type == TOK_STR_LIT || type == TOK_CHR_LIT ||
              type == TOK_NUM_LIT || type == TOK_WILDCARD ||
-             type == TOK_IDENTIFIER) {
+             type == TOK_IDENTIFIER || type == TOK_ARR_DECL) {
     return parse_leaf(p);
   } else if (type == TOK_OPEN_PAREN) {
     (void)consume_token(p);

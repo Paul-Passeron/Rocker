@@ -3,3 +3,41 @@
 //  MIT License
 //  Copyright (c) 2024 Paul Passeron
 //-----------------------------------------------------------------------------
+
+include "RockerSRC/token.rkr"
+include "RockerSRC/stdlib.rkr"
+include "RockerSRC/ast.rkr"
+
+rec parser => {
+    Toks: token_list,
+    Prog: ast_list,
+    Cursor: int,
+}
+
+let new_parser(l: token_list): parser => {
+    let res: parser => {
+        Toks => l,
+        Prog => NULL,
+        Cursor => 0
+    };
+    return res;
+}
+
+let peek_type(p: parser): token_type => {
+    let tok: token => peek_token(p);
+    return tok::Type;
+}
+
+let peek_token(p: parser): token => {
+    return get_nth_token(p::Toks, p::Cursor);
+}
+
+let consume_token(p: parser): token => {
+    let res: token => peek_token(p);
+    p::Cursor => p::Cursor + 1;
+    return res;
+}
+
+let parse_program(p: parser): void => {
+    implemented("parse_program");
+}

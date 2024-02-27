@@ -1,18 +1,17 @@
 #include "fundefs.h"
+#include "../../RockerAllocator/alloc.h"
 #include <stdio.h>
 #include <string.h>
-#include "../../RockerAllocator/alloc.h"
 
 void print(string s) {
   for (int i = 0; i < s.length; i++)
     putchar(s.data[i]);
+  fflush(stdout);
 }
 
-char* string_to_cstr(string s) {
-  return s.data;
-}
+char *string_to_cstr(string s) { return s.data; }
 
-string cstr_to_string(char* cstr) {
+string cstr_to_string(char *cstr) {
   return (string){.data = cstr, .length = strlen(cstr)};
 }
 
@@ -23,7 +22,7 @@ char get_nth_char(string s, int n) {
 }
 
 string append_string(string s, char c) {
-  char* tmp = allocate_compiler_persistent(s.length + 2);
+  char *tmp = allocate_compiler_persistent(s.length + 2);
   memcpy(tmp, s.data, s.length);
   tmp[s.length] = c;
   tmp[s.length + 1] = 0;
@@ -32,16 +31,14 @@ string append_string(string s, char c) {
 }
 
 string concat_string(string s1, string s2) {
-  char* buffer = allocate_compiler_persistent(s1.length + s2.length + 1);
+  char *buffer = allocate_compiler_persistent(s1.length + s2.length + 1);
   memcpy(buffer, s1.data, s1.length);
   memcpy(&buffer[s1.length], s2.data, s2.length);
   buffer[s1.length + s2.length] = 0;
   return (string){.data = buffer, .length = s1.length + s2.length};
 }
 
-int get_string_length(string s) {
-  return s.length;
-}
+int get_string_length(string s) { return s.length; }
 
 void set_nth_char(string s, int n, char c) {
   if (s.length > n)
@@ -51,7 +48,7 @@ void set_nth_char(string s, int n, char c) {
 }
 
 string read_file(string filename) {
-  FILE* f = fopen(string_to_cstr(filename), "r");
+  FILE *f = fopen(string_to_cstr(filename), "r");
   if (f == NULL) {
     printf("Unable to open file \"%s\" for reading: ",
            string_to_cstr(filename));
@@ -61,7 +58,7 @@ string read_file(string filename) {
   fseek(f, 0, SEEK_END);
   size_t length = ftell(f);
   fseek(f, 0, SEEK_SET);
-  char* buffer = allocate_compiler_persistent(length + 1);
+  char *buffer = allocate_compiler_persistent(length + 1);
   fread(buffer, 1, length, f);
   buffer[length] = 0;
   fclose(f);
@@ -77,8 +74,8 @@ string new_string(string s) {
 }
 
 void write_string_to_file(string s, string filename) {
-  char* fname = string_to_cstr(filename);
-  FILE* f = fopen(fname, "wb");
+  char *fname = string_to_cstr(filename);
+  FILE *f = fopen(fname, "wb");
   if (f == NULL) {
     printf("Unable to open file \"%s\" for writing: ",
            string_to_cstr(filename));
@@ -90,7 +87,7 @@ void write_string_to_file(string s, string filename) {
 }
 
 int str_eq(string s1, string s2) {
-  char* b1 = string_to_cstr(s1);
-  char* b2 = string_to_cstr(s2);
+  char *b1 = string_to_cstr(s1);
+  char *b2 = string_to_cstr(s2);
   return strcmp(b1, b2) == 0;
 }

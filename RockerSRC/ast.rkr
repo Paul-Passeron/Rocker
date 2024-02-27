@@ -1,0 +1,25 @@
+
+rec ast_identifier => {
+    id: token,
+}
+
+rec ast_data => {
+    indentfier: ast_identifier,
+}
+
+enum ast_type => {
+    identifier,
+}
+
+// Using a record type as an union type
+// It absolutely is not space efficient but
+// will get the job done for now
+rec ast => {
+    Tag: ast_type,
+    Data: ast_data,
+}
+
+rec ast_list => {
+    Head: ast,
+    Tail: ast_list,
+}

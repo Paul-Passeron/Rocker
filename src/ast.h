@@ -30,8 +30,6 @@ typedef struct ast_vardef ast_vardef;
 typedef struct ast_match ast_match;
 typedef struct ast_matchcase ast_matchcase;
 typedef struct ast_sub ast_sub;
-typedef struct ast_tuple ast_tuple;
-typedef struct ast_tupledef ast_tupledef;
 typedef struct ast_program ast_program;
 typedef struct ast_compound ast_compound;
 typedef struct ast_ifstmt ast_ifstmt;
@@ -43,6 +41,7 @@ typedef struct ast_assign ast_assign;
 typedef struct ast_while_loop ast_while_loop;
 typedef struct ast_while_loop ast_while_loop;
 typedef struct ast_enum_tdef ast_enum_tdef;
+typedef struct ast_type ast_type;
 
 struct ast_op {
   token_type_t op;
@@ -96,15 +95,10 @@ struct ast_sub {
   token_array_t path;
   ast_t expr;
 };
-
-struct ast_tuple {
-  ast_array_t elems;
+struct ast_type {
+  token_t name;
+  int is_array;
 };
-
-struct ast_tupledef {
-  token_array_t signature;
-};
-
 struct ast_program {
   ast_array_t prog;
 };
@@ -174,8 +168,6 @@ struct node_t {
     match,
     matchcase,
     sub,
-    tuple,
-    tupledef,
     program,
     compound,
     ifstmt,
@@ -186,6 +178,7 @@ struct node_t {
     assign,
     while_loop,
     enum_tdef,
+    type,
   } tag;
   union data {
     ast_op op;
@@ -198,8 +191,6 @@ struct node_t {
     ast_match match;
     ast_matchcase matchcase;
     ast_sub sub;
-    ast_tuple tuple;
-    ast_tupledef tupledef;
     ast_compound compound;
     ast_program program;
     ast_ifstmt ifstmt;
@@ -210,6 +201,7 @@ struct node_t {
     ast_assign assign;
     ast_while_loop while_loop;
     ast_enum_tdef enum_tdef;
+    ast_type type;
   } data;
 };
 
