@@ -1,0 +1,14 @@
+
+enum jours => {
+    Lundi,
+    Mardi,
+    Mercredi,
+    Jeudi,
+    Vendredi,
+    Samedi,
+    Dimanche,
+}
+
+let main(): int => {
+    return 0;
+}

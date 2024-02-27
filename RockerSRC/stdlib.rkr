@@ -1,3 +1,9 @@
+//-----------------------------------------------------------------------------
+//  ROCKER STANDARD LIBRARY
+//  MIT License
+//  Copyright (c) 2024 Paul Passeron
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 // FILE HANDLING
@@ -13,11 +19,12 @@ let READ_MODE: int => 0;
 let WRITE_MODE: int => 0;
 let CLOSED: int => 0;
 
+
+// Very very temporary
 let init_file_modes(): void => {
     READ_MODE => reset_counter();
     WRITE_MODE => incr_counter();
     CLOSED => incr_counter();
-
 }
 
 let open_file(filename: string, mode: int): file => {

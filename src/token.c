@@ -5,16 +5,17 @@
 #include "../RockerAllocator/alloc.h"
 
 static char* lexemes[TOK_COUNT] = {
-    "",      "",       "",  "",     "let",   ":",    ",",      "->",  "=>",
-    "{",     "}",      "(", ")",    "if",    "then", "else",   "rec", "pro",
-    "match", "return", "*", "-",    "+",     "/",    "%",      "||",  "&&",
-    "|",     "^",      "&", "<",    "<=",    ">",    ">=",     "=",   "!=",
-    "_",     "::",     ";", "loop", "while", "do",   "include"};
+    "",      "",       "",  "",     "let",   ":",    ",",       "->",  "=>",
+    "{",     "}",      "(", ")",    "if",    "then", "else",    "rec", "pro",
+    "match", "return", "*", "-",    "+",     "/",    "%",       "||",  "&&",
+    "|",     "^",      "&", "<",    "<=",    ">",    ">=",      "=",   "!=",
+    "_",     "::",     ";", "loop", "while", "do",   "include", "enum"};
 
 static token_type_t keywords[] = {
     TOK_MATCH, TOK_PRO,   TOK_REC, TOK_WILDCARD, TOK_RETURN,
     TOK_SUB,   TOK_LET,   TOK_IF,  TOK_THEN,     TOK_ELSE,
-    TOK_LOOP,  TOK_WHILE, TOK_DO,  TOK_INCLUDE};
+    TOK_LOOP,  TOK_WHILE, TOK_DO,  TOK_INCLUDE,  TOK_ENUM,
+};
 
 static token_type_t operators[] = {
     TOK_STAR,   TOK_MINUS,   TOK_PLUS,   TOK_DIV,     TOK_MODULO, TOK_LOG_AND,
@@ -22,7 +23,7 @@ static token_type_t operators[] = {
     TOK_LSSR,   TOK_LSSR_EQ, TOK_EQUAL,  TOK_DIFF};
 
 char* lexeme_of_type(token_type_t t) {
-  assert(TOK_COUNT == 43 &&
+  assert(TOK_COUNT == 44 &&
          "Exhaustive handling of token types in lexeme_of_type");
 
   switch (t) {
@@ -40,7 +41,7 @@ char* lexeme_of_type(token_type_t t) {
 }
 
 token_type_t type_of_lexeme(char* s) {
-  assert(TOK_COUNT == 43 &&
+  assert(TOK_COUNT == 44 &&
          "Exhaustive handling of token types in type_of_lexeme");
   for (int i = 4; i < TOK_COUNT; i++)
     if (strcmp(lexemes[i], s) == 0)
@@ -122,7 +123,7 @@ int get_precedence(token_type_t t) {
 }
 
 int is_type_typ_def(token_type_t t) {
-  return t == TOK_PRO || t == TOK_REC;
+  return t == TOK_PRO || t == TOK_REC || t == TOK_ENUM;
 }
 
 void token_array_push(token_array_t* arr, token_t tok) {

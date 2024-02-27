@@ -1,3 +1,9 @@
+//-----------------------------------------------------------------------------
+//  ROCKER TOKEN
+//  MIT License
+//  Copyright (c) 2024 Paul Passeron
+//-----------------------------------------------------------------------------
+
 include "RockerSRC/stdlib.rkr"
 
 //-----------------------------------------------------------------------------
@@ -46,6 +52,7 @@ let TOK_SEMICOL: int => 0;
 let TOK_LOOP: int => 0;
 let TOK_WHILE: int => 0;
 let TOK_DO: int => 0;
+let TOK_INCLUDE: int => 0;
 let TOK_COUNT: int => 0;
 
 
@@ -100,6 +107,7 @@ let init_types(): void => {
     TOK_LOOP        => incr_counter();
     TOK_WHILE       => incr_counter();
     TOK_DO          => incr_counter();
+    TOK_INCLUDE     => incr_counter();
     TOK_COUNT       => incr_counter();
 }
 
@@ -144,7 +152,9 @@ let lexeme_of_type(type: int): string => {
     else if type = TOK_SUB         then return "TOK_SUB";
     else if type = TOK_SEMICOL     then return "TOK_SEMICOL";
     else if type = TOK_LOOP        then return "TOK_LOOP";
-    else                                  return "ERROR";
+    else if type = TOK_DO          then return "TOK_DO";
+    else if type = TOK_INCLUDE     then return "TOK_INCLUDE";
+    return "";
 }
 
 
@@ -187,6 +197,7 @@ let type_of_lexeme(lexeme: string): int => {
     if str_eq(lexeme, "loop")                then return TOK_LOOP;
     if str_eq(lexeme, "while")               then return TOK_WHILE;
     if str_eq(lexeme, "do")                  then return TOK_DO;
+    if str_eq(lexeme, "include")             then return TOK_INCLUDE;
     return TOK_COUNT;
 }
 

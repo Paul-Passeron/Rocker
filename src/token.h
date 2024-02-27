@@ -59,6 +59,7 @@ typedef enum token_type_t {
   TOK_WHILE,
   TOK_DO,
   TOK_INCLUDE,
+  TOK_ENUM,
   TOK_COUNT
 
 } token_type_t;

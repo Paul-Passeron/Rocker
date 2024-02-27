@@ -1,3 +1,9 @@
+//-----------------------------------------------------------------------------
+//  ROCKER LEXER
+//  MIT License
+//  Copyright (c) 2024 Paul Passeron
+//-----------------------------------------------------------------------------
+
 include "RockerSRC/token.rkr"
 include "RockerSRC/stdlib.rkr"
 

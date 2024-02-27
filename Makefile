@@ -5,7 +5,7 @@ BUILD=build/
 
 DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)typechecker.o $(BUILD)name_table.o
 
-all: clean main lines
+all: main lines
 main: $(DEP)
 	$(CC) $(CFLAGS) -o $@ $^
 $(BUILD)%.o: RockerAllocator/%.c 
@@ -19,4 +19,4 @@ clean:
 	rm -rf main
 
 lines:
-	wc -l $$( find -name '*.[hc]' -o -name '*.rkr' -o -name '*.bnf') | tail -n 1
+	wc -l $$( find -name '*.[hc]' -o -name '*.rkr' ) | tail -n 1

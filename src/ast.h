@@ -10,10 +10,10 @@
 #include "token.h"
 
 typedef struct node_t node_t;
-typedef node_t* ast_t;
+typedef node_t *ast_t;
 
 typedef struct ast_array_t {
-  ast_t* data;
+  ast_t *data;
   int length;
   int capacity;
 } ast_array_t;
@@ -41,6 +41,8 @@ typedef struct ast_record_expr ast_record_expr;
 typedef struct ast_loop ast_loop;
 typedef struct ast_assign ast_assign;
 typedef struct ast_while_loop ast_while_loop;
+typedef struct ast_while_loop ast_while_loop;
+typedef struct ast_enum_tdef ast_enum_tdef;
 
 struct ast_op {
   token_type_t op;
@@ -155,6 +157,11 @@ struct ast_while_loop {
   ast_t statement;
 };
 
+struct ast_enum_tdef {
+  token_t name;
+  token_array_t items;
+};
+
 struct node_t {
   enum tag {
     op,
@@ -178,6 +185,7 @@ struct node_t {
     loop,
     assign,
     while_loop,
+    enum_tdef,
   } tag;
   union data {
     ast_op op;
@@ -201,12 +209,13 @@ struct node_t {
     ast_loop loop;
     ast_assign assign;
     ast_while_loop while_loop;
+    ast_enum_tdef enum_tdef;
   } data;
 };
 
 ast_t new_ast(node_t node);
 ast_array_t new_ast_array(void);
 
-void push_ast_array(ast_array_t* arr, ast_t a);
+void push_ast_array(ast_array_t *arr, ast_t a);
 void print_ast(ast_t root);
-#endif  // AST_H
+#endif // AST_H
