@@ -1,21 +1,176 @@
 
+
+rec ast_data => {
+    data_op: ast_op,
+    data_literal: ast_literal,
+    data_identifier: ast_identifier,
+    data_fundef: ast_fundef,
+    data_funcall: ast_funcall,
+    data_ret: ast_ret,
+    data_vardef: ast_vardef,
+    data_match: ast_match,
+    data_matchcase: ast_matchcase,
+    data_sub: ast_sub,
+    data_program: ast_program,
+    data_compound: ast_compound,
+    data_ifstmt: ast_ifstmt,
+    data_tdef: ast_tdef,
+    data_cons: ast_cons,
+    data_record_expr: ast_record_expr,
+    data_loop: ast_loop,
+    data_assign: ast_assign,
+    data_while_loop: ast_while_loop,
+    data_enum_tdef: ast_enum_tdef,
+    data_type: ast_type,
+}
+
+enum ast_kind => {
+    tag_op,
+    tag_literal,
+    tag_identifier,
+    tag_fundef,
+    tag_funcall,
+    tag_ret,
+    tag_vardef,
+    tag_match,
+    tag_matchcase,
+    tag_sub,
+    tag_program,
+    tag_compound,
+    tag_ifstmt,
+    tag_tdef,
+    tag_cons,
+    tag_record_expr,
+    tag_loop,
+    tag_assign,
+    tag_while_loop,
+    tag_enum_tdef,
+    tag_type,
+}
+
+rec ast_op => {
+    op: token_type,
+    left: ast,
+    right: ast,
+}
+
+rec ast_literal => {
+    lit: token,
+}
+
 rec ast_identifier => {
     id: token,
 }
 
-rec ast_data => {
-    indentfier: ast_identifier,
+rec ast_fundef => {
+    name: token,
+    args: token [],
+    types: ast [],
+    body: ast,
+    ret_type: ast,
 }
 
-enum ast_type => {
-    identifier,
+rec ast_funcall => {
+    name: token,
+    args: ast [],
 }
+
+rec ast_ret => {
+    expr: ast,
+}
+
+
+rec ast_vardef => {
+    name: token,
+    is_rec: boolean,
+    expr: ast,
+    type: ast,
+}
+
+rec ast_match => {
+    expr: ast,
+    cases: ast [],
+}
+
+rec ast_matchcase => {
+    expr: ast,
+    body: ast,
+}
+
+rec ast_sub => {
+    path: token [],
+    expr: ast,
+}
+
+rec ast_type => {
+    name : token,
+    is_array: boolean,
+}
+
+rec ast_program => {
+    prog: ast [],
+}
+
+rec ast_compound => {
+    stmts: ast[],
+}
+
+rec ast_ifstmt => {
+    expr: ast,
+    body: ast,
+    elsestmt: ast,
+}
+
+enum tdef_type => {
+    TDEF_REC,
+    TDEF_PRO,
+}
+
+rec ast_tdef => {
+    name: token,
+    t: tdef_type,
+    constructors: ast [],
+}
+
+rec ast_cons => {
+    name: token,
+    type: ast,
+}
+
+rec ast_record_expr => {
+    names: token [],
+    exprs: ast [],
+}
+
+rec ast_loop => {
+    variable: token,
+    start: ast,
+    end: ast,
+    statement: ast,
+}
+
+rec ast_assign => {
+    target: ast,
+    expr: ast,
+}
+
+rec ast_while_loop => {
+    condition: ast,
+    statement: ast,
+}
+
+rec ast_enum_tdef => {
+    name: token,
+    items: token [],
+}
+
+
 
 // Using a record type as an union type
 // It absolutely is not space efficient but
 // will get the job done for now
 rec ast => {
-    Tag: ast_type,
+    Tag: ast_kind,
     Data: ast_data,
 }
 

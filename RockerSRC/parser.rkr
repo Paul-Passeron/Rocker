@@ -41,5 +41,5 @@ let consume_token(p: parser): token => {
 }
 
 let parse_program(p: parser): void => {
-    implemented("parse_program");
+    // implemented("parse_program");
 }

@@ -3,7 +3,7 @@
 
 #include "typedefs.h"
 
-#define __INTERNAL_DYNAMIC_ARRAY_CAP 64
+#define __INTERNAL_DYNAMIC_ARRAY_CAP 2
 
 __internal_dynamic_array_t __internal_make_array(size_t size);
 int __internal_push_array(__internal_dynamic_array_t arr, void *elem);

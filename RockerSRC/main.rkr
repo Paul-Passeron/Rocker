@@ -17,15 +17,13 @@ include "RockerSRC/parser.rkr"
 
 
 
-let main(): int => {
+let main(): void => {
     let l: lexer => new_lexer("RockerSRC/main.rkr");
     lex_program(l);
     let toks: token[] => l::Toks;
-    print_int(get_length(toks));
-    print("\n");
-    let p: parser => new_parser(l::Toks);
+    print_list_types(toks);
+    let p: parser => new_parser(toks);
     parse_program(p);
-    return 0;
 }
 
 //-----------------------------------------------------------------------------

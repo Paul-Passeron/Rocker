@@ -479,27 +479,27 @@ void generate_fundef(generator_t *g, ast_t fun) {
   ast_fundef fundef = fun->data.fundef;
   new_nt_scope(&g->table);
   push_nt(&g->table, fundef.name.lexeme, NT_FUN, fun);
-  generate_type(f, fundef.ret_type);
-  fprintf(f, " %s(", fundef.name.lexeme);
-  for (int i = 0; i < fundef.args.length; i++) {
-    push_nt(&g->table, fundef.args.data[i].lexeme, NT_VAR, fun);
-    if (i > 0)
-      fprintf(f, ", ");
-    generate_type(f, fundef.types.data[i]);
-    fprintf(f, " ");
-    fprintf(f, "%s", fundef.args.data[i].lexeme);
-  }
-  fprintf(f, ")\n");
-  if (strcmp(fundef.name.lexeme, "main") == 0) {
-    fprintf(f, "{\n");
+  if (strcmp(fundef.name.lexeme, "main") != 0) {
+    generate_type(f, fundef.ret_type);
+    fprintf(f, " %s(", fundef.name.lexeme);
+    for (int i = 0; i < fundef.args.length; i++) {
+      push_nt(&g->table, fundef.args.data[i].lexeme, NT_VAR, fun);
+      if (i > 0)
+        fprintf(f, ", ");
+      generate_type(f, fundef.types.data[i]);
+      fprintf(f, " ");
+      fprintf(f, "%s", fundef.args.data[i].lexeme);
+    }
+    fprintf(f, ")\n");
+    generate_compound(g, fundef.body);
+    fprintf(f, "\n\n");
+  } else {
+    fprintf(f, "int main() {\n");
     fprintf(f, "init_compiler_stack();\n");
     generate_compound(g, fundef.body);
     fprintf(f, "kill_compiler_stack();\n");
+    fprintf(f, "return 0;\n");
     fprintf(f, "}\n\n");
-
-  } else {
-    generate_compound(g, fundef.body);
-    fprintf(f, "\n\n");
   }
   end_nt_scope(&g->table);
 }
@@ -537,16 +537,20 @@ void generate_forward_defs(generator_t *g, ast_t program) {
     ast_t stmt = stmts.data[i];
     if (stmt->tag == fundef) {
       ast_fundef fundef = stmt->data.fundef;
-      generate_type(f, fundef.ret_type);
-      fprintf(f, " %s(", fundef.name.lexeme);
-      for (int i = 0; i < fundef.args.length; i++) {
-        if (i > 0)
-          fprintf(f, ", ");
-        generate_type(f, fundef.types.data[i]);
-        fprintf(f, " ");
-        fprintf(f, "%s", fundef.args.data[i].lexeme);
+      if (strcmp(fundef.name.lexeme, "main") != 0) {
+
+        generate_type(f, fundef.ret_type);
+
+        fprintf(f, " %s(", fundef.name.lexeme);
+        for (int i = 0; i < fundef.args.length; i++) {
+          if (i > 0)
+            fprintf(f, ", ");
+          generate_type(f, fundef.types.data[i]);
+          fprintf(f, " ");
+          fprintf(f, "%s", fundef.args.data[i].lexeme);
+        }
+        fprintf(f, ");\n\n");
       }
-      fprintf(f, ");\n\n");
     }
   }
 

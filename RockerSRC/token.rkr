@@ -171,6 +171,8 @@ let is_type_keyword(type: int): boolean => {
     if type = TOK_LOOP then return true; 
     if type = TOK_WHILE then return true; 
     if type = TOK_DO then return true; 
+    if type = TOK_INCLUDE then return true; 
+
     return false;
 }
 
@@ -221,16 +223,13 @@ let append_token(l: token_list, t: token): token_list => {
 
 
 
+
 let print_list_types(_l: token []) : void => {
-    let l : token [] => _l;
-    let len: int => get_length(l);
-    loop i: 0 -> len-1 => {
-        let tok: token => get(l, i);
-        print("-> ");
-        print(lexeme_of_type(tok::Type));
-        print(": '");
-        print(tok::Lexeme);
-        print("'\n");
+    let l: token [] => _l; 
+  loop i : 0 -> get_length(l) - 1 => {
+        let t: token => get(l, i); 
+        print(lexeme_of_type(t::Type));
+        print("\n");
     }
 }
 //-----------------------------------------------------------------------------
