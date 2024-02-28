@@ -205,14 +205,6 @@ int global_argc;
 char **global_argv;
 
 void fill_cmd_args(int argc, char **argv) {
-  // cmd_args = string_make_array();
-  // for (int i = 0; i < argc; i++) {
-  //   string arg = new_string(cstr_to_string(argv[i]));
-  //   string_push_array(cmd_args, arg);
-  //   printf("Pushing arg \'");
-  //   print(arg);
-  //   printf("\'\n");
-  // }
   global_argc = argc;
   global_argv = argv;
 }
