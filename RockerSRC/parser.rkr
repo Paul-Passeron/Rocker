@@ -12,14 +12,17 @@ rec parser => {
     Toks: token [],
     Prog: ast [],
     Cursor: int,
+    Includes: string [],
 }
 
 let new_parser(l: token []): parser => {
     let prog: ast [] => [];
+    let includes: string [] => [];
     let res: parser => {
         Toks => l,
         Prog => prog,
-        Cursor => 0
+        Cursor => 0,
+        Includes => includes
     };
     return res;
 }

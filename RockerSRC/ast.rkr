@@ -164,8 +164,6 @@ rec ast_enum_tdef => {
     items: token [],
 }
 
-
-
 // Using a record type as an union type
 // It absolutely is not space efficient but
 // will get the job done for now
@@ -173,4 +171,3 @@ rec ast => {
     Tag: ast_kind,
     Data: ast_data,
 }
-

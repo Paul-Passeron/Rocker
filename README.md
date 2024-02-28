@@ -39,7 +39,7 @@ let main() : int => {
 - [x] Add integer for loops 
 - [x] Add while loops 
 - [ ] Add foreach loop for array types
-- [ ] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
+- [<x] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
 - [x] Add including files support
-- [ ] Improve including files support
+- [x] Improve including files support
 - [ ] Self-Hosting

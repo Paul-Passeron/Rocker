@@ -567,12 +567,16 @@ void parse_program(parser_t *p) {
       char *buffer = allocate_compiler_persistent(strlen(filename) - 1);
       memcpy(buffer, filename + 1, strlen(filename) - 2);
       buffer[strlen(filename) - 1] = 0;
-      if (!has_been_included(buffer)) {
+      char *abs_path_tmp = realpath(buffer, NULL);
+      char *abs_path = allocate_compiler_persistent(strlen(abs_path_tmp + 1));
+      memcpy(abs_path, abs_path_tmp, strlen(abs_path_tmp) + 1);
+      free(abs_path_tmp);
+      if (!has_been_included(abs_path)) {
         if (includes_num >= 1024) {
           printf("Include limit reached !\n");
           exit(1);
         }
-        includes[includes_num++] = buffer;
+        includes[includes_num++] = abs_path;
 
         lexer_t l = new_lexer(buffer);
         token_array_t toks = lex_program(&l);
