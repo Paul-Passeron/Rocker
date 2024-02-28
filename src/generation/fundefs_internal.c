@@ -1,23 +1,24 @@
 #include "fundefs_internal.h"
 
 #include "../../RockerAllocator/alloc.h"
+#include "fundefs.h"
 #include "typedefs.h"
 #include <stdio.h>
 #include <string.h>
 
 __internal_dynamic_array_t __internal_make_array(size_t size) {
 
-  __internal_dynamic_array_t arr =
+  __internal_dynamic_array_t ptr =
       allocate_compiler_persistent(sizeof(struct __internal_dynamic_array));
   if (size == 0) {
     printf("Could not pop elem out of dynamic array: BAD ELEMENT SIZE\n");
-    return arr;
+    return ptr;
   }
-  arr->capacity = __INTERNAL_DYNAMIC_ARRAY_CAP;
-  arr->elem_size = size;
-  arr->data = allocate_compiler_persistent(arr->elem_size * arr->capacity);
-  arr->length = 0;
-  return arr;
+  (*ptr).capacity = __INTERNAL_DYNAMIC_ARRAY_CAP;
+  (*ptr).elem_size = size;
+  (*ptr).data = allocate_compiler_persistent(ptr->elem_size * ptr->capacity);
+  (*ptr).length = 0;
+  return ptr;
 }
 
 // We use the compiler version of thre
@@ -26,9 +27,13 @@ __internal_dynamic_array_t __internal_make_array(size_t size) {
 // does not change the scope in which
 // the pointer was allocated
 int __internal_push_array(__internal_dynamic_array_t arr, void *elem) {
+  if (arr->data == NULL) {
+    printf("Uninitialized array !\n");
+    exit(1);
+  }
   if (elem == NULL) {
     printf("Could not push elem to dynamic array: BAD ELEM\n");
-    return 1;
+    exit(1);
   }
   if (arr->length > arr->capacity) {
     arr->capacity *= 2;
@@ -36,7 +41,14 @@ int __internal_push_array(__internal_dynamic_array_t arr, void *elem) {
                                                arr->capacity * arr->elem_size);
   }
   void *dst = arr->data + arr->length * arr->elem_size;
-  memccpy(dst, elem, 1, arr->elem_size);
+  if (dst == NULL) {
+    printf("Could not push elem to dynamic array: BAD ARRAY\n");
+    exit(1);
+  }
+  // memccpy(dst, elem, 1, arr->elem_size);
+  for (int i = 0; i < arr->elem_size; i++) {
+    ((char *)dst)[i] = ((char *)elem)[i];
+  }
   arr->length++;
   return 0;
 }
@@ -66,10 +78,11 @@ void *__internal_get_elem(__internal_dynamic_array_t arr, size_t index) {
     printf("Could not get elem from dynamic array: BAD ELEMENT SIZE\n");
     return NULL;
   }
-  void *res = allocate_compiler_persistent(arr->elem_size);
+  // void *res = allocate_compiler_persistent(arr->elem_size);
   void *src = arr->data + index * arr->elem_size;
-  memccpy(res, src, 1, arr->elem_size);
-  return res;
+  if (src == NULL)
+    return NULL;
+  return src;
 }
 
 void __internal_insert(__internal_dynamic_array_t arr, size_t index,
@@ -79,3 +92,120 @@ void __internal_set_elem(__internal_dynamic_array_t arr, size_t index,
                          void *elem) {}
 
 size_t get_length(__internal_dynamic_array_t arr) { return arr->length; }
+
+__internal_dynamic_array_t cmd_args;
+
+__internal_dynamic_array_t int_make_array(void) {
+  return __internal_make_array(sizeof(int));
+}
+
+void int_push_array(__internal_dynamic_array_t arr, int elem) {
+  __internal_push_array(arr, &elem);
+}
+
+int int_pop_array(__internal_dynamic_array_t arr) {
+  int *res = __internal_pop_array(arr);
+  return *res;
+}
+
+int int_get_elem(__internal_dynamic_array_t arr, size_t index) {
+  int *res = __internal_get_elem(arr, index);
+  return *res;
+}
+
+void int_set_elem(__internal_dynamic_array_t arr, size_t index, int elem) {
+  __internal_set_elem(arr, index, &elem);
+}
+
+void int_insert(__internal_dynamic_array_t arr, size_t index, int elem) {
+  __internal_insert(arr, index, &elem);
+}
+
+__internal_dynamic_array_t boolean_make_array(void) {
+  return __internal_make_array(sizeof(int));
+}
+
+void boolean_push_array(__internal_dynamic_array_t arr, boolean elem) {
+  __internal_push_array(arr, &elem);
+}
+
+boolean boolean_pop_array(__internal_dynamic_array_t arr) {
+  boolean *res = __internal_pop_array(arr);
+  return *res;
+}
+
+boolean boolean_get_elem(__internal_dynamic_array_t arr, size_t index) {
+  boolean *res = __internal_get_elem(arr, index);
+  return *res;
+}
+
+void boolean_set_elem(__internal_dynamic_array_t arr, size_t index,
+                      boolean elem) {
+  __internal_set_elem(arr, index, &elem);
+}
+
+void boolean_insert(__internal_dynamic_array_t arr, size_t index,
+                    boolean elem) {
+  __internal_insert(arr, index, &elem);
+}
+
+__internal_dynamic_array_t string_make_array(void) {
+  return __internal_make_array(sizeof(int));
+}
+
+void string_push_array(__internal_dynamic_array_t arr, string elem) {
+  __internal_push_array(arr, &elem);
+}
+
+string string_pop_array(__internal_dynamic_array_t arr) {
+  string *res = __internal_pop_array(arr);
+  return *res;
+}
+
+string string_get_elem(__internal_dynamic_array_t arr, size_t index) {
+  string *res = __internal_get_elem(arr, index);
+  return *res;
+}
+
+void string_set_elem(__internal_dynamic_array_t arr, size_t index,
+                     string elem) {
+  __internal_set_elem(arr, index, &elem);
+}
+
+void string_insert(__internal_dynamic_array_t arr, size_t index, string elem) {
+  __internal_insert(arr, index, &elem);
+}
+
+__internal_dynamic_array_t char_make_array(void) {
+  return __internal_make_array(sizeof(int));
+}
+
+void char_push_array(__internal_dynamic_array_t arr, char elem) {
+  __internal_push_array(arr, &elem);
+}
+
+char char_pop_array(__internal_dynamic_array_t arr) {
+  char *res = __internal_pop_array(arr);
+  return *res;
+}
+
+char char_get_elem(__internal_dynamic_array_t arr, size_t index) {
+  char *res = __internal_get_elem(arr, index);
+  return *res;
+}
+
+void char_set_elem(__internal_dynamic_array_t arr, size_t index, char elem) {
+  __internal_set_elem(arr, index, &elem);
+}
+
+void char_insert(__internal_dynamic_array_t arr, size_t index, char elem) {
+  __internal_insert(arr, index, &elem);
+}
+
+void fill_cmd_args(int argc, char **argv) {
+  cmd_args = string_make_array();
+  for (int i = 0; i < argc; i++)
+    string_push_array(cmd_args, cstr_to_string(argv[i]));
+}
+
+__internal_dynamic_array_t get_args(void) { return cmd_args; }

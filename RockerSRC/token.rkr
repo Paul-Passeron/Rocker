@@ -68,49 +68,49 @@ rec token => {
 
 
 let lexeme_of_type(type: token_type): string => {
-         if type = TOK_IDENTIFIER  then return "TOK_IDENTIFIER";
-    else if type = TOK_CHR_LIT     then return "TOK_CHR_LIT";
-    else if type = TOK_STR_LIT     then return "TOK_STR_LIT";
-    else if type = TOK_NUM_LIT     then return "TOK_NUM_LIT";
-    else if type = TOK_LET         then return "TOK_LET";
-    else if type = TOK_COLON       then return "TOK_COLON";
-    else if type = TOK_COMMA       then return "TOK_COMMA";
-    else if type = TOK_SMALL_ARROW then return "TOK_SMALL_ARROW";
-    else if type = TOK_BIG_ARROW   then return "TOK_BIG_ARROW";
-    else if type = TOK_OPEN_BRACE  then return "TOK_OPEN_BRACE";
-    else if type = TOK_CLOSE_BRACE then return "TOK_CLOSE_BRACE";
-    else if type = TOK_OPEN_PAREN  then return "TOK_OPEN_PAREN";
-    else if type = TOK_CLOSE_PAREN then return "TOK_CLOSE_PAREN";
-    else if type = TOK_IF          then return "TOK_IF";
-    else if type = TOK_THEN        then return "TOK_THEN";
-    else if type = TOK_ELSE        then return "TOK_ELSE";
-    else if type = TOK_REC         then return "TOK_REC";
-    else if type = TOK_PRO         then return "TOK_PRO";
-    else if type = TOK_MATCH       then return "TOK_MATCH";
-    else if type = TOK_RETURN      then return "TOK_RETURN";
-    else if type = TOK_STAR        then return "TOK_STAR";
-    else if type = TOK_MINUS       then return "TOK_MINUS";
-    else if type = TOK_PLUS        then return "TOK_PLUS";
-    else if type = TOK_DIV         then return "TOK_DIV";
-    else if type = TOK_MODULO      then return "TOK_MODULO";
-    else if type = TOK_LOG_OR      then return "TOK_LOG_OR";
-    else if type = TOK_LOG_AND     then return "TOK_LOG_AND";
-    else if type = TOK_BIT_OR      then return "TOK_BIT_OR";
-    else if type = TOK_BIT_XOR     then return "TOK_BIT_XOR";
-    else if type = TOK_BIT_AND     then return "TOK_BIT_AND";
-    else if type = TOK_LSSR        then return "TOK_LSSR";
-    else if type = TOK_LSSR_EQ     then return "TOK_LSSR_EQ";
-    else if type = TOK_GRTR        then return "TOK_GRTR";
-    else if type = TOK_GRTR_EQ     then return "TOK_GRTR_EQ";
-    else if type = TOK_EQUAL       then return "TOK_EQUAL";
-    else if type = TOK_DIFF        then return "TOK_DIFF";
-    else if type = TOK_WILDCARD    then return "TOK_WILDCARD";
-    else if type = TOK_SUB         then return "TOK_SUB";
-    else if type = TOK_SEMICOL     then return "TOK_SEMICOL";
-    else if type = TOK_LOOP        then return "TOK_LOOP";
-    else if type = TOK_DO          then return "TOK_DO";
-    else if type = TOK_INCLUDE     then return "TOK_INCLUDE";
-    return "";
+    if type = TOK_IDENTIFIER  then return "TOK_IDENTIFIER";
+    if type = TOK_CHR_LIT     then return "TOK_CHR_LIT";
+    if type = TOK_STR_LIT     then return "TOK_STR_LIT";
+    if type = TOK_NUM_LIT     then return "TOK_NUM_LIT";
+    if type = TOK_LET         then return "TOK_LET";
+    if type = TOK_COLON       then return "TOK_COLON";
+    if type = TOK_COMMA       then return "TOK_COMMA";
+    if type = TOK_SMALL_ARROW then return "TOK_SMALL_ARROW";
+    if type = TOK_BIG_ARROW   then return "TOK_BIG_ARROW";
+    if type = TOK_OPEN_BRACE  then return "TOK_OPEN_BRACE";
+    if type = TOK_CLOSE_BRACE then return "TOK_CLOSE_BRACE";
+    if type = TOK_OPEN_PAREN  then return "TOK_OPEN_PAREN";
+    if type = TOK_CLOSE_PAREN then return "TOK_CLOSE_PAREN";
+    if type = TOK_IF          then return "TOK_IF";
+    if type = TOK_THEN        then return "TOK_THEN";
+    if type = TOK_ELSE        then return "TOK_ELSE";
+    if type = TOK_REC         then return "TOK_REC";
+    if type = TOK_PRO         then return "TOK_PRO";
+    if type = TOK_MATCH       then return "TOK_MATCH";
+    if type = TOK_RETURN      then return "TOK_RETURN";
+    if type = TOK_STAR        then return "TOK_STAR";
+    if type = TOK_MINUS       then return "TOK_MINUS";
+    if type = TOK_PLUS        then return "TOK_PLUS";
+    if type = TOK_DIV         then return "TOK_DIV";
+    if type = TOK_MODULO      then return "TOK_MODULO";
+    if type = TOK_LOG_OR      then return "TOK_LOG_OR";
+    if type = TOK_LOG_AND     then return "TOK_LOG_AND";
+    if type = TOK_BIT_OR      then return "TOK_BIT_OR";
+    if type = TOK_BIT_XOR     then return "TOK_BIT_XOR";
+    if type = TOK_BIT_AND     then return "TOK_BIT_AND";
+    if type = TOK_LSSR        then return "TOK_LSSR";
+    if type = TOK_LSSR_EQ     then return "TOK_LSSR_EQ";
+    if type = TOK_GRTR        then return "TOK_GRTR";
+    if type = TOK_GRTR_EQ     then return "TOK_GRTR_EQ";
+    if type = TOK_EQUAL       then return "TOK_EQUAL";
+    if type = TOK_DIFF        then return "TOK_DIFF";
+    if type = TOK_WILDCARD    then return "TOK_WILDCARD";
+    if type = TOK_SUB         then return "TOK_SUB";
+    if type = TOK_SEMICOL     then return "TOK_SEMICOL";
+    if type = TOK_LOOP        then return "TOK_LOOP";
+    if type = TOK_DO          then return "TOK_DO";
+    if type = TOK_INCLUDE     then return "TOK_INCLUDE";
+    return "ERROR";
 }
 
 
@@ -227,8 +227,10 @@ let append_token(l: token_list, t: token): token_list => {
 let print_list_types(_l: token []) : void => {
     let l: token [] => _l; 
   loop i : 0 -> get_length(l) - 1 => {
-        let t: token => get(l, i); 
-        print(lexeme_of_type(t::Type));
+        let t: token => get(l, i);
+        let typ: token_type => t::Type;
+        let s: string => lexeme_of_type(typ);
+        print(s);
         print("\n");
     }
 }

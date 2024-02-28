@@ -18,12 +18,12 @@ include "RockerSRC/parser.rkr"
 
 
 let main(): void => {
-    let l: lexer => new_lexer("RockerSRC/main.rkr");
+    let l: lexer => new_lexer("examples/test.rkr");
     lex_program(l);
     let toks: token[] => l::Toks;
     print_list_types(toks);
-    let p: parser => new_parser(toks);
-    parse_program(p);
+    // let p: parser => new_parser(toks);
+    // parse_program(p);
 }
 
 //-----------------------------------------------------------------------------

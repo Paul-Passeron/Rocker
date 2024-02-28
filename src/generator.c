@@ -228,6 +228,11 @@ void generate_array_funcs(generator_t *g, char *type_name) {
   fprintf(f, "%s %s_get_elem(__internal_dynamic_array_t arr, size_t index) {\n",
           type_name, type_name);
   fprintf(f, "  %s *res = __internal_get_elem(arr, index);\n", type_name);
+  fprintf(
+      f,
+      "  if (res == NULL){ printf(\"NULL ELEMENT IN %s_get_elem\"); exit(1);}",
+      type_name);
+
   fprintf(f, "  return *res;\n");
   fprintf(f, "}\n\n");
   fprintf(f,
@@ -505,7 +510,7 @@ void generate_fundef(generator_t *g, ast_t fun) {
 }
 
 int is_builtin_typename(char *name) {
-  if (strcmp(name, "bool") == 0)
+  if (strcmp(name, "boolean") == 0)
     return 1;
   if (strcmp(name, "int") == 0)
     return 1;
@@ -553,11 +558,6 @@ void generate_forward_defs(generator_t *g, ast_t program) {
       }
     }
   }
-
-  generate_array_funcs(g, "int");
-  generate_array_funcs(g, "boolean");
-  generate_array_funcs(g, "string");
-  generate_array_funcs(g, "char");
 
   for (int i = 0; i < stmts.length; i++) {
     ast_t stmt = stmts.data[i];

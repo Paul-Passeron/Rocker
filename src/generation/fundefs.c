@@ -69,7 +69,7 @@ string new_string(string s) {
   string res;
   res.data = allocate_compiler_persistent(s.length + 1);
   res.length = s.length;
-  memcpy(res.data, s.data, s.length + 1);
+  strcpy(res.data, s.data);
   return res;
 }
 
