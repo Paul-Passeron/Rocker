@@ -360,14 +360,13 @@ void generate_vardef(generator_t *g, ast_t var) {
     generate_type(f, vardef.type);
     fprintf(f, " %s = \n", vardef.name.lexeme);
     if (vardef.expr->tag != literal) {
+      generate_expression(g, vardef.expr);
+      fprintf(f, ";\n");
+    } else if (vardef.expr->data.literal.lit.type != TOK_ARR_DECL) {
       printf("Cannot declare arrays this way yet\n");
       exit(1);
-    }
-    if (vardef.expr->data.literal.lit.type != TOK_ARR_DECL) {
-      printf("Cannot declare arrays this way yet\n");
-      exit(1);
-    }
-    fprintf(f, "__internal_make_array(sizeof(%s));\n", type_name);
+    } else
+      fprintf(f, "__internal_make_array(sizeof(%s));\n", type_name);
   } else if (is_builtin_typename(type_name)) {
     generate_type(f, vardef.type);
     fprintf(f, " %s = ", vardef.name.lexeme);

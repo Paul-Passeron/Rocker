@@ -17,15 +17,48 @@ let test(): void => {
     print("\n");
 }
 
+rec array_wrapper => {
+  Items: int [],
+  Names: int [],
+}
+
+let func(): array_wrapper => {
+  let a: array_wrapper => {
+    Items => NULL,
+    Names => NULL,
+  };
+  let items: int [] => [];
+  a::Items => items;
+  let names: string [] => [];
+  a::Names => names;
+  append(items, 1);
+  append(names, "First\n");
+  append(items, 2);
+  append(names, "Second\n");
+  append(items, 3);
+  append(names, "Third\n");
+
+  return a;
+}
+
 let main(): int => {
-  test();
-  let strings: string[] => [];
-  append(strings, "Hey !\n");
-  append(strings, "How are you ?\n");
-  append(strings, "What ???\n");
-  loop i: 0 -> get_length(strings) - 1 => {
-    let s:  string => get(strings, i);
-    print(s);
+  // test();
+  // let strings: string[] => [];
+  // append(strings, "Hey !\n");
+  // append(strings, "How are you ?\n");
+  // append(strings, "What ???\n");
+  // loop i: 0 -> get_length(strings) - 1 => {
+  //   let s:  string => get(strings, i);
+  //   print(s);
+  // }
+  let a: array_wrapper => func();
+  // For the moment, you must bind them by name to use them
+  let names: string [] => a::Names;
+  print("\n");
+  loop i: 0 -> get_length(names) - 1 => {
+    print(get(names, i));
+    print("\n");
   }
   return 0;
 }
+

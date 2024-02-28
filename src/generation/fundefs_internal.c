@@ -6,6 +6,7 @@
 #include <string.h>
 
 __internal_dynamic_array_t __internal_make_array(size_t size) {
+
   __internal_dynamic_array_t arr =
       allocate_compiler_persistent(sizeof(struct __internal_dynamic_array));
   if (size == 0) {
@@ -34,8 +35,9 @@ int __internal_push_array(__internal_dynamic_array_t arr, void *elem) {
     arr->data = reallocate_compiler_persistent(arr->data,
                                                arr->capacity * arr->elem_size);
   }
-  void *dst = &arr->data + (arr->length++) * arr->elem_size;
+  void *dst = arr->data + arr->length * arr->elem_size;
   memccpy(dst, elem, 1, arr->elem_size);
+  arr->length++;
   return 0;
 }
 
@@ -49,7 +51,7 @@ void *__internal_pop_array(__internal_dynamic_array_t arr) {
     return NULL;
   }
   void *res = allocate_compiler_persistent(arr->elem_size);
-  void *src = &arr->data + (arr->length - 1) * arr->elem_size;
+  void *src = arr->data + (arr->length - 1) * arr->elem_size;
   memccpy(res, src, 1, arr->elem_size);
   arr->length--;
   return res;
@@ -65,7 +67,7 @@ void *__internal_get_elem(__internal_dynamic_array_t arr, size_t index) {
     return NULL;
   }
   void *res = allocate_compiler_persistent(arr->elem_size);
-  void *src = &arr->data + index * arr->elem_size;
+  void *src = arr->data + index * arr->elem_size;
   memccpy(res, src, 1, arr->elem_size);
   return res;
 }

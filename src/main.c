@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     // compile C file
     char command[1024];
     sprintf(command,
-            "clang -g -o %s %s src/generation/fundefs.c "
+            "gcc -Wall -g -o %s %s src/generation/fundefs.c "
             "src/generation/fundefs_internal.c RockerAllocator/alloc.c",
             output, cout);
     printf("[CMD] %s\n", command);
