@@ -20,7 +20,7 @@ This language is transpiled to C for the moment
 // Simple function definition
 
 let main() : int => {
-  print "Hello from Rocker!\n";
+  print("Hello from Rocker!\n");
   return 0;
 }
 ```
