@@ -275,7 +275,7 @@ ast_t parse_loop(parser_t *p) {
   ast_t end = parse_expression(p);
   expect(*p, TOK_BIG_ARROW);
   consume_token(p);
-  ast_t stmt = parse_compound(p);
+  ast_t stmt = parse_statement(p);
   return new_ast((node_t){loop, {.loop = {var_name, begin, end, stmt}}});
 }
 

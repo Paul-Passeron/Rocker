@@ -339,28 +339,223 @@ let parse_match(p: parser): ast => {
 }
 
 let parse_compound(p: parser): ast => {
-    implemented("parse_compound");
-    return NULL;
+    expect(p, TOK_OPEN_BRACE);
+    consume_token(p);
+    let stmts: ast [] => [];
+    while peek_type(p) != TOK_CLOSE_BRACE do 
+        append(stmts, parse_statement(p));
+    consume_token(p);
+    let data_compound: ast_compound => {stmts => stmts};
+    let data: ast_data => {
+        data_compound => data_compound,
+    };
+    let res: ast => {
+        Tag => tag_compound,
+        Data => data
+    };
+    return res;
 }
 
 let parse_var_def(p: parser): ast => {
-    implemented("parse_var_def");
-    return NULL;
+    expect(p, TOK_LET);
+    consume_token(p);
+    let id: token => consume_token(p);
+    expect(p, TOK_COLON);
+    consume_token(p);
+    let type: ast => parse_type(p);
+    expect(p, TOK_BIG_ARROW);
+    consume_token(p);
+    let data_vardef: ast_vardef => {
+        name => id,
+        is_rec => false,
+        expr => NULL,
+        type => type,
+    };
+    if peek_type(p) = TOK_OPEN_BRACE then {
+        data_vardef::is_rec => true;
+        consume_token(p);
+    }
+    else if peek_type(p) = TOK_ARR_DECL then 
+        data_vardef::expr => parse_literal(p);
+    else data_vardef::expr => parse_expression(p);
+    expect(p, TOK_SEMICOL);
+    consume_token(p);
+    let data: ast_data => {
+        data_vardef => data_vardef,
+    };
+    let res: ast => {
+        Tag => tag_vardef,
+        Data => data
+    };
+    return res;
+    
 }
 
 let parse_fundef(p: parser): ast => {
-    implemented("parse_fundef");
-    return NULL;
+    expect(p, TOK_LET);
+    consume_token(p);
+    let id: token => consume_token(p);
+    expect(p, TOK_OPEN_PAREN);
+    consume_token(p);
+    let args: token [] => [];
+    let types: ast [] => [];
+    let break_cond: boolean => false;
+    while peek_type(p) != TOK_CLOSE_PAREN && break_cond = false do {
+        expect(p, TOK_IDENTIFIER);
+        append(args, consume_token(p));
+        expect(p, TOK_COLON);
+        consume_token(p);
+        append(types, parse_type(p));
+        if peek_type(p) != TOK_COMMA then break_cond => true;
+        else consume_token(p);
+    }
+    expect(p, TOK_CLOSE_PAREN);
+    consume_token(p);
+    expect(p, TOK_COLON);
+    consume_token(p);
+    let type: ast => parse_type(p);
+    expect(p, TOK_BIG_ARROW);
+    consume_token(p);
+    let body: ast => parse_compound(p);
+    let data_fundef: ast_fundef => {
+        name => id,
+        args => args,
+        types => types,
+        body => body,
+        ret_type => type
+    };
+    let data: ast_data => {
+        data_fundef => data_fundef,
+    };
+    let res: ast => {
+        Tag => tag_fundef,
+        Data => data
+    };
+    return res;
 }
 
 let parse_loop(p: parser): ast => {
-    implemented("parse_loop");
-    return NULL;
+    expect(p, TOK_LOOP);
+    consume_token(p);
+    expect(p, TOK_IDENTIFIER);
+    consume_token(p);
+    let var_name: token => consume_token(p);
+    expect(p, TOK_COLON);
+    consume_token(p);
+    let begin: ast => parse_expression(p);
+    expect(p, TOK_SMALL_ARROW);
+    consume_token(p);
+    let end: ast => parse_expression(p);
+    expect(p, TOK_BIG_ARROW);
+    consume_token(p);
+    let body: ast => parse_statement(p);
+    let data_loop: ast_loop => {
+       variable => var_name,
+       start => begin,
+       end => end,
+       statement => body,
+    };
+    let data: ast_data => {
+        data_loop => data_loop,
+    };
+    let res: ast => {
+        Tag => tag_loop,
+        Data => data
+    };
+    return res;
+
+}
+
+let is_primary(p: parser): boolean => {
+    let t: token_type => peek_type(p);
+    return t = TOK_OPEN_BRACE || t = TOK_OPEN_PAREN
+        || t = TOK_IDENTIFIER || t = TOK_STR_LIT
+        || t = TOK_CHR_LIT    || t = TOK_NUM_LIT 
+        || t = TOK_WILDCARD   || t = TOK_ARR_DECL;
+}
+
+let is_funcall(p: parser): boolean => {
+    let p2: parser => copy_parser(p);
+    if peek_type(p2) != TOK_IDENTIFIER then return false;
+    consume_token(p2); 
+    if peek_type(p2) != TOK_OPEN_PAREN then return false;
+    return true;
+}
+
+let parse_funcall(p: parser): ast => {
+    let id: token => consume_token(p);
+    expect(p, TOK_OPEN_PAREN);
+    consume_token(p);
+    let args: ast [] => [];
+    let break_cond: boolean => false;
+    while peek_type(p) != TOK_CLOSE_PAREN && break_cond = false do {
+        append(args, parse_expression(p));
+        if peek_type(p) != TOK_COMMA then break_cond => true;
+        else consume_token(p);
+    }
+    expect(p, TOK_CLOSE_PAREN);
+    consume_token(p);
+    let data_funcall: ast_funcall => {
+        name => id,
+        args => args,
+    };
+    let data: ast_data => {
+        data_funcall => data_funcall,
+    };
+    let res: ast => {
+        Tag => tag_funcall,
+        Data => data
+    };
+    return res;
 }
 
 let parse_while_loop(p: parser): ast => {
-    implemented("parse_while_loop");
-    return NULL;
+    expect(p, TOK_WHILE);
+    consume_token(p);
+    let condition: ast => parse_expression(p);
+    expect(p, TOK_DO);
+    consume_token(p);
+    let statement: ast => parse_statement(p);
+    let data_while_loop: ast_while_loop => {
+       condition => condition,
+       statement => statement,
+    };
+    let data: ast_data => {
+        data_while_loop => data_while_loop,
+    };
+    let res: ast => {
+        Tag => tag_while_loop,
+        Data => data
+    };
+    return res;
+}
+
+let parse_record_expression(p: parser): ast => {
+    let names: token [] => [];
+    let exprs: ast [] => [];
+    let break_cond: boolean => false;
+    while peek_type(p) != TOK_CLOSE_BRACE && break_cond = false do {
+        expect(p, TOK_IDENTIFIER);
+        let cons_name: token => consume_token(p);
+        append(names, cons_name);
+        expect(p, TOK_BIG_ARROW);
+        let expr: ast => parse_expression(p);
+        append(exprs, expr);
+        if peek_type(p) != TOK_COMMA then break_cond => true;
+        else consume_token(p);
+    }
+    let data_record_expr: ast_record_expr => {
+       exprs => exprs,
+       names => names
+    };
+    let data: ast_data => {
+        data_record_expr => data_record_expr,
+    };
+    let res: ast => {
+        Tag => tag_record_expr,
+        Data => data
+    };
+    return res;
 }
 
 let is_sub(p: parser): boolean =>{
@@ -369,8 +564,44 @@ let is_sub(p: parser): boolean =>{
 } 
 
 let parse_type(p: parser): ast => {
-    implemented("parse_type");
-    return NULL;
+   expect(p, TOK_IDENTIFIER);
+   let name: token => consume_token(p);
+   let is_arr: boolean => false;
+   if peek_type(p) = TOK_ARR_DECL then {
+    consume_token(p);
+    is_arr => true;
+   }
+   let data_type: ast_type => {
+      name => name,
+      is_array => is_arr,
+    };
+    let data: ast_data => {
+        data_type => data_type,
+    };
+    let res: ast => {
+        Tag => tag_type,
+        Data => data
+    };
+    return res;
+}
+
+let parse_identifier(p: parser): ast => {
+    let t: token => consume_token(p);
+    let data_identifier: ast_identifier => {id => t};
+    let data: ast_data => {
+        data_identifier => data_identifier,
+    };
+    let res: ast => {
+        Tag => tag_identifier,
+        Data => data
+    };
+    return res;
+}
+let parse_leaf(p: parser): ast => {
+    if is_funcall(p) then return parse_funcall(p);
+    let t: token_type => peek_type(p);
+    if t = TOK_IDENTIFIER then return parse_identifier(p);
+    return parse_literal(p);
 }
 
 let parse_expression(p: parser): ast => {

@@ -55,6 +55,7 @@ enum token_type => {
     TOK_DO,
     TOK_INCLUDE,
     TOK_ENUM,
+    TOK_ARR_DECL,
     TOK_COUNT,
 }
 
@@ -112,6 +113,7 @@ let lexeme_of_type(type: token_type): string => {
     if type = TOK_DO          then return "TOK_DO";
     if type = TOK_INCLUDE     then return "TOK_INCLUDE";
     if type = TOK_ENUM        then return "TOK_ENUM";
+    if type = TOK_ARR_DECL    then return "TOK_ARR_DECL";
     return "ERROR";
 }
 
@@ -157,6 +159,7 @@ let type_of_lexeme(lexeme: string): token_type => {
     if str_eq(lexeme, "do")                  then return TOK_DO;
     if str_eq(lexeme, "include")             then return TOK_INCLUDE;
     if str_eq(lexeme, "enum")                then return TOK_ENUM;
+    if str_eq(lexeme, "[]")                  then return TOK_ARR_DECL;
     return TOK_COUNT;
 }
 
