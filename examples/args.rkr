@@ -1,0 +1,7 @@
+let main(): void => {
+    let args: string [] => get_args();
+    loop i: 0 -> get_length(args) - 1 => {
+        print(get(args, i));
+        print("\n");
+    }
+}

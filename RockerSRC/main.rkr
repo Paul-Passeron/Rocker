@@ -18,12 +18,22 @@ include "RockerSRC/parser.rkr"
 
 
 let main(): void => {
-    let l: lexer => new_lexer("examples/test.rkr");
+    let args: string [] => get_args();
+    if get_length(args) != 2 then{
+        print("Expected 1 cmd argument but got ");
+        print_int(get_length(args) - 1);
+        print("\n");
+        exit(1);
+    }
+    let filename: string => get(args, 1);
+    print(filename);
+    print("\n");
+    let l: lexer => new_lexer(filename);
     lex_program(l);
     let toks: token[] => l::Toks;
     print_list_types(toks);
-    // let p: parser => new_parser(toks);
-    // parse_program(p);
+    let p: parser => new_parser(toks);
+    parse_program(p);
 }
 
 //-----------------------------------------------------------------------------

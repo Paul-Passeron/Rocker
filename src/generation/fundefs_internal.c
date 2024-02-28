@@ -93,8 +93,6 @@ void __internal_set_elem(__internal_dynamic_array_t arr, size_t index,
 
 size_t get_length(__internal_dynamic_array_t arr) { return arr->length; }
 
-__internal_dynamic_array_t cmd_args;
-
 __internal_dynamic_array_t int_make_array(void) {
   return __internal_make_array(sizeof(int));
 }
@@ -122,7 +120,7 @@ void int_insert(__internal_dynamic_array_t arr, size_t index, int elem) {
 }
 
 __internal_dynamic_array_t boolean_make_array(void) {
-  return __internal_make_array(sizeof(int));
+  return __internal_make_array(sizeof(boolean));
 }
 
 void boolean_push_array(__internal_dynamic_array_t arr, boolean elem) {
@@ -150,7 +148,7 @@ void boolean_insert(__internal_dynamic_array_t arr, size_t index,
 }
 
 __internal_dynamic_array_t string_make_array(void) {
-  return __internal_make_array(sizeof(int));
+  return __internal_make_array(sizeof(string));
 }
 
 void string_push_array(__internal_dynamic_array_t arr, string elem) {
@@ -163,8 +161,9 @@ string string_pop_array(__internal_dynamic_array_t arr) {
 }
 
 string string_get_elem(__internal_dynamic_array_t arr, size_t index) {
-  string *res = __internal_get_elem(arr, index);
-  return *res;
+  string *tmp = __internal_get_elem(arr, index);
+  string res = *tmp;
+  return new_string(res);
 }
 
 void string_set_elem(__internal_dynamic_array_t arr, size_t index,
@@ -177,7 +176,7 @@ void string_insert(__internal_dynamic_array_t arr, size_t index, string elem) {
 }
 
 __internal_dynamic_array_t char_make_array(void) {
-  return __internal_make_array(sizeof(int));
+  return __internal_make_array(sizeof(char));
 }
 
 void char_push_array(__internal_dynamic_array_t arr, char elem) {
@@ -202,10 +201,30 @@ void char_insert(__internal_dynamic_array_t arr, size_t index, char elem) {
   __internal_insert(arr, index, &elem);
 }
 
+int global_argc;
+char **global_argv;
+
 void fill_cmd_args(int argc, char **argv) {
-  cmd_args = string_make_array();
-  for (int i = 0; i < argc; i++)
-    string_push_array(cmd_args, cstr_to_string(argv[i]));
+  // cmd_args = string_make_array();
+  // for (int i = 0; i < argc; i++) {
+  //   string arg = new_string(cstr_to_string(argv[i]));
+  //   string_push_array(cmd_args, arg);
+  //   printf("Pushing arg \'");
+  //   print(arg);
+  //   printf("\'\n");
+  // }
+  global_argc = argc;
+  global_argv = argv;
 }
 
-__internal_dynamic_array_t get_args(void) { return cmd_args; }
+__internal_dynamic_array_t get_args(void) {
+  __internal_dynamic_array_t cmd_args = string_make_array();
+  for (int i = 0; i < global_argc; i++) {
+    string arg = new_string(cstr_to_string(global_argv[i]));
+    string_push_array(cmd_args, arg);
+    printf("Pushing arg \'");
+    print(arg);
+    printf("\'\n");
+  }
+  return cmd_args;
+}

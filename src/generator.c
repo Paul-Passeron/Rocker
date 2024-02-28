@@ -499,8 +499,9 @@ void generate_fundef(generator_t *g, ast_t fun) {
     generate_compound(g, fundef.body);
     fprintf(f, "\n\n");
   } else {
-    fprintf(f, "int main() {\n");
+    fprintf(f, "int main(int argc, char **argv) {\n");
     fprintf(f, "init_compiler_stack();\n");
+    fprintf(f, "fill_cmd_args(argc, argv);\n");
     generate_compound(g, fundef.body);
     fprintf(f, "kill_compiler_stack();\n");
     fprintf(f, "return 0;\n");
