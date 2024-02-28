@@ -29,7 +29,7 @@ let main() : int => {
 - [x] Simple rec and pro type generation
 - [x] Simple Hello World example compiling and working
 - [x] Simple recursion example compiling and working
-- [ ] Deprecate Tuples (using record types because all types are forward-declared)
+- [x] Deprecate Tuples (using record types because all types are forward-declared)
 - [x] Allow assignments
 - [x] Accessing fields of record types
 - [ ] Pattern matching product types
