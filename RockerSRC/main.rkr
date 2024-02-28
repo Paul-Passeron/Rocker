@@ -11,11 +11,6 @@ include "RockerSRC/stdlib.rkr"
 include "RockerSRC/lexer.rkr"
 include "RockerSRC/parser.rkr"
 
-//-----------------------------------------------------------------------------
-// MAIN FUNCTION
-//-----------------------------------------------------------------------------
-
-
 
 let main(): void => {
     let args: string [] => get_args();
@@ -26,8 +21,6 @@ let main(): void => {
         exit(1);
     }
     let filename: string => get(args, 1);
-    print(filename);
-    print("\n");
     let l: lexer => new_lexer(filename);
     lex_program(l);
     let toks: token[] => l::Toks;

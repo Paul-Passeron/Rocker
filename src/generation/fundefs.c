@@ -67,10 +67,6 @@ string read_file(string filename) {
 
 string new_string(string s) {
   string res;
-  if (s.length == 0) {
-    printf("Cannot create empty string !\n");
-    exit(1);
-  }
   res.data = allocate_compiler_persistent(s.length + 1);
   res.length = s.length;
   for (int i = 0; i < res.length; i++)

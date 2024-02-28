@@ -54,6 +54,7 @@ enum token_type => {
     TOK_WHILE,
     TOK_DO,
     TOK_INCLUDE,
+    TOK_ENUM,
     TOK_COUNT,
 }
 
@@ -110,6 +111,7 @@ let lexeme_of_type(type: token_type): string => {
     if type = TOK_LOOP        then return "TOK_LOOP";
     if type = TOK_DO          then return "TOK_DO";
     if type = TOK_INCLUDE     then return "TOK_INCLUDE";
+    if type = TOK_ENUM        then return "TOK_ENUM";
     return "ERROR";
 }
 
@@ -154,6 +156,7 @@ let type_of_lexeme(lexeme: string): token_type => {
     if str_eq(lexeme, "while")               then return TOK_WHILE;
     if str_eq(lexeme, "do")                  then return TOK_DO;
     if str_eq(lexeme, "include")             then return TOK_INCLUDE;
+    if str_eq(lexeme, "enum")                then return TOK_ENUM;
     return TOK_COUNT;
 }
 
@@ -172,7 +175,7 @@ let is_type_keyword(type: int): boolean => {
     if type = TOK_WHILE then return true; 
     if type = TOK_DO then return true; 
     if type = TOK_INCLUDE then return true; 
-
+    if type = TOK_ENUM then return true; 
     return false;
 }
 

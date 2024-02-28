@@ -91,18 +91,6 @@ ast_t parse_assign(parser_t *p) {
       (node_t){assign, {.assign = {.expr = expr, .target = target}}});
 }
 
-// ast_t parse_tuple(parser_t *p) {
-//   expect(*p, TOK_IDENTIFIER);
-//   token_array_t tuple = new_token_array();
-//   token_array_push(&tuple, consume_token(p));
-//   while (peek_type(*p) == TOK_STAR) {
-//     consume_token(p);
-//     expect(*p, TOK_IDENTIFIER);
-//     token_array_push(&tuple, consume_token(p));
-//   }
-//   return new_ast((node_t){tupledef, {.tupledef = {tuple}}});
-// }
-
 ast_t parse_cons(parser_t *p) {
   // Name : type [,]
   token_t name = consume_token(p);
