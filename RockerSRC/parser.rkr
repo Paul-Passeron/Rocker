@@ -9,15 +9,16 @@ include "RockerSRC/stdlib.rkr"
 include "RockerSRC/ast.rkr"
 
 rec parser => {
-    Toks: token_list,
-    Prog: ast_list,
+    Toks: token [],
+    Prog: ast [],
     Cursor: int,
 }
 
-let new_parser(l: token_list): parser => {
+let new_parser(l: token []): parser => {
+    let prog: ast [] => [];
     let res: parser => {
         Toks => l,
-        Prog => NULL,
+        Prog => prog,
         Cursor => 0
     };
     return res;
@@ -29,7 +30,8 @@ let peek_type(p: parser): token_type => {
 }
 
 let peek_token(p: parser): token => {
-    return get_nth_token(p::Toks, p::Cursor);
+    let toks: token[] => p::Toks;
+    return get(toks, p::Cursor);
 }
 
 let consume_token(p: parser): token => {

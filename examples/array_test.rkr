@@ -42,22 +42,21 @@ let func(): array_wrapper => {
 }
 
 let main(): int => {
-  // test();
-  // let strings: string[] => [];
-  // append(strings, "Hey !\n");
-  // append(strings, "How are you ?\n");
-  // append(strings, "What ???\n");
-  // loop i: 0 -> get_length(strings) - 1 => {
-  //   let s:  string => get(strings, i);
-  //   print(s);
-  // }
+  test();
+  let strings: string[] => [];
+  append(strings, "Hey !\n");
+  append(strings, "How are you ?\n");
+  append(strings, "What ???\n");
+  loop i: 0 -> get_length(strings) - 1 => {
+    let s:  string => get(strings, i);
+    print(s);
+  }
   let a: array_wrapper => func();
   // For the moment, you must bind them by name to use them
   let names: string [] => a::Names;
   print("\n");
   loop i: 0 -> get_length(names) - 1 => {
     print(get(names, i));
-    print("\n");
   }
   return 0;
 }

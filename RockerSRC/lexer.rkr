@@ -43,19 +43,20 @@ rec lexer => {
     Col: int,
     Line: int,
     Filename: string,
-    Toks: token_list
+    Toks: token [],
 }
 
 
 let new_lexer(filename: string): lexer => {
     let data: string => read_file(filename);
+    let toks : token [] => [];
     let res: lexer => {
         Data => data,
         Cursor => 0,
         Col => 1,
         Line => 1,
         Filename => filename,
-        Toks => NULL
+        Toks => toks,
     }; return res;
 }
 
@@ -260,7 +261,9 @@ let step_lexer(l: lexer): void => {
             res::Type => TOK_IDENTIFIER;
         lexer_consume_n(l, length);
     }
-    l::Toks => append_token(l::Toks, res);
+    let toks: token [] => l::Toks;
+    // l::Toks => append_token(l::Toks, res);
+    append(toks, res);
 }
 
 let lex_program(l: lexer): void => {

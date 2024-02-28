@@ -20,7 +20,8 @@ include "RockerSRC/parser.rkr"
 let main(): int => {
     let l: lexer => new_lexer("RockerSRC/main.rkr");
     lex_program(l);
-    print_int(get_list_length(l::Toks));
+    let toks: token[] => l::Toks;
+    print_int(get_length(toks));
     print("\n");
     let p: parser => new_parser(l::Toks);
     parse_program(p);

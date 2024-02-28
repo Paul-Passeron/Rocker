@@ -19,7 +19,3 @@ rec ast => {
     Data: ast_data,
 }
 
-rec ast_list => {
-    Head: ast,
-    Tail: ast_list,
-}
