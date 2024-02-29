@@ -1,5 +1,5 @@
 build
-main
+rocker
 *.vscode
 *.json
 out*
