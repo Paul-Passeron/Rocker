@@ -10,8 +10,7 @@ let print_int(n: int): void => {
   putchar(n%10 + '0');                          // Actually printing the character 
 }
 
-let main(): int => {
+let main(): void => {
   print_int(1234567890);                        // printing the integer 1234567890
   print("\n");                                  // printing a new line character
-  return 0;                                     // returning 0 exit-code because everything went well !
 }

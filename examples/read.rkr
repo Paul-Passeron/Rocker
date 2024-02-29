@@ -1,4 +1,4 @@
-let main(): int => {
+let main(): void => {
     let filename :string => "test.txt";
     let contents :string => read_file(filename);
     let len :int => get_string_length(contents);
@@ -7,5 +7,4 @@ let main(): int => {
         printf(string_to_cstr("GOT: %c\n"), c);
     }
     print("\n");
-    return 0;
 }

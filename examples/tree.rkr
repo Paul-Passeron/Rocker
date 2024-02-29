@@ -30,7 +30,7 @@ let print_tree(t: tree): void => {
   print_tree_aux(t, 0);
 }
 
-let main(): int => {
+let main(): void => {
   let node1: tree => {
     Val => 1,
     left => NULL,
@@ -67,5 +67,4 @@ let main(): int => {
     right => node3,
   };
   print_tree(node7);
-  return 0;
 }

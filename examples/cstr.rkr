@@ -1,4 +1,3 @@
-let main(): int => {
+let main(): void => {
     printf(string_to_cstr("Test%d\n"), 10);
-    return 0;
 }

@@ -15,12 +15,11 @@ let print_int(n: int): void => {
   putchar(n%10 + '0');
 }
 
-let main(): int => {
+let main(): void => {
   loop i: 1 -> 10 => {
     print_int(i);
     print(": ");
     print_int(fact(i));
     print("\n");
   }
-  return 0;
 }

@@ -20,7 +20,7 @@ let is_whitespace(c: char): boolean => {
 
 
 let is_delimeter(c: char): boolean => {
-    let delimeters: string => "><;,:-+*/%&|!=(){}^ \n\'\"0123456789";
+    let delimeters: string => "><;,:-+*/%&|!=(){}^ \n\'\"0123456789[]";
     let len: int => get_string_length(delimeters);
     loop i: 0 -> len - 1 => {
         if get_nth_char(delimeters, i) = c then 

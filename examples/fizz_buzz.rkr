@@ -25,7 +25,6 @@ let Fizzbuzz(): void => {
   fizz_buzz_aux(1);
 }
 
-let main(): int => {
+let main(): void => {
   Fizzbuzz();
-  return 0;
 }

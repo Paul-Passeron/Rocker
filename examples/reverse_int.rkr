@@ -14,11 +14,10 @@ let inverse_int(n: int): int => {
   return inverse_int_aux(n, 0);
 }
 
-let main(): int => {
+let main(): void => {
   let a:int => 123456;
   print_int(a);
   print("\n");
   print_int(inverse_int(a));
   print("\n");
-  return 0;
 }

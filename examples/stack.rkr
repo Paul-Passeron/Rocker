@@ -42,7 +42,7 @@ let new_stack(): stack =>{
 }
 
 
-let main(): int => {
+let main(): void => {
   let s : stack => new_stack();
   
   
@@ -52,5 +52,4 @@ let main(): int => {
   
   print_stack(s);
   print("\n");
-  return 0;
 }

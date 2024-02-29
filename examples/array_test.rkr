@@ -41,7 +41,7 @@ let func(): array_wrapper => {
   return a;
 }
 
-let main(): int => {
+let main(): void => {
   test();
   let strings: string[] => [];
   append(strings, "Hey !\n");
@@ -58,6 +58,5 @@ let main(): int => {
   loop i: 0 -> get_length(names) - 1 => {
     print(get(names, i));
   }
-  return 0;
 }
 

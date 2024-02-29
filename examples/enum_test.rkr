@@ -9,6 +9,5 @@ enum jours => {
     Dimanche,
 }
 
-let main(): int => {
-    return 0;
+let main(): void => {
 }

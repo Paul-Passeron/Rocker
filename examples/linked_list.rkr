@@ -14,7 +14,5 @@ let append(l: int_linked_list, val: int): int_linked_list => {
   let res: int_linked_list => Node::(node);
   return res;
 } 
-let main(): int => {
-  
-  return 0;
+let main():void => {  
 }

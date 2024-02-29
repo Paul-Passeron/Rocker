@@ -15,12 +15,11 @@ let print_int(n: int): void => {
 }
 
 
-let main(): int => {
+let main(): void => {
   loop i: 1 -> 10 => {
     print_int(i);
     print(": ");
     print_int(fib(i));
     print("\n");
   }
-  return 0;
 }

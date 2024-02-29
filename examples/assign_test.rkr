@@ -7,10 +7,9 @@ let modify_t(arg: t): void => {
   arg::b => "hooo\n";
 }
 
-let main(): int => {
+let main(): void => {
   let var: t => {a => 3, b => "hey !\n"};
   print(var::b);
   modify_t(var);
   print(var::b);
-  return 0;
 }
