@@ -488,6 +488,7 @@ ast_t parse_primary(parser_t *p) {
   } else if (type == TOK_OPEN_BRACE) {
     return parse_record_expression(p);
   } else {
+    print_error_prefix(*p);
     printf("Pb : %s\n", lexeme_of_type(type));
     printf("Could not parse as a primary !\n");
     exit(1);

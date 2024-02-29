@@ -558,10 +558,6 @@ let parse_record_expression(p: parser): ast => {
     return res;
 }
 
-let is_sub(p: parser): boolean =>{
-    implemented("is_sub");
-    return false;
-} 
 
 let parse_type(p: parser): ast => {
    expect(p, TOK_IDENTIFIER);
@@ -597,6 +593,7 @@ let parse_identifier(p: parser): ast => {
     };
     return res;
 }
+
 let parse_leaf(p: parser): ast => {
     if is_funcall(p) then return parse_funcall(p);
     let t: token_type => peek_type(p);
@@ -604,12 +601,111 @@ let parse_leaf(p: parser): ast => {
     return parse_literal(p);
 }
 
+let is_sub(p: parser): boolean => {
+    let p2: parser => copy_parser(p);
+    if peek_type(p2) != TOK_IDENTIFIER then return false;
+    consume_token(p2);
+    if peek_type(p2) != TOK_SUB then return false;
+    return true;
+}
+
+let is_leaf(p: parser): boolean => {
+    let type: token_type => peek_type(p);
+    return type = TOK_STR_LIT || type = TOK_CHR_LIT  ||
+       type = TOK_NUM_LIT     || type = TOK_WILDCARD ||
+       type = TOK_IDENTIFIER  || type = TOK_ARR_DECL;  
+}
+
+let parse_primary(p: parser): ast => {
+    if is_funcall(p) then return parse_funcall(p);
+    if is_sub(p) then return parse_sub(p);
+    if is_leaf(p) then return parse_leaf(p);
+    if peek_type(p) = TOK_OPEN_PAREN then {
+        consume_token(p);
+        let res: ast => parse_expression(p);
+        // I dunno why I didn't use expect here
+        if peek_type(p) != TOK_CLOSE_PAREN then {
+            print_error_prefix(p);
+            print("TODO: Unclosed parenthesis\n");
+            exit(1);
+        }
+        consume_token(p);
+        return res;
+    }
+    if peek_type(p) = TOK_OPEN_BRACE then
+        return parse_record_expression(p);
+    print_error_prefix(p);
+    print("TODO: Could not parse as primary \'");
+    print(lexeme_of_type(peek_type(p)));
+    print("\'\n");
+    exit(1);
+    return NULL; // For TCC
+}
+
 let parse_expression(p: parser): ast => {
-    implemented("parse_expression");
-    return NULL;
+    let a: token_type => peek_type(p);
+    if a = TOK_OPEN_PAREN then {
+        consume_token(p);
+        let res: ast => parse_expression(p);
+        expect(p, TOK_CLOSE_PAREN);
+        consume_token(p);
+        return res;
+    }
+    if a = TOK_OPEN_BRACE then {
+        consume_token(p);
+        return parse_record_expression(p);
+    }
+    return parse_expression_aux(p, 0);
+}
+
+let parse_expression_aux(p: parser, min_prec: int): ast => {
+    let left: ast => parse_primary(p);
+    let break_cond: boolean => false;
+    while break_cond = false do {
+        let node: ast => parse_increasing_precedence(p, left, min_prec);
+        if node = left then
+            break_cond => true;
+        else left => node;
+    }
+    return left;
+}
+
+let parse_increasing_precedence(p: parser, left: ast, min_prec: int): ast => {
+    let next: token_type => peek_type(p);
+    if is_type_operator(next) = false then return left;
+    let next_prec: int => get_precedence(next);
+    if next_prec < min_prec then return left;
+    consume_token(p);
+    let right: ast => parse_expression_aux(p, next_prec);
+    let data_op: ast_op => {
+        op => next,
+        left => left,
+        right => right
+    };
+    let data: ast_data => {
+        data_op => data_op
+    };
+    let res: ast => {
+        Tag => tag_op,
+        Data => data
+    };
+    return res;
+}
+
+let has_been_included(p: parser, filename: string): boolean => {
+    let includes: string [] => p::Includes;
+    let len: int => get_length(includes);
+    loop i: 0 -> len - 1 =>
+        if str_eq(filename, get(includes, i)) then return true; 
+    return false;
 }
 
 let parse_program(p: parser): void => {
     // Try to parse an assignment !
-    parse_assign(p);
+    let res: ast => parse_var_def(p);
+    let data: ast_data => res::Data;
+    let vardef: ast_vardef => data::data_vardef;
+    let name: token => vardef::name;
+    print(name::Lexeme);
+    print("\n");
 }

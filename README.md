@@ -43,3 +43,4 @@ let main() : int => {
 - [x] Add including files support
 - [x] Improve including files support
 - [ ] Self-Hosting
+- [ ] Add cstr type (for easier printfs mostly)

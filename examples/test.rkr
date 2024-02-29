@@ -1,2 +1,2 @@
 // Trying to parse an assignment
-a => 3;
+let this_is_a_var: int => 3;

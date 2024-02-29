@@ -11,13 +11,16 @@ include "RockerSRC/stdlib.rkr"
 include "RockerSRC/lexer.rkr"
 include "RockerSRC/parser.rkr"
 
+let usage(prog_name: string): void => {
+    print("Usage:\n");
+    printf(string_to_cstr("\t%s <input file> [output file]\n"),
+           string_to_cstr(prog_name));
+}
 
 let main(): void => {
     let args: string [] => get_args();
-    if get_length(args) != 2 then{
-        print("Expected 1 cmd argument but got ");
-        print_int(get_length(args) - 1);
-        print("\n");
+    if get_length(args) < 2 then{
+        usage(get(args, 0));
         exit(1);
     }
     let filename: string => get(args, 1);

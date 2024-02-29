@@ -207,26 +207,25 @@ let is_lexeme_keyword(s: string):boolean => {
     return is_type_keyword(type_of_lexeme(s));
 }
 
-
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-// TOKEN LIST FUNCTIONS
-//-----------------------------------------------------------------------------
-rec token_list => {
-    Head: token,
-    Tail: token_list
+let get_precedence(t: token_type): int => {
+    if t = TOK_STAR then return 11;
+    if t = TOK_DIV then return 11;
+    if t = TOK_MODULO then return 11;
+    if t = TOK_PLUS then return 9;
+    if t = TOK_MINUS then return 10;
+    if t = TOK_GRTR then return 7;
+    if t = TOK_LSSR then return 7;
+    if t = TOK_GRTR_EQ then return 7;
+    if t = TOK_LSSR_EQ then return 7;
+    if t = TOK_EQUAL then return 6;
+    if t = TOK_DIFF then return 6;
+    if t = TOK_BIT_AND then return 5;
+    if t = TOK_BIT_XOR then return 4;
+    if t = TOK_BIT_OR then return 3;
+    if t = TOK_LOG_AND then return 2;
+    if t = TOK_LOG_OR then return 1;
+    return 0;
 }
-
-
-let append_token(l: token_list, t: token): token_list => {
-    let res : token_list => {
-        Head => t,
-        Tail => l
-    };
-    return res;
-}
-
 
 
 
