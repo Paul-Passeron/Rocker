@@ -5,14 +5,18 @@ BUILD=build/
 
 DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o
 
-all: rocker lines
-rocker: $(DEP)
+all: lines bootstrap rocker 
+
+bootstrap: $(DEP)
 	$(CC) $(CFLAGS) -o $@ $^
 $(BUILD)%.o: RockerAllocator/%.c 
 	$(CC) $(CFLAGS) -o $@ $^ -c
 
 $(BUILD)%.o: $(SRC)%.c 
 	$(CC) $(CFLAGS) -o $@ $^ -c
+
+rocker:
+	./bootstrap RockerSRC/main.rkr $@
 
 clean:
 	rm -rf $(BUILD)*

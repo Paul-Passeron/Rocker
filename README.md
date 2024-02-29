@@ -42,5 +42,7 @@ let main() : int => {
 - [<x] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
 - [x] Add including files support
 - [x] Improve including files support
+- [x] The Rocker version of the compiler can lex/tokenize itself
+- [x] The Rocker version of the compiler can parse itself
 - [ ] Self-Hosting
 - [ ] Add cstr type (for easier printfs mostly)

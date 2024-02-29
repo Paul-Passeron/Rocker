@@ -4,3 +4,5 @@ rocker
 *.json
 out*
 *_old.c
+rocker.c
+bootstrap
