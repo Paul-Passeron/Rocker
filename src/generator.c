@@ -287,8 +287,10 @@ void generate_loop(generator_t *g, ast_t loop_ast) {
 void generate_sub_as_expression(generator_t *g, ast_t expr) {
   FILE *f = g->f;
   ast_sub sub = expr->data.sub;
-  assert(sub.path.length == 1 && "SUB AS EXPRESSION LENGTH LIMIT\n");
-  fprintf(f, "%s->", sub.path.data[0].lexeme);
+  // assert(sub.path.length == 1 && "SUB AS EXPRESSION LENGTH LIMIT\n");
+  for (int i = 0; i < sub.path.length; i++) {
+    fprintf(f, "%s->", sub.path.data[i].lexeme);
+  }
   generate_expression(g, sub.expr);
 }
 

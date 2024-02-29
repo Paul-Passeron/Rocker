@@ -701,11 +701,5 @@ let has_been_included(p: parser, filename: string): boolean => {
 }
 
 let parse_program(p: parser): void => {
-    // Try to parse an assignment !
-    let res: ast => parse_var_def(p);
-    let data: ast_data => res::Data;
-    let vardef: ast_vardef => data::data_vardef;
-    let name: token => vardef::name;
-    print(name::Lexeme);
-    print("\n");
+
 }
