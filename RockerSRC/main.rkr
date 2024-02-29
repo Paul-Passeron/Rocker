@@ -30,6 +30,9 @@ let main(): void => {
     print_list_types(toks);
     let p: parser => new_parser(toks);
     parse_program(p);
+    let prog: ast [] => p::Prog::Data::data_program::prog;
+    print_int(get_length(prog));
+    print("\n");
 }
 
 //-----------------------------------------------------------------------------

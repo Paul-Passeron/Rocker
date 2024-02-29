@@ -99,5 +99,6 @@ string get_abs_path(string path) {
   char *abs_path = allocate_compiler(strlen(abs_path_tmp + 1));
   memcpy(abs_path, abs_path_tmp, strlen(abs_path_tmp) + 1);
   free(abs_path_tmp);
-  return new_string(cstr_to_string(abs_path));
+  string res = new_string(cstr_to_string(abs_path));
+  return res;
 }

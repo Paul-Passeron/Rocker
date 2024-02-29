@@ -373,6 +373,7 @@ let parse_var_def(p: parser): ast => {
     if peek_type(p) = TOK_OPEN_BRACE then {
         data_vardef::is_rec => true;
         consume_token(p);
+        data_vardef::expr => parse_record_expression(p);
     }
     else if peek_type(p) = TOK_ARR_DECL then 
         data_vardef::expr => parse_literal(p);
@@ -437,7 +438,6 @@ let parse_loop(p: parser): ast => {
     expect(p, TOK_LOOP);
     consume_token(p);
     expect(p, TOK_IDENTIFIER);
-    consume_token(p);
     let var_name: token => consume_token(p);
     expect(p, TOK_COLON);
     consume_token(p);
@@ -538,11 +538,14 @@ let parse_record_expression(p: parser): ast => {
         let cons_name: token => consume_token(p);
         append(names, cons_name);
         expect(p, TOK_BIG_ARROW);
+        consume_token(p);
         let expr: ast => parse_expression(p);
         append(exprs, expr);
         if peek_type(p) != TOK_COMMA then break_cond => true;
         else consume_token(p);
     }
+    expect(p, TOK_CLOSE_BRACE);
+    consume_token(p);
     let data_record_expr: ast_record_expr => {
        exprs => exprs,
        names => names
@@ -634,7 +637,7 @@ let parse_primary(p: parser): ast => {
     if peek_type(p) = TOK_OPEN_BRACE then
         return parse_record_expression(p);
     print_error_prefix(p);
-    print("TODO: Could not parse as primary \'");
+    print(" TODO: Could not parse as primary \'");
     print(lexeme_of_type(peek_type(p)));
     print("\'\n");
     exit(1);
@@ -703,13 +706,15 @@ let parse_program(p: parser): void => {
     let prog: ast [] => [];
     let tokens: token [] => p::Toks;
     let includes: string [] => p::Includes;
+    // TODO: add the main file absolute path in includes
     while p::Cursor < get_length(tokens) do {
         tokens => p::Toks;
         if peek_type(p) = TOK_INCLUDE then {
             consume_token(p);
             expect(p, TOK_STR_LIT);
             let fn: token => consume_token(p);
-            let filename: string => create_string(fn::Lexeme, 1, get_string_length(filename) - 2);
+            let filename: string => create_string(fn::Lexeme, 1, get_string_length(fn::Lexeme) - 2);
+            let l: int => get_string_length(filename);
             let abs_path: string => get_abs_path(filename);
             if has_been_included(p, abs_path) = false then {
                 append(includes, abs_path);
@@ -723,14 +728,13 @@ let parse_program(p: parser): void => {
                     append(new_toks, get(toks, i));
                 loop i: p::Cursor -> get_length(tokens) -1 => 
                     append(new_toks, get(tokens, i));
+                p::Toks => new_toks;
             }
         }
         else
             append(prog, parse_statement(p));
     }
-    let data_program: ast_program => {
-        prog => prog
-    };
+    let data_program: ast_program => { prog => prog };
     let data: ast_data => { data_program => data_program };
     let res: ast => {
         Tag => tag_program,
