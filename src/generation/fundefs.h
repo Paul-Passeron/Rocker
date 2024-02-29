@@ -16,5 +16,6 @@ string read_file(string filename);
 string new_string(string s);
 void write_string_to_file(string s, string filename);
 int str_eq(string s1, string s2);
+string get_abs_path(string path);
 
 #endif // ROCKER_FUNDEFS

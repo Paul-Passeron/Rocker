@@ -5,22 +5,22 @@
 //-----------------------------------------------------------------------------
 
 include "RockerSRC/token.rkr"
+include "RockerSRC/lexer.rkr"
 include "RockerSRC/stdlib.rkr"
 include "RockerSRC/ast.rkr"
 
 rec parser => {
     Toks: token [],
-    Prog: ast [],
+    Prog: ast,
     Cursor: int,
     Includes: string [],
 }
 
 let new_parser(l: token []): parser => {
-    let prog: ast [] => [];
     let includes: string [] => [];
     let res: parser => {
         Toks => l,
-        Prog => prog,
+        Prog => NULL,
         Cursor => 0,
         Includes => includes
     };
@@ -67,11 +67,10 @@ let expect(p: parser, t: token_type): void => {
 
 let copy_parser(p: parser): parser => {
     let toks: token [] => p::Toks;
-    let prog: ast [] => p::Prog;
     let includes: string [] => p::Includes;
     let res: parser => {
         Toks => toks,
-        Prog => prog,
+        Prog => p::Prog,
         Cursor => p::Cursor,
         Includes => includes,
     };
@@ -701,5 +700,41 @@ let has_been_included(p: parser, filename: string): boolean => {
 }
 
 let parse_program(p: parser): void => {
-
+    let prog: ast [] => [];
+    let tokens: token [] => p::Toks;
+    let includes: string [] => p::Includes;
+    while p::Cursor < get_length(tokens) do {
+        tokens => p::Toks;
+        if peek_type(p) = TOK_INCLUDE then {
+            consume_token(p);
+            expect(p, TOK_STR_LIT);
+            let fn: token => consume_token(p);
+            let filename: string => create_string(fn::Lexeme, 1, get_string_length(filename) - 2);
+            let abs_path: string => get_abs_path(filename);
+            if has_been_included(p, abs_path) = false then {
+                append(includes, abs_path);
+                let l: lexer => new_lexer(filename);
+                lex_program(l);
+                let toks: token [] => l::Toks;
+                let new_toks: token [] => [];
+                loop i: 0 -> p::Cursor - 1 => 
+                    append(new_toks, get(tokens, i));
+                loop i: 0 -> get_length(toks) - 1 => 
+                    append(new_toks, get(toks, i));
+                loop i: p::Cursor -> get_length(tokens) -1 => 
+                    append(new_toks, get(tokens, i));
+            }
+        }
+        else
+            append(prog, parse_statement(p));
+    }
+    let data_program: ast_program => {
+        prog => prog
+    };
+    let data: ast_data => { data_program => data_program };
+    let res: ast => {
+        Tag => tag_program,
+        Data => data
+    };
+    p::Prog => res;
 }
