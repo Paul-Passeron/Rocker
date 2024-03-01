@@ -31,10 +31,13 @@ let main(): void => {
     let p: parser => new_parser(toks);
     parse_program(p);
     // let prog: ast [] => p::Prog::Data::data_program::prog;
-    print_list_types(p::Toks);
+    // print_list_types(p::Toks);
     let prog: token [] => p::Toks;
     print_int(get_length(prog));
     print("\n");
+    let g: gen => new_gen("test.c");
+    // generate_array_funcs(g, "int");
+    kill_generator(g);
 }
 
 //-----------------------------------------------------------------------------

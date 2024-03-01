@@ -47,7 +47,7 @@ let close_file(f: file): void => {
     f::Filename => "";
 }
 
-let print_to_file(f: file, s: string): void => {
+let pfile(f: file, s: string): void => {
     f::Data => concat_string(f::Data, s);
 }
 //-----------------------------------------------------------------------------

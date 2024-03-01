@@ -12,11 +12,15 @@ enum nt_kind => {
     NT_BUILTIN_TYPE,
 }
 
+rec nt_elem => {
+    kind: nt_kind,
+    name: string [],
+    scope: int,
+    res: ast,
+}
+
 rec nt => {
-    kinds: nt_kind [],
-    names: string [],
-    scopes: int [],
-    res: ast [],
+    elems: nt_elem [],
     scope: int
 }
 
@@ -25,10 +29,17 @@ let get_ref(name: string, table: nt):ast => {
     return NULL;
 }
 
-let new_nt_scope(table: nt): void => {
-    {
-    implemented("new_nt_scope");
+let new_nt(): nt => {
+    let elems: nt_elem [] => [];
+    let res: nt => {
+        elems => elems,
+        scope => 0,
+    };
+    return res;
 }
+
+let new_nt_scope(table: nt): void => {
+    implemented("new_nt_scope");
 }
 let end_nt_scope(table: nt): void => {
     implemented("end_nt_scope");

@@ -5,8 +5,177 @@
 //-----------------------------------------------------------------------------
 
 include "RockerSRC/name_table.rkr"
+include "RockerSRC/stdlib.rkr"
 
 rec gen => {
     f: file,
     table: nt
+}
+
+let new_gen(filename: string): gen => {
+    let res: gen => {
+        f => open_file(filename, WRITE_MODE),
+        table => new_nt(),
+    };
+    return res;
+}
+
+let kill_generator(g: gen): void => {
+    close_file(g::f);
+}
+
+let generate_type(g: gen, a: ast): void => {
+    let type: ast_type => a::Data::data_type;
+    if type::is_array then pfile(g::f, "__internal_dynamic_array_t");
+    else pfile(g::f, type::name::Lexeme);
+}
+
+let generate_gen_type_fun(g: gen, funcall: ast_funcall, suffixe: string): void => {
+    let args: ast [] => funcall::args;
+    // skipping error catching because this will be done by the typechecker
+    let arr_ast: ast => get(args, 0);
+    let arr_name: string => arr_ast::Data::data_identifier::id::Lexeme;
+    // getting the type of the array (for the moment you have to bind
+    // it to a variable, even if it is an argument to the function
+    let ref: ast => get_ref(arr_name, g::table);
+    if ref::Tag != tag_vardef then
+        print("Arrays must be declared as variables !\n");
+        exit(1);
+    generate_type(g, ref::Data::data_vardef::type);
+    print(suffixe);
+    pfile(g::f,"(");
+    generate_expression(g, get(args, 0));
+    pfile(g::f, ", ");
+    generate_expression(g, get(args, 1));
+    pfile(g::f, ")");
+}
+
+let generate_append(g: gen, funcall: ast_funcall): void => {
+   generate_gen_type_fun(g, funcall, "_get_elem");
+}
+
+let generate_get(g: gen, funcall: ast_funcall): void => {
+   generate_gen_type_fun(g, funcall, "_get_elem");
+}
+
+let generate_set(g: gen, funcall: ast_funcall): void => {
+   generate_gen_type_fun(g, funcall, "_set_elem");
+}
+
+let generate_funcall(g: gen, fun: ast): void => {
+    let funcall: ast_funcall => fun::Data::data_funcall;
+    if str_eq(funcall::name::Lexeme, "append") then
+        generate_append(g, funcall);
+    else if str_eq(funcall::name::Lexeme, "get") then
+        generate_get(g, funcall);
+    else if str_eq(funcall::name::Lexeme, "set") then
+        generate_set(g, funcall);
+    else {
+        pfile(g::f, funcall::name::Lexeme);
+        pfile(g::f, "(");
+        let args: ast [] => funcall::args;
+        loop i: 0 -> get_length(args) - 1 => {
+            if i > 0 then pfile(g::f, ", ");
+            generate_expression(g, get(args, i));
+        }
+        pfile(g::f, ")");
+    }    
+}
+
+let get_lit_str_length(s: string): int => {
+    let length: int => 0;
+    loop i: 0 -> get_string_length(s) - 1 => {
+        if get_nth_char(s, i) = '\\' then {
+            i => i + 1;
+            let c: char => get_nth_char(s, i);
+            if c = 'n' || c = 't'  || c = '\\' ||
+              c = '\"' || c = '\'' || c = 'r' then
+                length => length + 1; 
+            else length => length + 2;
+        }
+        else length => length + 1;
+    }
+    return length - 1;
+}
+
+let generate_op(g: gen, expr: ast): void => {
+    let op: ast_op => expr::Data::data_op;
+    generate_expression(g, op::left);
+    if op::op = TOK_EQUAL then
+        pfile(g::f, "==");
+    else
+        pfile(g::f, lexeme_of_type(op::op));
+    generate_expression(g, op::right);
+}
+
+let generate_if_statement(g: gen, stmt: ast): void => {
+    let ifstmt: ast_ifstmt => stmt::Data::data_ifstmt;
+    pfile(g::f, "if (");
+    generate_expression(g, ifstmt::expr);
+    pfile(g::f, ")\n");
+    generate_statement(g, ifstmt::body);
+    if ifstmt::elsestmt != NULL then{
+        pfile(g::f, "else\n");
+        generate_statement(g, ifstmt::elsestmt);
+    }
+}
+
+let generate_array_funcs(g: gen, type_name: string): void => {
+        pfile(g::f, "__internal_dynamic_array_t ");
+        pfile(g::f, type_name);
+        pfile(g::f, "_make_array(void) {\n");
+        pfile(g::f, "return __internal_make_array(sizeof(");
+        pfile(g::f, type_name);
+        pfile(g::f, "));\n");
+        pfile(g::f, "}\n\n");
+        pfile(g::f, " void ");
+        pfile(g::f, type_name);
+        pfile(g::f, "_push_array(__internal_dynamic_array_t arr, ");
+        pfile(g::f, type_name);
+        pfile(g::f," elem) {\n");
+        pfile(g::f, "  __internal_push_array(arr, &elem);\n");
+        pfile(g::f, "}\n\n");
+        pfile(g::f, type_name);
+        pfile(g::f, " ");
+        pfile(g::f, type_name);
+        pfile(g::f, "_pop_array(__internal_dynamic_array_t arr) {\n ");
+        pfile(g::f, type_name);
+        pfile(g::f, " *res = __internal_pop_array(arr);\n");
+        pfile(g::f, "  return *res;\n");
+        pfile(g::f, "}\n\n");
+        pfile(g::f, type_name);
+        pfile(g::f, " ");
+        pfile(g::f, type_name);
+        pfile(g::f, "_get_elem(__internal_dynamic_array_t arr, size_t index) {\n ");
+        pfile(g::f, type_name);
+        pfile(g::f, " *res = __internal_get_elem(arr, index);\n");
+        pfile(g::f,"  if (res == NULL){ printf(\"NULL ELEMENT IN ");
+        pfile(g::f, type_name);
+        pfile(g::f, "_get_elem\"); exit(1);}");
+        pfile(g::f, "  return *res;\n");
+        pfile(g::f, "}\n\n");
+        pfile(g::f, "void ");
+        pfile(g::f, type_name);
+        pfile(g::f, "_set_elem(__internal_dynamic_array_t arr, size_t index, %s elem) {\n");
+        pfile(g::f, "  __internal_set_elem(arr, index, &elem);\n");
+        pfile(g::f, "}\n\n");
+        pfile(g::f,"void ");
+        pfile(g::f, type_name);
+        pfile(g::f, "_insert(__internal_dynamic_array_t arr, size_t index, ");
+        pfile(g::f, type_name);
+        pfile(g::f, " elem) {\n");
+        pfile(g::f, "  __internal_insert(arr, index, &elem);\n");
+        pfile(g::f, "}\n\n");
+}
+
+let generate_sub(g: gen, a: ast_sub, is_rec: boolean): void => {
+    implemented("generate_sub");
+}
+
+let generate_expression(g: gen, a: ast): void => {
+    implemented("generate_expression");
+}
+
+let generate_statement(g: gen, a: ast): void => {
+    implemented("generate_statement");
 }

@@ -1,3 +1,9 @@
+//-----------------------------------------------------------------------------
+//  ROCKER GENERATOR
+//  MIT License
+//  Copyright (c) 2024 Paul Passeron
+//-----------------------------------------------------------------------------
+
 #include "generator.h"
 #include "../RockerAllocator/alloc.h"
 #include "ast.h"

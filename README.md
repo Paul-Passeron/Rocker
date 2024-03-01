@@ -47,3 +47,4 @@ let main() : int => {
 - [ ] Self-Hosting
 - [ ] Add cstr type (for easier printfs mostly)
 - [x] Use string views for lexemes (limit the ammount of allocated data)
+- [ ] Make exit not leak memory
