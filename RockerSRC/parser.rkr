@@ -16,14 +16,21 @@ rec parser => {
     Includes: string [],
 }
 
-let new_parser(l: token []): parser => {
+let new_parser(_l: token []): parser => {
+    let l : token [] => _l ; 
     let includes: string [] => [];
     let res: parser => {
         Toks => l,
         Prog => NULL,
         Cursor => 0,
-        Includes => includes
+        Includes => includes,
     };
+    if get_length(l) > 0 then {
+        let tok: token => get(l, 0);
+        let main_file: string => tok::Filename;
+        let abs_path: string => get_abs_path(main_file);
+        append(includes, abs_path);
+    }
     return res;
 }
 

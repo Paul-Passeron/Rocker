@@ -4,39 +4,7 @@
 //  Copyright (c) 2024 Paul Passeron
 //-----------------------------------------------------------------------------
 
-enum nt_kind => {
-    NT_FUN,
-    NT_VAR,
-    NT_USER_TYPE,
-    NT_BUILTIN_TYPE,
-}
-
-rec nt => {
-    kinds: nt_kind [],
-    names: string [],
-    scopes: int [],
-    res: ast [],
-    scope: int
-}
-
-let get_ref(name: string, table: nt):ast => {
-    implemented("get_ref");
-    return NULL;
-}
-
-let new_nt_scope(table: nt): void => {
-    {
-    implemented("new_nt_scope");
-}
-}
-let end_nt_scope(table: nt): void => {
-    implemented("end_nt_scope");
-}
-
-let push_nt(table: nt, name:string, kind: nt_kind, ref: ast): void => {
-    implemented("push_nt");
-}
-
+include "RockerSRC/name_table.rkr"
 
 rec gen => {
     f: file,
