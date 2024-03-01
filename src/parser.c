@@ -555,6 +555,8 @@ char *get_sub_string(char *s, size_t length){
   return res;
 }
 
+char *realpath(const char * restrict,  char * restrict);
+
 char *get_abs_path(char * s){
   char buffer[1024];
   memset(buffer, 0, 1024);

@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
     printf("[CMD] %s\n", command);
     system(command);
   }
+  //printf("Program length is %d tokens\n", p.tokens.length);
 
   kill_compiler_stack();
   return 0;
