@@ -1,6 +1,5 @@
 #include "ast.h"
 #include "../RockerAllocator/alloc.h"
-#include <stdio.h>
 
 ast_t new_ast(node_t node) {
   ast_t ptr = allocate_compiler_persistent(sizeof(node_t));

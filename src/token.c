@@ -2,8 +2,6 @@
 #include "../RockerAllocator/alloc.h"
 #include "stringview.h"
 #include <assert.h>
-#include <stdio.h>
-#include <string.h>
 
 static string_view lexemes[TOK_COUNT] = {
     SV_Static(""),        SV_Static(""),       SV_Static(""),
