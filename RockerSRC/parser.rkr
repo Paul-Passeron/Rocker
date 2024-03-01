@@ -714,7 +714,7 @@ let parse_program(p: parser): void => {
             expect(p, TOK_STR_LIT);
             let fn: token => consume_token(p);
             let filename: string => create_string(fn::Lexeme, 1, get_string_length(fn::Lexeme) - 2);
-            let l: int => get_string_length(filename);
+            // let l: int => get_string_length(filename);
             let abs_path: string => get_abs_path(filename);
             if has_been_included(p, abs_path) = false then {
                 append(includes, abs_path);

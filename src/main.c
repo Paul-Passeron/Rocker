@@ -95,10 +95,12 @@ int main(int argc, char *argv[]) {
     char command[1024];
     fclose(fopen(output, "w"));
     sprintf(command,
-            "clang-format %s -i && tcc -Wall -g -o %s %s "
+            // "clang-format %s -i &&"
+            "gcc -Wall -g -o %s %s "
             "src/generation/fundefs.c "
             "src/generation/fundefs_internal.c RockerAllocator/alloc.c",
-            cout, output, cout);
+            // cout,
+             output, cout);
     printf("[CMD] %s\n", command);
     system(command);
   }

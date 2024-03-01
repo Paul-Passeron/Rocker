@@ -3,10 +3,13 @@ CFLAGS=-Werror -Wall -Wextra -g -pedantic
 SRC=src/
 BUILD=build/
 
-DEP=$(BUILD)main.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o
+DEP=$(BUILD)bootstrap.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o
 
-all: lines bootstrap rocker 
+all:  clean_rocker lines bootstrap rocker
 
+
+create_build:
+	mkdir build
 bootstrap: $(DEP)
 	$(CC) $(CFLAGS) -o $@ $^
 $(BUILD)%.o: RockerAllocator/%.c 
@@ -14,12 +17,15 @@ $(BUILD)%.o: RockerAllocator/%.c
 
 $(BUILD)%.o: $(SRC)%.c 
 	$(CC) $(CFLAGS) -o $@ $^ -c
+$(BUILD)bootstrap.o: $(SRC)main.c
+	$(CC) $(CFLAGS) -o $@ $^ -c
 
 rocker:
 	./bootstrap RockerSRC/main.rkr $@
-
 clean:
 	rm -rf $(BUILD)*
+	rm -rf rocker
+clean_rocker:
 	rm -rf rocker
 
 lines:
