@@ -10,7 +10,6 @@
 include "RockerSRC/stdlib.rkr"
 include "RockerSRC/lexer.rkr"
 include "RockerSRC/parser.rkr"
-include "RockerSRC/generator.rkr"
 
 let usage(prog_name: string): void => {
     print("Usage:\n");

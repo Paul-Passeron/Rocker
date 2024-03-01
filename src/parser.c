@@ -3,6 +3,7 @@
 #include "ast.h"
 #include "lexer.h"
 #include "token.h"
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -546,23 +547,25 @@ int has_been_included(char *filename) {
   return 0;
 }
 
-char *get_sub_string(char *s, size_t length){
-  if (s == NULL) return NULL;
-  if (strlen(s) < length) return s;
+char *get_sub_string(char *s, size_t length) {
+  if (s == NULL)
+    return NULL;
+  if (strlen(s) < length)
+    return s;
   char *res = allocate_compiler_persistent(length + 1);
   memcpy(res, s, length);
   res[length] = 0;
   return res;
 }
 
-char *realpath(const char * restrict,  char * restrict);
+char *realpath(const char *restrict, char *restrict);
 
-char *get_abs_path(char * s){
+char *get_abs_path(char *s) {
   char buffer[1024];
   memset(buffer, 0, 1024);
   realpath(s, buffer);
   int l = strlen(buffer);
-  char *res = allocate_compiler_persistent(l+1);
+  char *res = allocate_compiler_persistent(l + 1);
   strcpy(res, buffer);
   return res;
 }
@@ -574,14 +577,15 @@ void parse_program(parser_t *p) {
       consume_token(p);
       expect(*p, TOK_STR_LIT);
       token_t tok = consume_token(p);
-      char *abs_path = get_abs_path(get_sub_string(tok.lexeme + 1, strlen(tok.lexeme) - 2));
+      char *abs_path =
+          get_abs_path(get_sub_string(tok.lexeme + 1, strlen(tok.lexeme) - 2));
       if (!has_been_included(abs_path)) {
         if (includes_num >= 1024) {
           printf("Include limit reached !\n");
           exit(1);
         }
         includes[includes_num++] = abs_path;
-  
+
         lexer_t l = new_lexer(abs_path);
         token_array_t toks = lex_program(&l);
         token_array_t new_toks = new_token_array();
@@ -594,39 +598,40 @@ void parse_program(parser_t *p) {
         p->tokens = new_toks;
       }
       continue;
-    } 
-  //  if (peek_type(*p) == TOK_INCLUDE) {
-  //    consume_token(p);
-  //    expect(*p, TOK_STR_LIT);
-  //    char *filename = consume_token(p).lexeme;
-  //    char *buffer = allocate_compiler_persistent(strlen(filename) - 1);
-  //    memcpy(buffer, filename + 1, strlen(filename) - 2);
-  //    buffer[strlen(filename) - 1] = 0;
-  //    char *abs_path_tmp = realpath(buffer, NULL);
-  //    char *abs_path = allocate_compiler_persistent(strlen(abs_path_tmp + 1));
-  //    memcpy(abs_path, abs_path_tmp, strlen(abs_path_tmp));
-  //    abs_path[strlen(abs_path_tmp)] = 0;
-  //    free(abs_path_tmp);
-  //    if (!has_been_included(abs_path)) {
-  //      if (includes_num >= 1024) {
-  //        printf("Include limit reached !\n");
-  //        exit(1);
-  //      }
-  //      includes[includes_num++] = abs_path;
-  //
-  //      lexer_t l = new_lexer(buffer);
-  //      token_array_t toks = lex_program(&l);
-  //      token_array_t new_toks = new_token_array();
-  //      for (int i = 0; i < p->cursor; i++)
-  //        token_array_push(&new_toks, p->tokens.data[i]);
-  //      for (int i = 0; i < toks.length; i++)
-  //        token_array_push(&new_toks, toks.data[i]);
-  //      for (int i = p->cursor; i < p->tokens.length; i++)
-  //        token_array_push(&new_toks, p->tokens.data[i]);
-  //      p->tokens = new_toks;
-  //    }
-  //    continue;
-  //  }
+    }
+
+    //  if (peek_type(*p) == TOK_INCLUDE) {
+    //    consume_token(p);
+    //    expect(*p, TOK_STR_LIT);
+    //    char *filename = consume_token(p).lexeme;
+    //    char *buffer = allocate_compiler_persistent(strlen(filename) - 1);
+    //    memcpy(buffer, filename + 1, strlen(filename) - 2);
+    //    buffer[strlen(filename) - 1] = 0;
+    //    char *abs_path_tmp = realpath(buffer, NULL);
+    //    char *abs_path = allocate_compiler_persistent(strlen(abs_path_tmp +
+    //    1)); memcpy(abs_path, abs_path_tmp, strlen(abs_path_tmp));
+    //    abs_path[strlen(abs_path_tmp)] = 0;
+    //    free(abs_path_tmp);
+    //    if (!has_been_included(abs_path)) {
+    //      if (includes_num >= 1024) {
+    //        printf("Include limit reached !\n");
+    //        exit(1);
+    //      }
+    //      includes[includes_num++] = abs_path;
+    //
+    //      lexer_t l = new_lexer(buffer);
+    //      token_array_t toks = lex_program(&l);
+    //      token_array_t new_toks = new_token_array();
+    //      for (int i = 0; i < p->cursor; i++)
+    //        token_array_push(&new_toks, p->tokens.data[i]);
+    //      for (int i = 0; i < toks.length; i++)
+    //        token_array_push(&new_toks, toks.data[i]);
+    //      for (int i = p->cursor; i < p->tokens.length; i++)
+    //        token_array_push(&new_toks, p->tokens.data[i]);
+    //      p->tokens = new_toks;
+    //    }
+    //    continue;
+    //  }
     push_ast_array(&prog, parse_statement(p));
   }
   p->prog = new_ast((node_t){program, {.program = {prog}}});
