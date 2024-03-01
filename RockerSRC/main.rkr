@@ -10,6 +10,7 @@
 include "RockerSRC/stdlib.rkr"
 include "RockerSRC/lexer.rkr"
 include "RockerSRC/parser.rkr"
+include "RockerSRC/generator.rkr"
 
 let usage(prog_name: string): void => {
     print("Usage:\n");
@@ -27,10 +28,11 @@ let main(): void => {
     let l: lexer => new_lexer(filename);
     lex_program(l);
     let toks: token[] => l::Toks;
-    print_list_types(toks);
     let p: parser => new_parser(toks);
     parse_program(p);
-    let prog: ast [] => p::Prog::Data::data_program::prog;
+    // let prog: ast [] => p::Prog::Data::data_program::prog;
+    print_list_types(p::Toks);
+    let prog: token [] => p::Toks;
     print_int(get_length(prog));
     print("\n");
 }

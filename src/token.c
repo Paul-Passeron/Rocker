@@ -1,15 +1,26 @@
 #include "token.h"
 #include "../RockerAllocator/alloc.h"
+#include "stringview.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
-static char *lexemes[TOK_COUNT] = {
-    "",      "",       "",  "",     "let",   ":",    ",",       "->",   "=>",
-    "{",     "}",      "(", ")",    "if",    "then", "else",    "rec",  "pro",
-    "match", "return", "*", "-",    "+",     "/",    "%",       "||",   "&&",
-    "|",     "^",      "&", "<",    "<=",    ">",    ">=",      "=",    "!=",
-    "_",     "::",     ";", "loop", "while", "do",   "include", "enum", "[]"};
+static string_view lexemes[TOK_COUNT] = {
+    SV_Static(""),        SV_Static(""),       SV_Static(""),
+    SV_Static(""),        SV_Static("let"),    SV_Static(":"),
+    SV_Static(","),       SV_Static("->"),     SV_Static("=>"),
+    SV_Static("{"),       SV_Static("}"),      SV_Static("("),
+    SV_Static(")"),       SV_Static("if"),     SV_Static("then"),
+    SV_Static("else"),    SV_Static("rec"),    SV_Static("pro"),
+    SV_Static("match"),   SV_Static("return"), SV_Static("*"),
+    SV_Static("-"),       SV_Static("+"),      SV_Static("/"),
+    SV_Static("%"),       SV_Static("||"),     SV_Static("&&"),
+    SV_Static("|"),       SV_Static("^"),      SV_Static("&"),
+    SV_Static("<"),       SV_Static("<="),     SV_Static(">"),
+    SV_Static(">="),      SV_Static("="),      SV_Static("!="),
+    SV_Static("_"),       SV_Static("::"),     SV_Static(";"),
+    SV_Static("loop"),    SV_Static("while"),  SV_Static("do"),
+    SV_Static("include"), SV_Static("enum"),   SV_Static("[]")};
 
 static token_type_t keywords[] = {
     TOK_MATCH, TOK_PRO,     TOK_REC,  TOK_WILDCARD, TOK_RETURN, TOK_SUB,
@@ -21,29 +32,29 @@ static token_type_t operators[] = {
     TOK_LOG_OR, TOK_BIT_AND, TOK_BIT_OR, TOK_BIT_XOR, TOK_GRTR,   TOK_GRTR_EQ,
     TOK_LSSR,   TOK_LSSR_EQ, TOK_EQUAL,  TOK_DIFF};
 
-char *lexeme_of_type(token_type_t t) {
+string_view lexeme_of_type(token_type_t t) {
   assert(TOK_COUNT == 45 &&
          "Exhaustive handling of token types in lexeme_of_type");
 
   switch (t) {
   case TOK_IDENTIFIER:
-    return "<identifier>";
+    return (string_view)SV_Static("<identifier>");
   case TOK_CHR_LIT:
-    return "<char literal>";
+    return (string_view)SV_Static("<char literal>");
   case TOK_STR_LIT:
-    return "<string literal>";
+    return (string_view)SV_Static("<string literal>");
   case TOK_NUM_LIT:
-    return "<numeric literal>";
+    return (string_view)SV_Static("<numeric literal>");
   default:
     return lexemes[t];
   }
 }
 
-token_type_t type_of_lexeme(char *s) {
+token_type_t type_of_lexeme(string_view s) {
   assert(TOK_COUNT == 45 &&
          "Exhaustive handling of token types in type_of_lexeme");
   for (int i = 4; i < TOK_COUNT; i++)
-    if (strcmp(lexemes[i], s) == 0)
+    if (svcmp(lexemes[i], s) == 0)
       return i;
   return TOK_COUNT;
 }
@@ -62,7 +73,9 @@ int is_type_operator(token_type_t t) {
   return 0;
 }
 
-int is_lexeme_keyword(char *s) { return is_type_keyword(type_of_lexeme(s)); }
+int is_lexeme_keyword(string_view s) {
+  return is_type_keyword(type_of_lexeme(s));
+}
 
 token_array_t new_token_array(void) {
   token_array_t res;
@@ -132,10 +145,10 @@ void token_array_push(token_array_t *arr, token_t tok) {
   arr->data[arr->length++] = tok;
 }
 
-void print_token_array(token_array_t arr) {
-  for (int i = 0; i < arr.length; i++)
-    print_token(arr.data[i]);
-}
-void print_token(token_t t) {
-  printf("-> Type: %s\n   Lexeme: %s\n\n", lexeme_of_type(t.type), t.lexeme);
-}
+// void print_token_array(token_array_t arr) {
+//   for (int i = 0; i < arr.length; i++)
+//     print_token(arr.data[i]);
+// }
+// void print_token(token_t t) {
+//   printf("-> Type: %s\n   Lexeme: %s\n\n", lexeme_of_type(t.type), t.lexeme);
+// }

@@ -7,23 +7,22 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
-#include <stdio.h>
 #include "ast.h"
 #include "name_table.h"
+#include <stdio.h>
 typedef struct generator_t {
-  FILE* f;
+  FILE *f;
   name_table_t table;
 } generator_t;
 
-generator_t new_generator(char* filename);
+generator_t new_generator(char *filename);
 void kill_generator(generator_t g);
 
 name_table_t new_name_table(void);
-ast_t get_ref(char* name, name_table_t table);
-void new_nt_scope(name_table_t* table);
-void end_nt_scope(name_table_t* table);
-void push_nt(name_table_t* table, char* name, nt_kind kind, ast_t ref);
+ast_t get_ref(char *name, name_table_t table);
+void new_nt_scope(name_table_t *table);
+void end_nt_scope(name_table_t *table);
+void push_nt(name_table_t *table, char *name, nt_kind kind, ast_t ref);
+void transpile(generator_t *g, ast_t program);
 
-void transpile(generator_t* g, ast_t program);
-
-#endif  // GENERATOR_H
+#endif // GENERATOR_H

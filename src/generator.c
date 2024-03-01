@@ -2,6 +2,7 @@
 #include "../RockerAllocator/alloc.h"
 #include "ast.h"
 #include "name_table.h"
+#include "stringview.h"
 #include "token.h"
 #include <assert.h>
 #include <string.h>
@@ -45,7 +46,7 @@ void generate_type(FILE *f, ast_t a) {
   if (type.is_array)
     fprintf(f, "__internal_dynamic_array_t");
   else
-    fprintf(f, "%s", type.name.lexeme);
+    fprintf(f, SV_Fmt, SV_Arg(type.name.lexeme));
 }
 
 void generate_expression(generator_t *g, ast_t expr);
@@ -61,8 +62,8 @@ void generate_append(generator_t *g, ast_funcall funcall) {
     printf("Arrays must be bound by name for the moment\n");
     exit(1);
   }
-  char *name = arr->data.identifier.id.lexeme;
-  ast_t ref = get_ref(name, g->table);
+  string_view name = arr->data.identifier.id.lexeme;
+  ast_t ref = get_ref(string_of_sv(name), g->table);
   if (ref == NULL) {
     printf("Array is not declared in the current scope\n");
     exit(1);
@@ -73,8 +74,8 @@ void generate_append(generator_t *g, ast_funcall funcall) {
     exit(1);
   }
   ast_type type = ref->data.vardef.type->data.type;
-  char *type_name = type.name.lexeme;
-  fprintf(f, "%s_push_array(", type_name);
+  string_view type_name = type.name.lexeme;
+  fprintf(f, SV_Fmt "_push_array(", SV_Arg(type_name));
   generate_expression(g, funcall.args.data[0]);
   fprintf(f, ", ");
   generate_expression(g, funcall.args.data[1]);
@@ -92,8 +93,8 @@ void generate_get(generator_t *g, ast_funcall funcall) {
     printf("Arrays must be bound by name for the moment\n");
     exit(1);
   }
-  char *name = arr->data.identifier.id.lexeme;
-  ast_t ref = get_ref(name, g->table);
+  string_view name = arr->data.identifier.id.lexeme;
+  ast_t ref = get_ref(string_of_sv(name), g->table);
   if (ref == NULL) {
     printf("Array is not declared in the current scope\n");
     exit(1);
@@ -103,8 +104,8 @@ void generate_get(generator_t *g, ast_funcall funcall) {
     exit(1);
   }
   ast_type type = ref->data.vardef.type->data.type;
-  char *type_name = type.name.lexeme;
-  fprintf(f, "%s_get_elem(", type_name);
+  string_view type_name = type.name.lexeme;
+  fprintf(f, SV_Fmt "_get_elem(", SV_Arg(type_name));
   generate_expression(g, funcall.args.data[0]);
   fprintf(f, ", ");
   generate_expression(g, funcall.args.data[1]);
@@ -122,8 +123,8 @@ void generate_set(generator_t *g, ast_funcall funcall) {
     printf("Arrays must be bound by name for the moment\n");
     exit(1);
   }
-  char *name = arr->data.identifier.id.lexeme;
-  ast_t ref = get_ref(name, g->table);
+  string_view name = arr->data.identifier.id.lexeme;
+  ast_t ref = get_ref(string_of_sv(name), g->table);
   if (ref == NULL) {
     printf("Array is not declared in the current scope\n");
     exit(1);
@@ -133,8 +134,8 @@ void generate_set(generator_t *g, ast_funcall funcall) {
     exit(1);
   }
   ast_type type = ref->data.vardef.type->data.type;
-  char *type_name = type.name.lexeme;
-  fprintf(f, "%s_set_elem(", type_name);
+  string_view type_name = type.name.lexeme;
+  fprintf(f, SV_Fmt "_set_elem(", SV_Arg(type_name));
   generate_expression(g, funcall.args.data[0]);
   fprintf(f, ", ");
   generate_expression(g, funcall.args.data[1]);
@@ -146,14 +147,14 @@ void generate_set(generator_t *g, ast_funcall funcall) {
 void generate_funcall(generator_t *g, ast_t fun) {
   FILE *f = g->f;
   ast_funcall funcall = fun->data.funcall;
-  if (strcmp(funcall.name.lexeme, "append") == 0) {
+  if (svcmp(funcall.name.lexeme, sv_from_cstr("append")) == 0) {
     generate_append(g, funcall);
-  } else if (strcmp(funcall.name.lexeme, "get") == 0) {
+  } else if (svcmp(funcall.name.lexeme, sv_from_cstr("get")) == 0) {
     generate_get(g, funcall);
-  } else if (strcmp(funcall.name.lexeme, "set") == 0) {
+  } else if (svcmp(funcall.name.lexeme, sv_from_cstr("set")) == 0) {
     generate_set(g, funcall);
   } else {
-    fprintf(f, "%s(", funcall.name.lexeme);
+    fprintf(f, SV_Fmt "(", SV_Arg(funcall.name.lexeme));
     for (int i = 0; i < funcall.args.length; i++) {
       if (i > 0)
         fprintf(f, ", ");
@@ -184,7 +185,7 @@ int calcEscapedLength(const char *str) {
 }
 
 int get_literal_string_length(token_t tok) {
-  return calcEscapedLength(tok.lexeme);
+  return calcEscapedLength(string_of_sv(tok.lexeme));
 }
 
 void generate_op(generator_t *g, ast_t expr) {
@@ -194,7 +195,7 @@ void generate_op(generator_t *g, ast_t expr) {
   if (op.op == TOK_EQUAL)
     fprintf(f, " == ");
   else
-    fprintf(f, " %s ", lexeme_of_type(op.op));
+    fprintf(f, " " SV_Fmt " ", SV_Arg(lexeme_of_type(op.op)));
   generate_expression(g, op.right);
 }
 
@@ -261,7 +262,7 @@ void generate_sub(generator_t *g, ast_t sub_ast, int is_rec) {
     if (sub.expr->tag == literal)
       if (sub.expr->data.literal.lit.type == TOK_WILDCARD)
         is_wild = 1;
-    fprintf(f, "{.tag = %s", sub.path.data[0].lexeme);
+    fprintf(f, "{.tag = " SV_Fmt, SV_Arg(sub.path.data[0].lexeme));
     if (!is_wild) {
       fprintf(f, ", .data = ");
       generate_expression(g, sub.expr);
@@ -274,8 +275,8 @@ void generate_loop(generator_t *g, ast_t loop_ast) {
   FILE *f = g->f;
   ast_loop loop = loop_ast->data.loop;
   new_nt_scope(&g->table);
-  push_nt(&g->table, loop.variable.lexeme, NT_VAR, loop_ast);
-  fprintf(f, "for(int %s =", loop.variable.lexeme);
+  push_nt(&g->table, string_of_sv(loop.variable.lexeme), NT_VAR, loop_ast);
+  fprintf(f, "for(int " SV_Fmt " =", SV_Arg(loop.variable.lexeme));
   generate_expression(g, loop.start);
   fprintf(f, "; i <= ");
   generate_expression(g, loop.end);
@@ -289,7 +290,7 @@ void generate_sub_as_expression(generator_t *g, ast_t expr) {
   ast_sub sub = expr->data.sub;
   // assert(sub.path.length == 1 && "SUB AS EXPRESSION LENGTH LIMIT\n");
   for (int i = 0; i < sub.path.length; i++) {
-    fprintf(f, "%s->", sub.path.data[i].lexeme);
+    fprintf(f, SV_Fmt "->", SV_Arg(sub.path.data[i].lexeme));
   }
   generate_expression(g, sub.expr);
 }
@@ -306,11 +307,11 @@ void generate_while_loop(generator_t *g, ast_t loop) {
 void generate_enum_tdef(generator_t *g, ast_t expr) {
   FILE *f = g->f;
   ast_enum_tdef enum_tdef = expr->data.enum_tdef;
-  fprintf(f, "enum %s {\n", enum_tdef.name.lexeme);
+  fprintf(f, "enum " SV_Fmt " {\n", SV_Arg(enum_tdef.name.lexeme));
   for (int i = 0; i < enum_tdef.items.length; i++) {
     if (i > 0)
       fprintf(f, ",\n");
-    fprintf(f, "%s", enum_tdef.items.data[i].lexeme);
+    fprintf(f, SV_Fmt, SV_Arg(enum_tdef.items.data[i].lexeme));
   }
   fprintf(f, "};\n");
 }
@@ -320,13 +321,13 @@ void generate_expression(generator_t *g, ast_t expr) {
   if (expr->tag == literal) {
     token_t tok = expr->data.literal.lit;
     if (tok.type != TOK_STR_LIT)
-      fprintf(f, "%s", tok.lexeme);
+      fprintf(f, SV_Fmt, SV_Arg(tok.lexeme));
     else
-      fprintf(f, "new_string((string){.data = %s, .length = %d})", tok.lexeme,
-              get_literal_string_length(tok) - 1);
+      fprintf(f, "new_string((string){.data = " SV_Fmt ", .length = %d})",
+              SV_Arg(tok.lexeme), get_literal_string_length(tok) - 1);
   } else if (expr->tag == identifier) {
-    char *lexeme = expr->data.identifier.id.lexeme;
-    fprintf(f, "%s", lexeme);
+    string_view lexeme = expr->data.identifier.id.lexeme;
+    fprintf(f, SV_Fmt, SV_Arg(lexeme));
   } else if (expr->tag == funcall)
     generate_funcall(g, expr);
   else if (expr->tag == op)
@@ -361,11 +362,11 @@ void generate_assignement(generator_t *g, ast_t assignment) {
 void generate_vardef(generator_t *g, ast_t var) {
   FILE *f = g->f;
   ast_vardef vardef = var->data.vardef;
-  push_nt(&g->table, vardef.name.lexeme, NT_VAR, var);
-  char *type_name = vardef.type->data.type.name.lexeme;
+  push_nt(&g->table, string_of_sv(vardef.name.lexeme), NT_VAR, var);
+  string_view type_name = vardef.type->data.type.name.lexeme;
   if (vardef.type->data.type.is_array) {
     generate_type(f, vardef.type);
-    fprintf(f, " %s = \n", vardef.name.lexeme);
+    fprintf(f, " " SV_Fmt " = \n", SV_Arg(vardef.name.lexeme));
     if (vardef.expr->tag != literal) {
       generate_expression(g, vardef.expr);
       fprintf(f, ";\n");
@@ -373,10 +374,11 @@ void generate_vardef(generator_t *g, ast_t var) {
       printf("Cannot declare arrays this way yet\n");
       exit(1);
     } else
-      fprintf(f, "__internal_make_array(sizeof(%s));\n", type_name);
-  } else if (is_builtin_typename(type_name)) {
+      fprintf(f, "__internal_make_array(sizeof(" SV_Fmt "));\n",
+              SV_Arg(type_name));
+  } else if (is_builtin_typename(string_of_sv(type_name))) {
     generate_type(f, vardef.type);
-    fprintf(f, " %s = ", vardef.name.lexeme);
+    fprintf(f, " " SV_Fmt " = ", SV_Arg(vardef.name.lexeme));
     // Temporary, we'll need to store the constructors in the name table, with
     // a flag saying if it's void or not
     if (vardef.expr->tag == sub)
@@ -384,11 +386,11 @@ void generate_vardef(generator_t *g, ast_t var) {
     else
       generate_expression(g, vardef.expr);
     fprintf(f, ";\n");
-  } else if (!is_builtin_typename(type_name) &&
+  } else if (!is_builtin_typename(string_of_sv(type_name)) &&
              vardef.expr->tag == record_expr) {
     fprintf(f, "struct ");
     generate_type(f, vardef.type);
-    fprintf(f, " tmp_%s = ", vardef.name.lexeme);
+    fprintf(f, " tmp_" SV_Fmt " = ", SV_Arg(vardef.name.lexeme));
     ast_record_expr rec = vardef.expr->data.record_expr;
     if (vardef.is_rec) {
       fprintf(f, "{\n");
@@ -396,7 +398,7 @@ void generate_vardef(generator_t *g, ast_t var) {
         if (i > 0)
           fprintf(f, ",\n");
         ast_t expr = rec.exprs.data[i];
-        fprintf(f, ".%s = ", rec.names.data[i].lexeme);
+        fprintf(f, "." SV_Fmt " = ", SV_Arg(rec.names.data[i].lexeme));
         if (expr->tag == sub)
           generate_sub_as_expression(g, expr);
         else
@@ -413,14 +415,15 @@ void generate_vardef(generator_t *g, ast_t var) {
       fprintf(f, ";\n");
     }
     generate_type(f, vardef.type);
-    fprintf(f, " %s = allocate_compiler_persistent(sizeof(struct ",
-            vardef.name.lexeme);
+    fprintf(f, " " SV_Fmt " = allocate_compiler_persistent(sizeof(struct ",
+            SV_Arg(vardef.name.lexeme));
     generate_type(f, vardef.type);
     fprintf(f, "));\n");
-    fprintf(f, "*%s = tmp_%s;\n", vardef.name.lexeme, vardef.name.lexeme);
+    fprintf(f, "*" SV_Fmt " = tmp_" SV_Fmt ";\n", SV_Arg(vardef.name.lexeme),
+            SV_Arg(vardef.name.lexeme));
   } else {
     generate_type(f, vardef.type);
-    fprintf(f, " %s = ", vardef.name.lexeme);
+    fprintf(f, " " SV_Fmt " = ", SV_Arg(vardef.name.lexeme));
     // Temporary, we'll need to store the constructors in the name table, with
     // a flag saying if it's void or not
     if (vardef.expr->tag == sub)
@@ -485,17 +488,17 @@ void generate_fundef(generator_t *g, ast_t fun) {
   FILE *f = g->f;
   ast_fundef fundef = fun->data.fundef;
   new_nt_scope(&g->table);
-  push_nt(&g->table, fundef.name.lexeme, NT_FUN, fun);
-  if (strcmp(fundef.name.lexeme, "main") != 0) {
+  push_nt(&g->table, string_of_sv(fundef.name.lexeme), NT_FUN, fun);
+  if (svcmp(fundef.name.lexeme, sv_from_cstr("main")) != 0) {
     generate_type(f, fundef.ret_type);
-    fprintf(f, " %s(", fundef.name.lexeme);
+    fprintf(f, " " SV_Fmt "(", SV_Arg(fundef.name.lexeme));
     for (int i = 0; i < fundef.args.length; i++) {
-      push_nt(&g->table, fundef.args.data[i].lexeme, NT_VAR, fun);
+      push_nt(&g->table, string_of_sv(fundef.args.data[i].lexeme), NT_VAR, fun);
       if (i > 0)
         fprintf(f, ", ");
       generate_type(f, fundef.types.data[i]);
       fprintf(f, " ");
-      fprintf(f, "%s", fundef.args.data[i].lexeme);
+      fprintf(f, SV_Fmt, SV_Arg(fundef.args.data[i].lexeme));
     }
     fprintf(f, ")\n");
     generate_compound(g, fundef.body);
@@ -531,13 +534,15 @@ void generate_forward_defs(generator_t *g, ast_t program) {
     ast_t stmt = stmts.data[i];
     if (stmt->tag == tdef) {
       struct ast_tdef tdef = stmt->data.tdef;
-      char *name = tdef.name.lexeme;
-      fprintf(f, "typedef struct %s *%s;\n", name, name);
+      string_view name = tdef.name.lexeme;
+      fprintf(f, "typedef struct " SV_Fmt " *" SV_Fmt ";\n", SV_Arg(name),
+              SV_Arg(name));
     }
     if (stmt->tag == enum_tdef) {
       struct ast_tdef tdef = stmt->data.tdef;
-      char *name = tdef.name.lexeme;
-      fprintf(f, "typedef enum %s %s;\n", name, name);
+      string_view name = tdef.name.lexeme;
+      fprintf(f, "typedef enum " SV_Fmt " " SV_Fmt ";\n", SV_Arg(name),
+              SV_Arg(name));
     }
   }
 
@@ -545,17 +550,17 @@ void generate_forward_defs(generator_t *g, ast_t program) {
     ast_t stmt = stmts.data[i];
     if (stmt->tag == fundef) {
       ast_fundef fundef = stmt->data.fundef;
-      if (strcmp(fundef.name.lexeme, "main") != 0) {
+      if (svcmp(fundef.name.lexeme, sv_from_cstr("main")) != 0) {
 
         generate_type(f, fundef.ret_type);
 
-        fprintf(f, " %s(", fundef.name.lexeme);
+        fprintf(f, " " SV_Fmt "(", SV_Arg(fundef.name.lexeme));
         for (int i = 0; i < fundef.args.length; i++) {
           if (i > 0)
             fprintf(f, ", ");
           generate_type(f, fundef.types.data[i]);
           fprintf(f, " ");
-          fprintf(f, "%s", fundef.args.data[i].lexeme);
+          fprintf(f, SV_Fmt, SV_Arg(fundef.args.data[i].lexeme));
         }
         fprintf(f, ");\n\n");
       }
@@ -566,7 +571,7 @@ void generate_forward_defs(generator_t *g, ast_t program) {
     ast_t stmt = stmts.data[i];
     if (stmt->tag == tdef) {
       struct ast_tdef tdef = stmt->data.tdef;
-      char *name = tdef.name.lexeme;
+      char *name = string_of_sv(tdef.name.lexeme);
       generate_array_funcs(g, name);
     }
   }
@@ -575,25 +580,25 @@ void generate_forward_defs(generator_t *g, ast_t program) {
 void generate_tdef(generator_t *g, ast_t tdef_ast) {
   FILE *f = g->f;
   struct ast_tdef tdef = tdef_ast->data.tdef;
-  char *name = tdef.name.lexeme;
+  string_view name = tdef.name.lexeme;
   // fprintf(f, "typedef struct %s %s;\n", name, name);
-  fprintf(f, "struct %s{\n", name);
+  fprintf(f, "struct " SV_Fmt "{\n", SV_Arg(name));
   if (tdef.t == TDEF_PRO) {
     fprintf(f, "enum {\n");
     for (int i = 0; i < tdef.constructors.length; i++) {
       ast_cons cons = tdef.constructors.data[i]->data.cons;
       if (i > 0)
         fprintf(f, ",\n");
-      fprintf(f, "%s", cons.name.lexeme);
+      fprintf(f, SV_Fmt, SV_Arg(cons.name.lexeme));
     }
     fprintf(f, "\n} tag; \n");
     fprintf(f, "union {\n");
     for (int i = 0; i < tdef.constructors.length; i++) {
       ast_cons cons = tdef.constructors.data[i]->data.cons;
       ast_type type = cons.type->data.type;
-      if (strcmp(type.name.lexeme, "void") != 0) {
+      if (svcmp(type.name.lexeme, sv_from_cstr("void")) != 0) {
         generate_type(f, cons.type);
-        fprintf(f, " %s;", cons.name.lexeme);
+        fprintf(f, SV_Fmt, SV_Arg(cons.name.lexeme));
       }
     }
     fprintf(f, "} data;");
@@ -601,9 +606,9 @@ void generate_tdef(generator_t *g, ast_t tdef_ast) {
     for (int i = 0; i < tdef.constructors.length; i++) {
       ast_cons cons = tdef.constructors.data[i]->data.cons;
       ast_type type = cons.type->data.type;
-      if (strcmp(type.name.lexeme, "void") != 0) {
+      if (svcmp(type.name.lexeme, sv_from_cstr("void")) != 0) {
         generate_type(f, cons.type);
-        fprintf(f, " %s;", cons.name.lexeme);
+        fprintf(f, " " SV_Fmt ";\n", SV_Arg(cons.name.lexeme));
       }
     }
   }

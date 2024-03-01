@@ -1,31 +1,26 @@
 #ifndef STRING_VIEW_H
 #define STRING_VIEW_H
 
+#include "../RockerAllocator/alloc.h"
 #include <stddef.h>
 #include <string.h>
-#include "../RockerAllocator/alloc.h"
+
+#define SV_Fmt "%.*s"
+#define SV_Arg(sv) (int)(sv).length, (sv).data
+#define SV_Static(cstr_lit)                                                    \
+  { (cstr_lit), sizeof(cstr_lit) - 1 }
 
 typedef struct string_view {
-    char *data;
-    size_t length;
-}string_view;
+  char *data;
+  size_t length;
+} string_view;
 
-string_view sv_from_parts(char *data, size_t length){
-    return (string_view){
-        data, length
-    };
-}
+string_view sv_from_parts(char *data, size_t length);
 
-string_view sv_from_cstr(char *s){
-    if(s == NULL) return (string_view){0};
-    return sv_from_parts(s, strlen(s));
-}
+string_view sv_from_cstr(char *s);
 
-char *string_of_sv(string_view s){
-    char *data = (char*)allocate_compiler_persistent(s.length + 1);
-    memcpy(data, s.data, s.length);
-    data[s.length] = 0;
-    return data;
-}   
+char *string_of_sv(string_view s);
+
+int svcmp(string_view s1, string_view s2);
 
 #endif // STRING_VIEW_H

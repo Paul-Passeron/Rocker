@@ -2,6 +2,7 @@
 #include "../RockerAllocator/alloc.h"
 #include "ast.h"
 #include "lexer.h"
+#include "stringview.h"
 #include "token.h"
 #include <linux/limits.h>
 #include <stdio.h>
@@ -50,7 +51,8 @@ void expect(parser_t p, token_type_t b) {
   token_type_t a = peek_type(p);
   if (a != b) {
     print_error_prefix(p);
-    printf("Expected %s but got: %s\n", lexeme_of_type(b), lexeme_of_type(a));
+    printf("Expected " SV_Fmt " but got: " SV_Fmt "\n",
+           SV_Arg(lexeme_of_type(b)), SV_Arg(lexeme_of_type(a)));
     exit(1);
   }
 }
@@ -479,7 +481,7 @@ ast_t parse_primary(parser_t *p) {
     type = peek_type(*p);
 
     if (type != TOK_CLOSE_PAREN) {
-      printf("%s\n", peek_token(*p).lexeme);
+      printf(SV_Fmt "\n", SV_Arg(peek_token(*p).lexeme));
       printf("TODO : Better error reporting\n");
       printf("Unclosed parenthesis !\n");
       exit(1);
@@ -490,7 +492,7 @@ ast_t parse_primary(parser_t *p) {
     return parse_record_expression(p);
   } else {
     print_error_prefix(*p);
-    printf("Pb : %s\n", lexeme_of_type(type));
+    printf("Pb : " SV_Fmt "\n", SV_Arg(lexeme_of_type(type)));
     printf("Could not parse as a primary !\n");
     exit(1);
   }
@@ -577,8 +579,8 @@ void parse_program(parser_t *p) {
       consume_token(p);
       expect(*p, TOK_STR_LIT);
       token_t tok = consume_token(p);
-      char *abs_path =
-          get_abs_path(get_sub_string(tok.lexeme + 1, strlen(tok.lexeme) - 2));
+      char *abs_path = get_abs_path(
+          get_sub_string(string_of_sv(tok.lexeme) + 1, tok.lexeme.length - 2));
       if (!has_been_included(abs_path)) {
         if (includes_num >= 1024) {
           printf("Include limit reached !\n");
@@ -599,39 +601,6 @@ void parse_program(parser_t *p) {
       }
       continue;
     }
-
-    //  if (peek_type(*p) == TOK_INCLUDE) {
-    //    consume_token(p);
-    //    expect(*p, TOK_STR_LIT);
-    //    char *filename = consume_token(p).lexeme;
-    //    char *buffer = allocate_compiler_persistent(strlen(filename) - 1);
-    //    memcpy(buffer, filename + 1, strlen(filename) - 2);
-    //    buffer[strlen(filename) - 1] = 0;
-    //    char *abs_path_tmp = realpath(buffer, NULL);
-    //    char *abs_path = allocate_compiler_persistent(strlen(abs_path_tmp +
-    //    1)); memcpy(abs_path, abs_path_tmp, strlen(abs_path_tmp));
-    //    abs_path[strlen(abs_path_tmp)] = 0;
-    //    free(abs_path_tmp);
-    //    if (!has_been_included(abs_path)) {
-    //      if (includes_num >= 1024) {
-    //        printf("Include limit reached !\n");
-    //        exit(1);
-    //      }
-    //      includes[includes_num++] = abs_path;
-    //
-    //      lexer_t l = new_lexer(buffer);
-    //      token_array_t toks = lex_program(&l);
-    //      token_array_t new_toks = new_token_array();
-    //      for (int i = 0; i < p->cursor; i++)
-    //        token_array_push(&new_toks, p->tokens.data[i]);
-    //      for (int i = 0; i < toks.length; i++)
-    //        token_array_push(&new_toks, toks.data[i]);
-    //      for (int i = p->cursor; i < p->tokens.length; i++)
-    //        token_array_push(&new_toks, p->tokens.data[i]);
-    //      p->tokens = new_toks;
-    //    }
-    //    continue;
-    //  }
     push_ast_array(&prog, parse_statement(p));
   }
   p->prog = new_ast((node_t){program, {.program = {prog}}});

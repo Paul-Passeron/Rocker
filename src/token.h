@@ -7,6 +7,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include "stringview.h"
+
 #define INIT_TOK_ARR 64
 
 /*****************************************************
@@ -65,16 +67,16 @@ typedef enum token_type_t {
 
 } token_type_t;
 
-char *lexeme_of_type(token_type_t);
-token_type_t type_of_lexeme(char *);
-int is_lexeme_keyword(char *s);
+string_view lexeme_of_type(token_type_t);
+token_type_t type_of_lexeme(string_view);
+int is_lexeme_keyword(string_view);
 int is_type_keyword(token_type_t t);
 int is_type_operator(token_type_t t);
 int is_type_typ_def(token_type_t t);
 
 typedef struct token_t {
   token_type_t type;
-  char *lexeme;
+  string_view lexeme;
   int col;
   int line;
   char *filename;

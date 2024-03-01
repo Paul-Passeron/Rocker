@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "../RockerAllocator/alloc.h"
+#include "stringview.h"
 #include "token.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,17 +132,18 @@ int length_of_delimited_literal(lexer_t l, char c) {
   return l.cursor - cursor + 1;
 }
 
-char *create_lexeme(lexer_t l, int length) {
-  char *s = allocate_compiler_persistent(length + 1);
-  if (s == NULL) {
-    printf("Could not allocate memory\n");
-    exit(1);
-  }
-  for (int i = 0; i < length; i++) {
-    s[i] = l.data[l.cursor + i];
-  }
-  s[length] = 0;
-  return s;
+string_view create_lexeme(lexer_t l, int length) {
+  // char *s = allocate_compiler_persistent(length + 1);
+  // if (s == NULL) {
+  //   printf("Could not allocate memory\n");
+  //   exit(1);
+  // }
+  // for (int i = 0; i < length; i++) {
+  //   s[i] = l.data[l.cursor + i];
+  // }
+  // s[length] = 0;
+  // return s;
+  return sv_from_parts(l.data + l.cursor, length);
 }
 typedef enum comment_type_t { COM_SINGLE = 1, COM_MULTI } comment_type_t;
 
@@ -260,7 +262,7 @@ token_array_t lex_program(lexer_t *l) {
   token_array_t arr = new_token_array();
   while (lexer_peek(*l)) {
     token_t t = step_lexer(l);
-    if (t.lexeme)
+    if (t.lexeme.data)
       token_array_push(&arr, t);
   }
   return arr;

@@ -46,4 +46,4 @@ let main() : int => {
 - [x] The Rocker version of the compiler can parse itself
 - [ ] Self-Hosting
 - [ ] Add cstr type (for easier printfs mostly)
-- [ ] Use string views for lexemes (limit the ammount of allocated data)
+- [x] Use string views for lexemes (limit the ammount of allocated data)

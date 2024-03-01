@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
 
   lexer_t l = new_lexer(input);
   token_array_t prog = lex_program(&l);
-  if (print_lexer)
-    print_token_array(prog);
+  // if (print_lexer)
+  //   print_token_array(prog);
   parser_t p = new_parser(prog);
   parse_program(&p);
 
@@ -95,16 +95,15 @@ int main(int argc, char *argv[]) {
     char command[1024];
     fclose(fopen(output, "w"));
     sprintf(command,
-            // "clang-format %s -i &&"
+            "clang-format %s -i &&"
             "gcc -Wall -g -o %s %s "
             "src/generation/fundefs.c "
             "src/generation/fundefs_internal.c RockerAllocator/alloc.c",
-            // cout,
-             output, cout);
+            cout, output, cout);
     printf("[CMD] %s\n", command);
     system(command);
   }
-  //printf("Program length is %d tokens\n", p.tokens.length);
+  // printf("Program length is %d tokens\n", p.tokens.length);
 
   kill_compiler_stack();
   return 0;
