@@ -3,7 +3,7 @@ CFLAGS=-Werror -Wall -Wextra -g -pedantic
 SRC=src/
 BUILD=build/
 
-DEP=$(BUILD)bootstrap.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o
+DEP=$(BUILD)bootstrap.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o $(BUILD)stringview.o
 
 all:  clean_rocker lines bootstrap rocker
 

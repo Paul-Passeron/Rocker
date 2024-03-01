@@ -17,7 +17,7 @@ string_view sv_from_parts(char *data, size_t length){
 }
 
 string_view sv_from_cstr(char *s){
-    if(s == NULL) return {0};
+    if(s == NULL) return (string_view){0};
     return sv_from_parts(s, strlen(s));
 }
 
