@@ -7,7 +7,6 @@
 #include <string.h>
 
 __internal_dynamic_array_t __internal_make_array(size_t size) {
-
   __internal_dynamic_array_t ptr =
       allocate_compiler_persistent(sizeof(struct __internal_dynamic_array));
   if (size == 0) {

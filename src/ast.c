@@ -1,9 +1,13 @@
 #include "ast.h"
 #include "../RockerAllocator/alloc.h"
+#include <stdio.h>
+int cter = 0;
 
 ast_t new_ast(node_t node) {
+  cter++;
   ast_t ptr = allocate_compiler_persistent(sizeof(node_t));
   *ptr = node;
+  printf("Counter is: %d\n", cter);
   return ptr;
 }
 

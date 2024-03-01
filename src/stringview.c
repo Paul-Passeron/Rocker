@@ -1,17 +1,17 @@
 #include "stringview.h"
 
-string_view sv_from_parts(char *data, size_t length) {
+string_view sv_from_parts(char* data, size_t length) {
   return (string_view){data, length};
 }
 
-string_view sv_from_cstr(char *s) {
+string_view sv_from_cstr(char* s) {
   if (s == NULL)
     return (string_view){0};
   return sv_from_parts(s, strlen(s));
 }
 
-char *string_of_sv(string_view s) {
-  char *data = (char *)allocate_compiler_persistent(s.length + 1);
+char* string_of_sv(string_view s) {
+  char* data = (char*)allocate_compiler_persistent(s.length + 1);
   memcpy(data, s.data, s.length);
   data[s.length] = 0;
   return data;

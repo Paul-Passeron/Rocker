@@ -63,13 +63,12 @@ void generate_append(generator_t *g, ast_funcall funcall) {
     exit(1);
   }
   string_view name = arr->data.identifier.id.lexeme;
-  ast_t ref = get_ref(string_of_sv(name), g->table);
+  ast_t ref = get_ref(name, g->table);
   if (ref == NULL) {
     printf("Array is not declared in the current scope\n");
     exit(1);
   }
   if (ref->tag != vardef) {
-
     printf("Arrays must be declared as variables: %d\n", ref->tag);
     exit(1);
   }
@@ -94,7 +93,7 @@ void generate_get(generator_t *g, ast_funcall funcall) {
     exit(1);
   }
   string_view name = arr->data.identifier.id.lexeme;
-  ast_t ref = get_ref(string_of_sv(name), g->table);
+  ast_t ref = get_ref(name, g->table);
   if (ref == NULL) {
     printf("Array is not declared in the current scope\n");
     exit(1);
@@ -124,7 +123,7 @@ void generate_set(generator_t *g, ast_funcall funcall) {
     exit(1);
   }
   string_view name = arr->data.identifier.id.lexeme;
-  ast_t ref = get_ref(string_of_sv(name), g->table);
+  ast_t ref = get_ref(name, g->table);
   if (ref == NULL) {
     printf("Array is not declared in the current scope\n");
     exit(1);
@@ -275,7 +274,7 @@ void generate_loop(generator_t *g, ast_t loop_ast) {
   FILE *f = g->f;
   ast_loop loop = loop_ast->data.loop;
   new_nt_scope(&g->table);
-  push_nt(&g->table, string_of_sv(loop.variable.lexeme), NT_VAR, loop_ast);
+  push_nt(&g->table, loop.variable.lexeme, NT_VAR, loop_ast);
   fprintf(f, "for(int " SV_Fmt " =", SV_Arg(loop.variable.lexeme));
   generate_expression(g, loop.start);
   fprintf(f, "; i <= ");
@@ -362,7 +361,7 @@ void generate_assignement(generator_t *g, ast_t assignment) {
 void generate_vardef(generator_t *g, ast_t var) {
   FILE *f = g->f;
   ast_vardef vardef = var->data.vardef;
-  push_nt(&g->table, string_of_sv(vardef.name.lexeme), NT_VAR, var);
+  push_nt(&g->table, vardef.name.lexeme, NT_VAR, var);
   string_view type_name = vardef.type->data.type.name.lexeme;
   if (vardef.type->data.type.is_array) {
     generate_type(f, vardef.type);
@@ -488,12 +487,12 @@ void generate_fundef(generator_t *g, ast_t fun) {
   FILE *f = g->f;
   ast_fundef fundef = fun->data.fundef;
   new_nt_scope(&g->table);
-  push_nt(&g->table, string_of_sv(fundef.name.lexeme), NT_FUN, fun);
+  push_nt(&g->table, fundef.name.lexeme, NT_FUN, fun);
   if (svcmp(fundef.name.lexeme, sv_from_cstr("main")) != 0) {
     generate_type(f, fundef.ret_type);
     fprintf(f, " " SV_Fmt "(", SV_Arg(fundef.name.lexeme));
     for (int i = 0; i < fundef.args.length; i++) {
-      push_nt(&g->table, string_of_sv(fundef.args.data[i].lexeme), NT_VAR, fun);
+      push_nt(&g->table, fundef.args.data[i].lexeme, NT_VAR, fun);
       if (i > 0)
         fprintf(f, ", ");
       generate_type(f, fundef.types.data[i]);
@@ -551,7 +550,6 @@ void generate_forward_defs(generator_t *g, ast_t program) {
     if (stmt->tag == fundef) {
       ast_fundef fundef = stmt->data.fundef;
       if (svcmp(fundef.name.lexeme, sv_from_cstr("main")) != 0) {
-
         generate_type(f, fundef.ret_type);
 
         fprintf(f, " " SV_Fmt "(", SV_Arg(fundef.name.lexeme));

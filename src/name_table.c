@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 
-ast_t get_ref(char *name, name_table_t table) {
+ast_t get_ref(string_view name, name_table_t table) {
   // get from top_scope
   ast_t res = NULL;
   for (int i = 0; i < table.length; i++) {
-    if (strcmp(table.names[i], name) == 0)
+    if (svcmp(table.names[i], name) == 0)
       res = table.refs.data[i];
   }
   return res;
@@ -39,7 +39,7 @@ void reallocate_table(name_table_t *table) {
                                                  table->capacity * sizeof(int));
 }
 
-void push_nt(name_table_t *table, char *name, nt_kind kind, ast_t ref) {
+void push_nt(name_table_t *table, string_view name, nt_kind kind, ast_t ref) {
   if (table->length >= table->capacity) {
     reallocate_table(table);
   }
