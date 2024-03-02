@@ -283,9 +283,9 @@ void generate_loop(generator_t *g, ast_t loop_ast) {
   push_nt(&g->table, loop.variable.lexeme, NT_VAR, loop_ast);
   fprintf(f, "for(int " SV_Fmt " =", SV_Arg(loop.variable.lexeme));
   generate_expression(g, loop.start);
-  fprintf(f, "; i <= ");
+  fprintf(f, "; " SV_Fmt " <= ", SV_Arg(loop.variable.lexeme));
   generate_expression(g, loop.end);
-  fprintf(f, "; i++)\n");
+  fprintf(f, "; " SV_Fmt "++)\n", SV_Arg(loop.variable.lexeme));
   generate_statement(g, loop.statement);
   end_nt_scope(&g->table);
 }

@@ -39,7 +39,7 @@ let new_nt(): nt => {
 }
 
 let new_nt_scope(table: nt): void => {
-    implemented("new_nt_scope");
+    table::scope => table::scope + 1;
 }
 let end_nt_scope(table: nt): void => {
     implemented("end_nt_scope");

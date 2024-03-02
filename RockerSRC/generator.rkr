@@ -95,7 +95,7 @@ let get_lit_str_length(s: string): int => {
         }
         else length => length + 1;
     }
-    return length - 1;
+    return length;
 }
 
 let generate_op(g: gen, expr: ast): void => {
@@ -156,7 +156,9 @@ let generate_array_funcs(g: gen, type_name: string): void => {
         pfile(g::f, "}\n\n");
         pfile(g::f, "void ");
         pfile(g::f, type_name);
-        pfile(g::f, "_set_elem(__internal_dynamic_array_t arr, size_t index, %s elem) {\n");
+        pfile(g::f, "_set_elem(__internal_dynamic_array_t arr, size_t index, ");
+        pfile(g::f ,type_name);
+        pfile(g::f, " elem) {\n");
         pfile(g::f, "  __internal_set_elem(arr, index, &elem);\n");
         pfile(g::f, "}\n\n");
         pfile(g::f,"void ");
@@ -168,12 +170,126 @@ let generate_array_funcs(g: gen, type_name: string): void => {
         pfile(g::f, "}\n\n");
 }
 
-let generate_sub(g: gen, a: ast_sub, is_rec: boolean): void => {
-    implemented("generate_sub");
+let generate_loop(g: gen, loop_ast: ast): void => {
+    let l: ast_loop => loop_ast::Data::data_loop;
+    new_nt_scope(g::table);
+    push_nt(g::table, l::variable::Lexeme, NT_VAR, loop_ast);
+    pfile(g::f, "for(int ");
+    pfile(g::f, l::variable::Lexeme);
+    pfile(g::f, " =");
+    generate_expression(g, l::start);
+    pfile(g::f, "; ");
+    pfile(g::f, l::variable::Lexeme);
+    pfile(g::f, " <= ");
+    generate_expression(g, l::end);
+    pfile(g::f, "; ");
+    pfile(g::f, l::variable::Lexeme);
+    pfile(g::f, "++)");
+    generate_statement(g, l::statement);
+    end_nt_scope(g::table);
 }
 
-let generate_expression(g: gen, a: ast): void => {
-    implemented("generate_expression");
+let generate_sub_as_expression(g: gen, expr: ast): void => {
+    let sub: ast_sub => expr::Data::data_sub;
+    let path: token [] => sub::path;
+    loop i: 0 -> get_length(path) - 1 => {
+        let tok: token => get(path, i);
+        pfile(g::f, tok::Lexeme);
+        pfile(g::f, "->");
+        generate_expression(g, sub::expr);
+    }
+}
+
+let generate_while_loop(g: gen, l: ast): void => {
+    let while_loop: ast_while_loop => l::Data::data_while_loop;
+    pfile(g::f, "while (");
+    generate_expression(g, while_loop::condition);
+    pfile(g::f, ")\n");
+    generate_statement(g, while_loop::statement);
+}
+
+let generate_enum_tdef(g: gen, expr: ast): void => {
+    let enum_tdef: ast_enum_tdef => expr::Data::data_enum_tdef;
+    pfile(g::f, "enum ");
+    pfile(g::f, enum_tdef::name::Lexeme);
+    pfile(g::f, " {\n");
+    let items: token [] => enum_tdef::items;  
+    loop i: 0 -> get_length(items) - 1 => {
+        if i > 0 then pfile(g::f, ",\n");
+        let tok: token => get(items, i);
+        pfile(g::f, tok::Lexeme);
+    }
+    pfile(g::f, "\n}:\n");
+}
+
+let generate_expression(g: gen, expr: ast): void => {
+    if expr::Tag = tag_literal then {
+        let tok: token => expr::Data::data_literal::lit;
+        if tok::Type != TOK_STR_LIT then
+            pfile(g::f, tok::Lexeme);
+        else {
+            pfile(g::f, "new_string((string){.data = ");
+            pfile(g::f, tok::Lexeme);
+            pfile(g::f, ", .length = ");
+            pfile(g::f, string_of_int(get_lit_str_length(tok::Lexeme)-2));
+            pfile(g::f, "})");
+        }
+    } else if expr::Tag = tag_identifier then 
+        // for the moment we don't perform any checks
+        pfile(g::f, expr::Data::data_identifier::id::Lexeme); 
+    else if expr::Tag = tag_funcall then
+        generate_funcall(g, expr);
+    else if expr::Tag = tag_op then
+        generate_op(g, expr);
+    else if expr::Tag = tag_ifstmt then
+        generate_if_statement(g, expr);
+    else if expr::Tag = tag_compound then
+        generate_compound(g, expr);
+    else if expr::Tag = tag_loop then
+        generate_loop(g, expr);
+    else if expr::Tag = tag_sub then
+        generate_sub_as_expression(g, expr);
+    else if expr::Tag = tag_assign then
+        generate_assign(g, expr);
+    else if expr::Tag = tag_while_loop then
+        generate_while_loop(g, expr);
+    else {
+        print("Could not generate expression !\n");
+        print_int(expr::Tag);
+        print("th tag is not implemented yet !\n");
+        compiler_assert(false, "TODO\n");
+    }
+}
+
+
+let generate_assign(g: gen, expr: ast): void => {
+    let assign: ast_assign => expr::Data::data_assign;
+    generate_expression(g, assign::target);
+    pfile(g::f, " = ");
+    generate_expression(g, assign::expr);
+}
+
+
+let generate_vardef(g: gen, var: ast): void => {
+    let vardef: ast_vardef => var::Data::data_vardef;
+    push_nt(g::table, vardef::name::Lexeme, NT_VAR, var);
+    let type_name: string =>
+        vardef::type::Data::data_type::name::Lexeme;
+    if vardef::type::Data::data_type::is_array then {
+        compiler_assert(false, "TODO\n");
+        print(type_name);
+    }
+        compiler_assert(false, "TODO\n");
+}
+
+let generate_compound(g: gen, expr: ast): void => {
+    implemented("generate_compound");
+}
+
+
+let generate_sub(g: gen, a: ast_sub, is_rec: boolean): void => {
+    // This will have to change anyway
+    implemented("generate_sub");
 }
 
 let generate_statement(g: gen, a: ast): void => {

@@ -29,4 +29,9 @@ clean_rocker:
 	rm -rf rocker
 
 lines:
-	wc -l $$( find -name '*.[hc]' -o -name '*.rkr' ) | tail -n 1
+	@echo "C:"
+	@wc -l $$( find -name '*.[hc]'  ) | tail -n 1
+	@echo "Rocker:"
+	@wc -l $$( find  -name '*.rkr' ) | tail -n 1
+	@echo "Total:"
+	@wc -l $$( find -name '*.[hc]' -o -name '*.rkr' ) | tail -n 1

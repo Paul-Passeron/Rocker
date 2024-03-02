@@ -67,9 +67,10 @@ let implemented(s: string): void => {
 }
 
 
-let compiler_assert(b: boolean): void => {
+let compiler_assert(b: boolean, s: string): void => {
     if b = 0 then {
-        print("Assertion failed\n");
+        print("Assertion failed: ");
+        print(s);
         exit(1);
     }
 }
@@ -78,6 +79,22 @@ let print_int(n: int): void => {
   let a: int => n / 10;
   if a then print_int(a);
   putchar(n%10 + '0');
+}
+
+let string_of_int(n: int): string => {
+    let chars: char [] => [];
+    if n = 0 then append(chars, '0');
+    while n > 0 do {
+        append(chars, n%10 + '0');
+        n => n/10;
+    }
+    let res: string => "";
+    loop i: 0 -> get_length(chars) -1 =>
+        res =>
+            append_string(res, get(chars, get_length(chars) - 1 - i));
+
+    // Using C bindings lol
+    return res;   
 }
 
 

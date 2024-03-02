@@ -11,7 +11,7 @@
 
 // #include "generator.h"
 
-void usage(char* name) {
+void usage(char *name) {
   printf("Usage:\n");
   printf("\t%s <input file> [output file]\n", name);
   // printf("\t%s [flags] <input file> [output file] [flags]\n", name);
@@ -20,19 +20,19 @@ void usage(char* name) {
   // printf("\t-l:\t\tPrints the list of lexemes\n");
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   init_compiler_stack();
   if (argc < 2) {
     usage(argv[0]);
     exit(1);
   }
-  char* input = NULL;
-  char* output = NULL;
+  char *input = NULL;
+  char *output = NULL;
   // int print_tree = 0;
   int print_lexer = 0;
 
   for (int i = 1; i < argc; i++) {
-    char* arg = argv[i];
+    char *arg = argv[i];
     if (*arg == '-') {
       // This is a flag
       if (strlen(arg) == 1) {
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
   if (0)
     ;
   else {
-    char* cout = allocate_compiler_persistent(strlen(output) + 3);
+    char *cout = allocate_compiler_persistent(strlen(output) + 3);
     sprintf(cout, "%s.c", output);
     generator_t g = new_generator(cout);
     transpile(&g, p.prog);
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
     char command[1024];
     fclose(fopen(output, "w"));
     sprintf(command,
-            "clang-format %s -i &&"
+            "clang-format %s -i && "
             "gcc -Wall -g -o %s %s "
             "src/generation/fundefs.c "
             "src/generation/fundefs_internal.c RockerAllocator/alloc.c",
