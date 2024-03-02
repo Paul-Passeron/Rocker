@@ -39,7 +39,7 @@ let main() : int => {
 - [x] Add integer for loops 
 - [x] Add while loops 
 - [ ] Add foreach loop for array types
-- [<x] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
+- [x] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
 - [x] Add including files support
 - [x] Improve including files support
 - [x] The Rocker version of the compiler can lex/tokenize itself
