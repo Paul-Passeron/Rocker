@@ -25,26 +25,28 @@ let main() : int => {
 }
 ```
 
-## TODO
+## Progress
 - [x] Simple rec and pro type generation
 - [x] Simple Hello World example compiling and working
 - [x] Simple recursion example compiling and working
 - [x] Deprecate Tuples (using record types because all types are forward-declared)
 - [x] Allow assignments
 - [x] Accessing fields of record types
-- [ ] Pattern matching product types
-- [ ] Get type of an expression (for match cases)
-- [ ] Generation of match expressions
-- [ ] Typechecking
 - [x] Add integer for loops 
 - [x] Add while loops 
-- [ ] Add foreach loop for array types
 - [x] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
+- [x] Use string views for lexemes (limit the ammount of allocated data)
 - [x] Add including files support
 - [x] Improve including files support
 - [x] The Rocker version of the compiler can lex/tokenize itself
 - [x] The Rocker version of the compiler can parse itself
 - [x] Self-Hosting
+
+## TODO
+- [ ] Pattern matching product types
+- [ ] Get type of an expression (for match cases)
+- [ ] Generation of match expressions
+- [ ] Typechecking
+- [ ] Add foreach loop for array types
 - [ ] Add cstr type (for easier printfs mostly)
-- [x] Use string views for lexemes (limit the ammount of allocated data)
 - [ ] Make exit not leak memory
