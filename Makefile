@@ -22,6 +22,8 @@ $(BUILD)bootstrap.o: $(SRC)main.c
 
 rocker:
 	./bootstrap RockerSRC/main.rkr $@
+	./rocker RockerSRC/main.rkr tmp_rocker
+	mv tmp_rocker rocker
 clean:
 	rm -rf $(BUILD)*
 	rm -rf rocker

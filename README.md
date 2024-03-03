@@ -44,7 +44,7 @@ let main() : int => {
 - [x] Improve including files support
 - [x] The Rocker version of the compiler can lex/tokenize itself
 - [x] The Rocker version of the compiler can parse itself
-- [ ] Self-Hosting
+- [x] Self-Hosting
 - [ ] Add cstr type (for easier printfs mostly)
 - [x] Use string views for lexemes (limit the ammount of allocated data)
 - [ ] Make exit not leak memory

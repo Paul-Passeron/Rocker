@@ -29,7 +29,7 @@ let main(): void => {
     let output: string => "";
     let default_output: string => "a.out";
     let print_lexer: boolean => false;
-
+    let quiet: boolean => true;
     loop i: 1 -> get_length(args) - 1 => {
         let arg: string => get(args, i);
         if get_nth_char(arg, 0) = '-' then {
@@ -40,6 +40,8 @@ let main(): void => {
             }
             if get_nth_char(arg, 1) = 'l' && print_lexer = false then
                 print_lexer => true;
+            else if get_nth_char(arg, 1) = 'v' && print_lexer = false then
+                quiet => false;
             else {
                 print("Unknows flag \'");
                 print(arg);
@@ -75,6 +77,8 @@ let main(): void => {
     let g: gen => new_gen(cout);
     transpile(g, p::Prog);
     kill_generator(g);
+    if quiet = false then 
+        print("[INFO] Transpiling to C successfusl\n");
     let command: string => "";
     command => concat_string(command, "clang-format ");
     command => concat_string(command, cout);
@@ -87,10 +91,26 @@ let main(): void => {
     command => concat_string(command,  " src/generation/fundefs.c");
     command => concat_string(command, " src/generation/fundefs_internal.c");
     command => concat_string(command, " RockerAllocator/alloc.c");
-    print("[CMD] ");
-    print(command);
-    print("\n");
+    if quiet = false then {
+        print("[CMD] ");
+        print(command);
+        print("\n");
+        print("[INFO] Compiling transpiled C file successful\n");
+
+    }
     system(string_to_cstr(command));
+    let remove_tmp: string => "rm ";
+    remove_tmp => concat_string(remove_tmp, cout);
+    if str_eq(cout, "") = false then {
+        if quiet = false then {
+            print("[CMD] ");
+            print(remove_tmp);
+            print("\n");
+            print("[INFO] Removing transpiled C file successful\n");
+        }
+        system(string_to_cstr(remove_tmp));
+    }
+    print("[INFO] Rocker compiling successful\n");
 }
 
 //-----------------------------------------------------------------------------
