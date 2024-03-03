@@ -14,9 +14,9 @@ enum nt_kind => {
 
 rec nt_elem => {
     kind: nt_kind,
-    name: string [],
+    name: string,
     scope: int,
-    res: ast,
+    ref: ast,
 }
 
 rec nt => {
@@ -25,8 +25,17 @@ rec nt => {
 }
 
 let get_ref(name: string, table: nt):ast => {
-    implemented("get_ref");
-    return NULL;
+    let elems: nt_elem [] => table::elems;
+    let max_scope: int => 0-1;
+    let res: ast => NULL;
+    loop i: 0 -> get_length(elems) - 1 => {
+        let elem: nt_elem => get(elems, i);
+        if str_eq(elem::name, name) && max_scope < elem::scope then {
+            max_scope => elem::scope;
+            res => elem::ref;
+        }
+    }
+    return res;
 }
 
 let new_nt(): nt => {
@@ -42,10 +51,27 @@ let new_nt_scope(table: nt): void => {
     table::scope => table::scope + 1;
 }
 let end_nt_scope(table: nt): void => {
-    implemented("end_nt_scope");
+    let elems: nt_elem [] => table::elems;
+    let i: int => get_length(elems) - 1;
+    let break_cond: boolean => false;
+    while i >= 0 && break_cond = false do {
+        let elem: nt_elem => get(elems, i);
+        if elem::scope < table::scope then
+            break_cond => true;
+        else 
+            pop(elems);
+        i => i - 1;
+    }
 }
 
 let push_nt(table: nt, name:string, kind: nt_kind, ref: ast): void => {
-    implemented("push_nt");
+    let res: nt_elem => {
+        kind => kind,
+        name => name,
+        ref => ref,
+        scope => table::scope
+    };
+    let elems: nt_elem [] => table::elems;
+    append(elems, res);
 }
 

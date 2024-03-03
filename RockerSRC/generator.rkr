@@ -38,20 +38,23 @@ let generate_gen_type_fun(g: gen, funcall: ast_funcall, suffixe: string): void =
     // getting the type of the array (for the moment you have to bind
     // it to a variable, even if it is an argument to the function
     let ref: ast => get_ref(arr_name, g::table);
-    if ref::Tag != tag_vardef then
+    if ref::Tag != tag_vardef then {
         print("Arrays must be declared as variables !\n");
         exit(1);
-    generate_type(g, ref::Data::data_vardef::type);
-    print(suffixe);
+    }
+    // generate_type(g, ref::Data::data_vardef::type);
+    pfile(g::f, ref::Data::data_vardef::type::Data::data_type::name::Lexeme);
+    pfile(g::f, suffixe);
     pfile(g::f,"(");
-    generate_expression(g, get(args, 0));
-    pfile(g::f, ", ");
-    generate_expression(g, get(args, 1));
+        loop i: 0 -> get_length(args) - 1 => {
+            if i > 0 then pfile(g::f, ", ");
+            generate_expression(g, get(args, i));
+        }
     pfile(g::f, ")");
 }
 
 let generate_append(g: gen, funcall: ast_funcall): void => {
-   generate_gen_type_fun(g, funcall, "_get_elem");
+   generate_gen_type_fun(g, funcall, "_push_array");
 }
 
 let generate_get(g: gen, funcall: ast_funcall): void => {
@@ -62,6 +65,10 @@ let generate_set(g: gen, funcall: ast_funcall): void => {
    generate_gen_type_fun(g, funcall, "_set_elem");
 }
 
+let generate_pop(g: gen, funcall: ast_funcall): void => {
+   generate_gen_type_fun(g, funcall, "_pop_array");
+}
+
 let generate_funcall(g: gen, fun: ast): void => {
     let funcall: ast_funcall => fun::Data::data_funcall;
     if str_eq(funcall::name::Lexeme, "append") then
@@ -70,6 +77,8 @@ let generate_funcall(g: gen, fun: ast): void => {
         generate_get(g, funcall);
     else if str_eq(funcall::name::Lexeme, "set") then
         generate_set(g, funcall);
+    else if str_eq(funcall::name::Lexeme, "pop") then
+        generate_pop(g, funcall);
     else {
         pfile(g::f, funcall::name::Lexeme);
         pfile(g::f, "(");
@@ -180,7 +189,7 @@ let generate_loop(g: gen, loop_ast: ast): void => {
     generate_expression(g, l::start);
     pfile(g::f, "; ");
     pfile(g::f, l::variable::Lexeme);
-    pfile(g::f, " <= ");
+    pfile(g::f, " <= (int)");
     generate_expression(g, l::end);
     pfile(g::f, "; ");
     pfile(g::f, l::variable::Lexeme);
@@ -196,8 +205,9 @@ let generate_sub_as_expression(g: gen, expr: ast): void => {
         let tok: token => get(path, i);
         pfile(g::f, tok::Lexeme);
         pfile(g::f, "->");
-        generate_expression(g, sub::expr);
+
     }
+    generate_expression(g, sub::expr);
 }
 
 let generate_while_loop(g: gen, l: ast): void => {
@@ -219,7 +229,7 @@ let generate_enum_tdef(g: gen, expr: ast): void => {
         let tok: token => get(items, i);
         pfile(g::f, tok::Lexeme);
     }
-    pfile(g::f, "\n}:\n");
+    pfile(g::f, "\n};\n");
 }
 
 let generate_expression(g: gen, expr: ast): void => {
@@ -241,18 +251,8 @@ let generate_expression(g: gen, expr: ast): void => {
         generate_funcall(g, expr);
     else if expr::Tag = tag_op then
         generate_op(g, expr);
-    else if expr::Tag = tag_ifstmt then
-        generate_if_statement(g, expr);
-    else if expr::Tag = tag_compound then
-        generate_compound(g, expr);
-    else if expr::Tag = tag_loop then
-        generate_loop(g, expr);
     else if expr::Tag = tag_sub then
-        generate_sub_as_expression(g, expr);
-    else if expr::Tag = tag_assign then
-        generate_assign(g, expr);
-    else if expr::Tag = tag_while_loop then
-        generate_while_loop(g, expr);
+        generate_sub_as_expression(g, expr);  
     else {
         print("Could not generate expression !\n");
         print_int(expr::Tag);
@@ -267,6 +267,15 @@ let generate_assign(g: gen, expr: ast): void => {
     generate_expression(g, assign::target);
     pfile(g::f, " = ");
     generate_expression(g, assign::expr);
+    pfile(g::f, ";\n");
+}
+
+let is_builtin_typename(name: string): boolean => {
+    if str_eq(name, "int") then return true; 
+    if str_eq(name, "boolean") then return true; 
+    if str_eq(name, "string") then return true; 
+    if str_eq(name, "char") then return true; 
+    return false;
 }
 
 
@@ -275,23 +284,220 @@ let generate_vardef(g: gen, var: ast): void => {
     push_nt(g::table, vardef::name::Lexeme, NT_VAR, var);
     let type_name: string =>
         vardef::type::Data::data_type::name::Lexeme;
-    if vardef::type::Data::data_type::is_array then {
-        compiler_assert(false, "TODO\n");
-        print(type_name);
+    if vardef::type::Data::data_type::is_array &&
+       vardef::expr::Tag = tag_literal then {
+        generate_type(g, vardef::type);
+        pfile(g::f, " ");
+        pfile(g::f, vardef::name::Lexeme);
+        pfile(g::f, " = ");
+        // Defining an empty array
+        compiler_assert(vardef::expr::Data::data_literal::lit::Type = TOK_ARR_DECL, "Cannot declare arrays this way !\n");
+        pfile(g::f, type_name);
+        pfile(g::f, "_make_array();\n");
+    } else if is_builtin_typename(type_name) ||
+        vardef::type::Data::data_type::is_array then {
+        generate_type(g, vardef::type);
+        pfile(g::f, " ");
+        pfile(g::f, vardef::name::Lexeme);
+        pfile(g::f, " = ");
+        generate_expression(g, vardef::expr);
+        pfile(g::f, ";\n");
+    } else if vardef::expr::Tag = tag_record_expr then {
+        generate_type(g, vardef::type);
+        pfile(g::f, " ");
+        pfile(g::f, vardef::name::Lexeme);
+        pfile(g::f, ";\n{\nstruct ");
+        generate_type(g, vardef::type);
+        pfile(g::f, " __internal_tmp = {\n");
+        let record: ast_record_expr => 
+            vardef::expr::Data::data_record_expr;
+        let names: token [] => record::names;
+        let exprs: ast [] => record::exprs;
+        // Zero initialized
+        if get_length(names) = 0 then pfile(g::f, "0"); 
+        loop i: 0 -> get_length(names) - 1 => {
+            if i > 0 then pfile(g::f, ",\n");
+            let name: token => get(names, i);
+            let expr: ast => get(exprs, i);
+            pfile(g::f, ".");
+            pfile(g::f, name::Lexeme);
+            pfile(g::f, " = ");
+            generate_expression(g, expr);
+        }
+        pfile(g::f, "};\n");
+        pfile(g::f, vardef::name::Lexeme);
+        pfile(g::f, " = allocate_compiler_persistent(sizeof(struct ");
+        generate_type(g, vardef::type);
+        pfile(g::f, "));\n*");        
+        pfile(g::f, vardef::name::Lexeme);
+        pfile(g::f, " = __internal_tmp;\n}\n");
+    }else {
+        generate_type(g, vardef::type);
+        pfile(g::f, " ");
+        pfile(g::f, vardef::name::Lexeme);
+        pfile(g::f, " = ");
+        generate_expression(g, vardef::expr);
+        pfile(g::f, ";\n");
     }
-        compiler_assert(false, "TODO\n");
 }
 
-let generate_compound(g: gen, expr: ast): void => {
-    implemented("generate_compound");
-}
-
-
-let generate_sub(g: gen, a: ast_sub, is_rec: boolean): void => {
-    // This will have to change anyway
-    implemented("generate_sub");
+let generate_return(g: gen, ret_ast: ast): void => {
+    pfile(g::f, "return ");
+    let expr: ast => ret_ast::Data::data_ret::expr; 
+    if expr != NULL then
+        generate_expression(g, expr);
+    pfile(g::f, ";\n");
 }
 
 let generate_statement(g: gen, a: ast): void => {
-    implemented("generate_statement");
+    let tag: ast_kind => a::Tag;
+    if tag = tag_vardef then
+        generate_vardef(g, a);
+    else if tag = tag_ret then
+        generate_return(g, a);
+    else if tag = tag_compound then
+        generate_compound(g, a);
+    else if tag = tag_ifstmt then
+        generate_if_statement(g, a);
+    else if tag = tag_tdef then
+        generate_tdef(g, a);
+    else if tag = tag_enum_tdef then
+        generate_enum_tdef(g, a);
+    else if tag = tag_fundef then
+        generate_fundef(g, a);
+    else if tag = tag_loop then
+        generate_loop(g, a);
+    else if tag = tag_while_loop then
+        generate_while_loop(g, a);
+    else if tag = tag_assign then
+        generate_assign(g, a);
+    else {
+        generate_expression(g, a);
+        pfile(g::f, ";\n");
+    }    
+}
+
+
+let generate_tdef(g: gen, a: ast): void => {
+    let tdef: ast_tdef => a::Data::data_tdef;
+    let name: string => tdef::name::Lexeme;
+    pfile(g::f, "struct ");
+    pfile(g::f, name);
+    pfile(g::f, "{\n");
+    compiler_assert(tdef::t != TDEF_PRO, "Product type definition not implemented yet\n");
+    let constructors: ast [] => tdef::constructors;
+    loop i: 0 -> get_length(constructors) - 1 => {
+        let cons_ast: ast => get(constructors, i);
+        let cons: ast_cons => cons_ast::Data::data_cons;
+        let type: ast_type => cons::type::Data::data_type;
+        if str_eq("void", type::name::Lexeme) = false then {
+            generate_type(g, cons::type);
+            pfile(g::f, " ");
+            pfile(g::f, cons::name::Lexeme);
+            pfile(g::f,  ";\n");
+        }
+    }
+    pfile(g::f, "};\n");
+}
+
+let generate_compound(g: gen, expr: ast): void => {
+    pfile(g::f, "{\n");
+    let compound: ast_compound => expr::Data::data_compound;
+    new_nt_scope(g::table);
+    let stmts: ast [] => compound::stmts;
+    loop i: 0 -> get_length(stmts) - 1 =>
+        generate_statement(g, get(stmts, i));
+    end_nt_scope(g::table);
+    pfile(g::f, "\n}\n");
+}
+
+
+let generate_fundef_proto(g: gen, fun: ast, add: boolean): void => {
+    let fundef: ast_fundef => fun::Data::data_fundef;
+    generate_type(g, fundef::ret_type);
+    pfile(g::f, " ");
+    pfile(g::f, fundef::name::Lexeme);
+    pfile(g::f, "(");
+    let args: token [] => fundef::args;
+    let types: ast [] => fundef::types;
+    loop i: 0 -> get_length(args) - 1 => {
+        let arg: token => get(args, i);
+        if add then
+            push_nt(g::table, arg::Lexeme, NT_VAR, fun);
+        if i > 0 then
+            pfile(g::f, ", ");
+        generate_type(g, get(types, i));
+        pfile(g::f, " ");
+        pfile(g::f, arg::Lexeme);
+    }
+    pfile(g::f, ")");
+}
+
+let generate_fundef(g: gen, fun: ast): void => {
+    let fundef: ast_fundef => fun::Data::data_fundef;
+    new_nt_scope(g::table);
+    push_nt(g::table, fundef::name::Lexeme, NT_FUN, fun);
+    if str_eq(fundef::name::Lexeme, "main") = false then {
+        generate_fundef_proto(g, fun, true);
+        generate_compound(g, fundef::body);
+        pfile(g::f, "\n\n");
+    } else {
+        pfile(g::f, "int main(int argc, char **argv) {\n");
+        pfile(g::f, "init_compiler_stack();\n");
+        pfile(g::f, "fill_cmd_args(argc, argv);\n");
+        generate_compound(g, fundef::body);
+        pfile(g::f, "kill_compiler_stack();\n");
+        pfile(g::f, "return 0;\n");
+        pfile(g::f, "}\n\n");
+    }
+    end_nt_scope(g::table);
+}
+
+let generate_forward_defs(g: gen, program: ast): void => {
+    let stmts: ast [] => program::Data::data_program::prog;
+    loop i: 0 -> get_length(stmts) - 1 => {
+        let stmt: ast => get(stmts, i);
+        if stmt::Tag = tag_tdef then {
+            let tdef: ast_tdef => stmt::Data::data_tdef;
+            let name: string => tdef::name::Lexeme;
+            pfile(g::f, "typedef struct ");
+            pfile(g::f, name);
+            pfile(g::f, "*");
+            pfile(g::f, name);
+            pfile(g::f, ";\n\n");
+            generate_array_funcs(g, name);
+        } else if stmt::Tag = tag_enum_tdef then {
+            let enum_tdef: ast_enum_tdef => stmt::Data::data_enum_tdef;
+            let name: string => enum_tdef::name::Lexeme;
+            pfile(g::f, "typedef enum ");
+            pfile(g::f, name);
+            pfile(g::f, " ");
+            pfile(g::f, name);
+            pfile(g::f, ";\n");
+        }
+    }
+    loop i: 0 -> get_length(stmts) - 1 => {
+        let stmt: ast => get(stmts, i);
+        if stmt::Tag = tag_fundef then {
+            let fundef: ast_fundef => stmt::Data::data_fundef;
+            let name: string => fundef::name::Lexeme;
+            if str_eq(name, "main") = false then {
+                generate_fundef_proto(g, stmt, false);
+                pfile(g::f, ";\n");
+            }
+        }
+    }
+}
+
+let transpile(g: gen, program: ast): void => {
+    let stmts: ast [] => program::Data::data_program::prog;
+    pfile(g::f, "#include \"./src/generation/fundefs.h\"\n");
+    pfile(g::f, "#include \"./src/generation/fundefs_internal.h\"\n");
+    pfile(g::f, "#include \"./src/generation/typedefs.h\"\n");
+    pfile(g::f, "#include \"./RockerAllocator/alloc.h\"\n");
+    generate_forward_defs(g, program);
+    loop i: 0 -> get_length(stmts) - 1 => {
+        generate_statement(g, get(stmts, i));
+    }
+
 }

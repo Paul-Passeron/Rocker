@@ -55,6 +55,7 @@ int __internal_push_array(__internal_dynamic_array_t arr, void *elem) {
 void *__internal_pop_array(__internal_dynamic_array_t arr) {
   if (arr->length == 0) {
     printf("Could not pop elem out of dynamic array: EMPTY ARRAY\n");
+
     return NULL;
   }
   if (arr->elem_size == 0) {
@@ -71,6 +72,8 @@ void *__internal_pop_array(__internal_dynamic_array_t arr) {
 void *__internal_get_elem(__internal_dynamic_array_t arr, size_t index) {
   if (index >= arr->length) {
     printf("Could not get elem from dynamic array: INDEX OUT OF BOUNDS\n");
+    int *tmp = NULL;
+    *tmp = 3;
     return NULL;
   }
   if (arr->elem_size == 0) {

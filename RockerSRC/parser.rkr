@@ -176,6 +176,7 @@ let parse_tdef(p: parser): ast => {
     while peek_type(p) != TOK_CLOSE_BRACE do
         append(conss, parse_cons(p));
     consume_token(p);
+    
     let data_tdef: ast_tdef => {
         name => name,
         t => type,

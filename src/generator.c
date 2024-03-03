@@ -149,6 +149,34 @@ void generate_set(generator_t *g, ast_funcall funcall) {
   fprintf(f, ")");
 }
 
+void generate_pop(generator_t *g, ast_funcall funcall) {
+  FILE *f = g->f;
+  if (funcall.args.length != 1) {
+    printf("TODO: pop has 1 arguments");
+    exit(1);
+  }
+  ast_t arr = funcall.args.data[0];
+  if (arr->tag != identifier) {
+    printf("Arrays must be bound by name for the moment\n");
+    exit(1);
+  }
+  string_view name = arr->data.identifier.id.lexeme;
+  ast_t ref = get_ref(name, g->table);
+  if (ref == NULL) {
+    printf("Array is not declared in the current scope\n");
+    exit(1);
+  }
+  if (ref->tag != vardef) {
+    printf("Arrays must be declared as variables: %d\n", ref->tag);
+    exit(1);
+  }
+  ast_type type = ref->data.vardef.type->data.type;
+  string_view type_name = type.name.lexeme;
+  fprintf(f, SV_Fmt "_pop_array(", SV_Arg(type_name));
+  generate_expression(g, funcall.args.data[0]);
+  fprintf(f, ")");
+}
+
 void generate_funcall(generator_t *g, ast_t fun) {
   FILE *f = g->f;
   ast_funcall funcall = fun->data.funcall;
@@ -158,6 +186,8 @@ void generate_funcall(generator_t *g, ast_t fun) {
     generate_get(g, funcall);
   } else if (svcmp(funcall.name.lexeme, sv_from_cstr("set")) == 0) {
     generate_set(g, funcall);
+  } else if (svcmp(funcall.name.lexeme, sv_from_cstr("pop")) == 0) {
+    generate_pop(g, funcall);
   } else {
     fprintf(f, SV_Fmt "(", SV_Arg(funcall.name.lexeme));
     for (int i = 0; i < funcall.args.length; i++) {
@@ -283,7 +313,7 @@ void generate_loop(generator_t *g, ast_t loop_ast) {
   push_nt(&g->table, loop.variable.lexeme, NT_VAR, loop_ast);
   fprintf(f, "for(int " SV_Fmt " =", SV_Arg(loop.variable.lexeme));
   generate_expression(g, loop.start);
-  fprintf(f, "; " SV_Fmt " <= ", SV_Arg(loop.variable.lexeme));
+  fprintf(f, "; " SV_Fmt " <= (int)", SV_Arg(loop.variable.lexeme));
   generate_expression(g, loop.end);
   fprintf(f, "; " SV_Fmt "++)\n", SV_Arg(loop.variable.lexeme));
   generate_statement(g, loop.statement);

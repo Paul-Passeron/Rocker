@@ -73,8 +73,24 @@ let main(): void => {
         print_list_types(p::Toks);
     let cout: string => concat_string(output, ".c");
     let g: gen => new_gen(cout);
-    generate_array_funcs(g, "token");
+    transpile(g, p::Prog);
     kill_generator(g);
+    let command: string => "";
+    command => concat_string(command, "clang-format ");
+    command => concat_string(command, cout);
+    command => concat_string(command, " -i");
+    command => concat_string(command, " && ");
+    command => concat_string(command, " gcc -Wall -g -o ");
+    command => concat_string(command, output);
+    command => concat_string(command, " ");
+    command => concat_string(command, cout);
+    command => concat_string(command,  " src/generation/fundefs.c");
+    command => concat_string(command, " src/generation/fundefs_internal.c");
+    command => concat_string(command, " RockerAllocator/alloc.c");
+    print("[CMD] ");
+    print(command);
+    print("\n");
+    system(string_to_cstr(command));
 }
 
 //-----------------------------------------------------------------------------
