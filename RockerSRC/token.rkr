@@ -241,6 +241,7 @@ let print_list_types(_l: token []) : void => {
 }
 
 let print_error_prefix_tok(t: token): void => {
+    print_error();
     print("\e[1;4m");
     print(t::Filename);
     print(":");

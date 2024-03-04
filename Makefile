@@ -32,8 +32,10 @@ clean_rocker:
 
 lines:
 	@echo "C:"
-	@wc -l $$( find -name '*.[hc]'  ) | tail -n 1
+	@wc -l $$( find -wholename './src/*.[hc]' -not -path "./src/generation" ) | tail -n 1
 	@echo "Rocker:"
-	@wc -l $$( find  -name '*.rkr' ) | tail -n 1
+	@wc -l $$( find  -wholename './RockerSRC/*.rkr') | tail -n 1
+	@echo "C dependencies:"
+	@wc -l $$( find -wholename './RockerAllocator/*.[hc]' -o  -wholename './src/generation/*.[hc]'  ) | tail -n 1
 	@echo "Total:"
-	@wc -l $$( find -name '*.[hc]' -o -name '*.rkr' ) | tail -n 1
+	@wc -l $$( find -wholename './src/*.[hc]' -o  -wholename './RockerSRC/*.rkr' -o -wholename './RockerAllocator/*.[hc]') | tail -n 1

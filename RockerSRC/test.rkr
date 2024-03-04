@@ -1,3 +1,0 @@
-let a(): void => {
-    print("Test !\n");
-}

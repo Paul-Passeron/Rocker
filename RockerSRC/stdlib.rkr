@@ -144,4 +144,26 @@ let print_underline(s: string): void => {
     print("\e[0m");
 }
 
+
+
+let print_info(): void => {
+    print("\e[1;32m");
+    print("[INFO] ");
+    print("\e[0m");
+}
+
+
+let print_cmd(): void => {
+    print("\e[1;33m");
+    print("[CMD]  ");
+    print("\e[0m");
+}
+
+
+let print_error(): void => {
+    print("\e[1;31m");
+    print("[ERROR] ");
+    print("\e[0m");
+}
+
 //-----------------------------------------------------------------------------

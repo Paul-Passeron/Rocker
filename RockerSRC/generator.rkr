@@ -76,7 +76,11 @@ let generate_pop(g: gen, funcall: ast_funcall): void => {
 let generate_funcall(g: gen, fun: ast): void => {
     let funcall: ast_funcall => fun::Data::data_funcall;
     let ref: nt_elem => get_ref(funcall::name::Lexeme, g::table);
-    if ref = NULL then{
+    let is_error: boolean => false;
+
+    if ref = NULL then is_error => true;
+    else if ref::Tag != fdef then  is_error => true;
+    if is_error then {
         print_error_prefix_tok(funcall::name);
         print_color(" [Syntax Error]", ROCKER_RED);
         print(" Function \'");
