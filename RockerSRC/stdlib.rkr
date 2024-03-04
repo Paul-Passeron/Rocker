@@ -115,3 +115,33 @@ let cons_str(src: string, offset: int): string => {
 
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+// Terminal utilities
+//-----------------------------------------------------------------------------
+enum term_color => {
+    ROCKER_WHITE,
+    ROCKER_RED,
+    ROCKER_GREEN,
+    ROCKER_YELLOW,
+}
+
+let print_color(src: string, col: term_color): void => {
+    if col = ROCKER_WHITE then
+        print("\e[1;37m");
+    else if col = ROCKER_RED then
+        print("\e[1;31m");
+    else if col = ROCKER_GREEN then
+        print("\e[1;42m");
+    else if col = ROCKER_YELLOW then
+        print("\e[1;43m");
+    print(src);
+    print("\e[0m");
+}
+
+let print_underline(s: string): void => {
+    print("\e[4m");
+    print(s);
+    print("\e[0m");
+}
+
+//-----------------------------------------------------------------------------

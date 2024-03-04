@@ -119,7 +119,7 @@ let main(): void => {
             print("\n");
 
         }
-        system(string_to_cstr(command));
+        system(command);
         if quiet = false then 
             print("[INFO] Compiling transpiled C file successful\n");
     }
@@ -134,11 +134,14 @@ let main(): void => {
                 print("\n");
                 print("[INFO] Removing transpiled C file successful\n");
             }
-            system(string_to_cstr(remove_tmp));
+            system(remove_tmp);
         }
     }
     if quiet = false && transpile_only = false then
         print("[INFO] Rocker compiling successful\n");
+
+    lala();
+
 }
 
 //-----------------------------------------------------------------------------

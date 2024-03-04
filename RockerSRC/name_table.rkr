@@ -54,7 +54,7 @@ let get_ref(name: string, table: nt):nt_elem => {
     let res: nt_elem => NULL;
     loop i: 0 -> get_length(elems) - 1 => {
         let elem: nt_elem => get(elems, i);
-        if str_eq(elem::name, name) && max_scope < elem::scope then {
+        if str_eq(elem::name, name) && max_scope <= elem::scope then {
             if elem::Tag = tdef then return elem;
             max_scope => elem::scope;
             res => elem;
@@ -183,16 +183,277 @@ let setup_name_table(table: nt): void => {
     push_nt(table, "char", get_builtin_type_tdef("char"));
     push_nt(table, "string", get_builtin_type_tdef("string"));
     push_nt(table, "void", get_builtin_type_tdef("void"));
-    push_nt(table, "null_type", get_builtin_type_tdef("null_type"));
-    push_nt(table, "array", get_builtin_type_tdef("array"));
+    push_nt(table, "__null_type", get_builtin_type_tdef("__null_type"));
+    push_nt(table, "__array", get_builtin_type_tdef("__array"));
+    push_nt(table, "__any", get_builtin_type_tdef("__any"));
 
 
     // builtin literals
     push_nt(table, "true", nt_builtin_vardef("true", "boolean"));
     push_nt(table, "false", nt_builtin_vardef("false", "boolean"));
-    push_nt(table, "NULL", nt_builtin_vardef("NULL", "null_type"));
+    push_nt(table, "NULL", nt_builtin_vardef("NULL", "__null_type"));
 
     // builtin functions
 
+    // get function
+    
+    let get_args: type_spec [] => [];
+    append(get_args, get_builtin_type("__array"));
+    append(get_args, get_builtin_type("int"));
+    let get_fun: nt_fun => {
+        // temporary
+        ret_type => get_builtin_type("__any"),
+        args => get_args
+    };
+    let get_elem: nt_elem => {
+        Tag => fdef,
+        name => "get",
+        fun => get_fun
+    };
+    push_nt(table,"get", get_elem);
 
+    
+    // pop function
+    let pop_args: type_spec [] => [];
+    append(pop_args, get_builtin_type("array"));
+    let pop_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => pop_args
+    };
+    let pop_elem: nt_elem => {
+        Tag => fdef,
+        name => "pop",
+        fun => pop_fun
+    };
+    push_nt(table, "pop", pop_elem);
+
+    // set function
+    
+    let set_args: type_spec [] => [];
+    append(set_args, get_builtin_type("array"));
+    append(set_args, get_builtin_type("int"));
+    append(set_args, get_builtin_type("__any"));
+    let set_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => set_args
+    };
+    let set_elem: nt_elem => {
+        Tag => fdef,
+        name => "set",
+        fun => set_fun
+    };
+    push_nt(table, "set", set_elem);
+    
+    // append function
+    
+    let append_args: type_spec [] => [];
+    append(append_args, get_builtin_type("__array"));
+    append(append_args, get_builtin_type("__any"));
+    let append_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => append_args
+    };
+    let append_elem: nt_elem => {
+        Tag => fdef,
+        name => "append",
+        fun => append_fun
+    };
+    push_nt(table, "append", append_elem);
+
+    // print function
+    let print_args: type_spec [] => [];
+    append(print_args, get_builtin_type("string"));
+    let print_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => print_args
+    };
+    let print_elem: nt_elem => {
+        Tag => fdef,
+        name => "print",
+        fun => print_fun
+    };
+    push_nt(table, "print", print_elem);
+
+    // str_eq function
+    let str_eq_args: type_spec [] => [];
+    append(str_eq_args, get_builtin_type("string"));
+    let str_eq_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => str_eq_args
+    };
+    let str_eq_elem: nt_elem => {
+        Tag => fdef,
+        name => "str_eq",
+        fun => str_eq_fun
+    };
+    push_nt(table, "str_eq", str_eq_elem);
+
+    // exit function
+    let exit_args: type_spec [] => [];
+    append(exit_args, get_builtin_type("int"));
+    let exit_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => exit_args
+    };
+    let exit_elem: nt_elem => {
+        Tag => fdef,
+        name => "exit",
+        fun => exit_fun
+    };
+    push_nt(table, "exit", exit_elem);
+
+    // get_length function
+    let get_length_args: type_spec [] => [];
+    append(get_length_args, get_builtin_type("__array"));
+    let get_length_fun: nt_fun => {
+        ret_type => get_builtin_type("int"),
+        args => get_length_args
+    };
+    let get_length_elem: nt_elem => {
+        Tag => fdef,
+        name => "get_length",
+        fun => get_length_fun
+    };
+    push_nt(table, "get_length", get_length_elem);
+
+    // get_args function
+    let get_args_args: type_spec [] => [];
+    let get_args_fun: nt_fun => {
+        ret_type => get_builtin_type("__array"),
+        args => get_args_args
+    };
+    let get_args_elem: nt_elem => {
+        Tag => fdef,
+        name => "get_args",
+        fun => get_args_fun
+    };
+    push_nt(table, "get_args", get_args_elem);
+
+    // read_file function
+    let read_file_args: type_spec [] => [];
+    append(read_file_args, get_builtin_type("string"));
+    let read_file_fun: nt_fun => {
+        ret_type => get_builtin_type("string"),
+        args => read_file_args
+    };
+    let read_file_elem: nt_elem => {
+        Tag => fdef,
+        name => "read_file",
+        fun => read_file_fun
+    };
+    push_nt(table, "read_file", read_file_elem);
+
+    // write_string_to_file function
+    let write_string_to_file_args: type_spec [] => [];
+    append(write_string_to_file_args, get_builtin_type("string"));
+    let write_string_to_file_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => write_string_to_file_args
+    };
+    let write_string_to_file_elem: nt_elem => {
+        Tag => fdef,
+        name => "write_string_to_file",
+        fun => write_string_to_file_fun
+    };
+    push_nt(table, "write_string_to_file", write_string_to_file_elem);
+
+    // concat_string function
+    let concat_string_args: type_spec [] => [];
+    append(concat_string_args, get_builtin_type("string"));
+    let concat_string_fun: nt_fun => {
+        ret_type => get_builtin_type("string"),
+        args => concat_string_args
+    };
+    let concat_string_elem: nt_elem => {
+        Tag => fdef,
+        name => "concat_string",
+        fun => concat_string_fun
+    };
+    push_nt(table, "concat_string", concat_string_elem);
+
+    // get_string_length function
+    let get_string_length_args: type_spec [] => [];
+    append(get_string_length_args, get_builtin_type("string"));
+    let get_string_length_fun: nt_fun => {
+        ret_type => get_builtin_type("int"),
+        args => get_string_length_args
+    };
+    let get_string_length_elem: nt_elem => {
+        Tag => fdef,
+        name => "get_string_length",
+        fun => get_string_length_fun
+    };
+    push_nt(table, "get_string_length", get_string_length_elem);
+
+    // get_nth_char function
+    let get_nth_char_args: type_spec [] => [];
+    append(get_nth_char_args, get_builtin_type("string"));
+    append(get_nth_char_args, get_builtin_type("int"));
+    let get_nth_char_fun: nt_fun => {
+        ret_type => get_builtin_type("char"),
+        args => get_nth_char_args
+    };
+    let get_nth_char_elem: nt_elem => {
+        Tag => fdef,
+        name => "get_nth_char",
+        fun => get_nth_char_fun
+    };
+    push_nt(table, "get_nth_char", get_nth_char_elem);
+
+    // system function
+    let system_args: type_spec [] => [];
+    append(system_args, get_builtin_type("string"));
+    let system_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => system_args
+    };
+    let system_elem: nt_elem => {
+        Tag => fdef,
+        name => "system",
+        fun => system_fun
+    };
+    push_nt(table, "system", system_elem);
+
+    // putchar function
+    let putchar_args: type_spec [] => [];
+    append(putchar_args, get_builtin_type("char"));
+    let putchar_fun: nt_fun => {
+        ret_type => get_builtin_type("void"),
+        args => putchar_args
+    };
+    let putchar_elem: nt_elem => {
+        Tag => fdef,
+        name => "putchar",
+        fun => putchar_fun
+    };
+    push_nt(table, "putchar", putchar_elem);
+
+    // get_abs_path function
+    let get_abs_path_args: type_spec [] => [];
+    append(get_abs_path_args, get_builtin_type("string"));
+    let get_abs_path_fun: nt_fun => {
+        ret_type => get_builtin_type("string"),
+        args => get_abs_path_args
+    };
+    let get_abs_path_elem: nt_elem => {
+        Tag => fdef,
+        name => "get_abs_path",
+        fun => get_abs_path_fun
+    };
+    push_nt(table, "get_abs_path", get_abs_path_elem);
+
+    // append_string function
+    let append_string_args: type_spec [] => [];
+    append(append_string_args, get_builtin_type("string"));
+    append(append_string_args, get_builtin_type("char"));
+    let append_string_fun: nt_fun => {
+        ret_type => get_builtin_type("string"),
+        args => append_string_args
+    };
+    let append_string_elem: nt_elem => {
+        Tag => fdef,
+        name => "append_string",
+        fun => append_string_fun
+    };
+    push_nt(table, "append_string", append_string_elem);
 }

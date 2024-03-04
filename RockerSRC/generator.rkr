@@ -75,6 +75,15 @@ let generate_pop(g: gen, funcall: ast_funcall): void => {
 
 let generate_funcall(g: gen, fun: ast): void => {
     let funcall: ast_funcall => fun::Data::data_funcall;
+    let ref: nt_elem => get_ref(funcall::name::Lexeme, g::table);
+    if ref = NULL then{
+        print_error_prefix_tok(funcall::name);
+        print_color(" [Syntax Error]", ROCKER_RED);
+        print(" Function \'");
+        print_underline(funcall::name::Lexeme);
+        print("\' is not declared within program !\n");
+        exit(1);
+    }
     if str_eq(funcall::name::Lexeme, "append") then
         generate_append(g, funcall);
     else if str_eq(funcall::name::Lexeme, "get") then
@@ -91,6 +100,15 @@ let generate_funcall(g: gen, fun: ast): void => {
             generate_expression(g, get(args, i));
         }
         pfile(g::f, ")");
+    }
+    else if str_eq(funcall::name::Lexeme, "system") then {
+        pfile(g::f, "system(string_to_cstr(");
+        let args: ast [] => funcall::args;
+        loop i: 0 -> get_length(args) - 1 => {
+            if i > 0 then pfile(g::f, ", ");
+            generate_expression(g, get(args, i));
+        }
+        pfile(g::f, "))");
     }
     else {
         pfile(g::f, funcall::name::Lexeme);
@@ -469,7 +487,6 @@ let generate_fundef_proto(g: gen, fun: ast, add: boolean): void => {
 let generate_fundef(g: gen, fun: ast): void => {
     let fundef: ast_fundef => fun::Data::data_fundef;
     new_nt_scope(g::table);
-    push_nt(g::table, fundef::name::Lexeme, get_nt_fun(fundef));
     if str_eq(fundef::name::Lexeme, "main") = false then {
         generate_fundef_proto(g, fun, true);
         generate_compound(g, fundef::body);
@@ -514,6 +531,7 @@ let generate_forward_defs(g: gen, program: ast): void => {
             let fundef: ast_fundef => stmt::Data::data_fundef;
             let name: string => fundef::name::Lexeme;
             if str_eq(name, "main") = false then {
+                push_nt(g::table, fundef::name::Lexeme, get_nt_fun(fundef));
                 generate_fundef_proto(g, stmt, false);
                 pfile(g::f, ";\n");
             }

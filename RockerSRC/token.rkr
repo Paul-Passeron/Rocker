@@ -239,4 +239,14 @@ let print_list_types(_l: token []) : void => {
         print("\n");
     }
 }
+
+let print_error_prefix_tok(t: token): void => {
+    print("\e[1;4m");
+    print(t::Filename);
+    print(":");
+    print(string_of_int(t::Line));
+    print(":");
+    print(string_of_int(t::Col));
+    print("\e[0m");
+}
 //-----------------------------------------------------------------------------

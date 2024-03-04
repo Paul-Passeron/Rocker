@@ -33,7 +33,7 @@ let main() : int => {
 - [x] Allow assignments
 - [x] Accessing fields of record types
 - [x] Add integer for loops 
-- [x] Add while loops 
+- [x] Add while loops
 - [x] Maybe add a dynamic array type -> Figure out syntax for pushing / poping
 - [x] Use string views for lexemes (limit the ammount of allocated data)
 - [x] Add including files support
@@ -48,3 +48,4 @@ let main() : int => {
 - [ ] Generation of match expressions
 - [ ] Typechecking
 - [ ] Add foreach loop for array types
+- [ ] Add variadic functions support
