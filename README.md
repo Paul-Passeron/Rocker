@@ -17,14 +17,29 @@ This language is transpiled to C for the moment
 ## Example code:
 
 ```
-// Simple function definition
-
 let main() : int => {
   print("Hello from Rocker!\n");
   return 0;
 }
 ```
 
+## Compilation
+```
+./rocker examples/hello_world.rkr
+./a.out
+```
+
+## Usage:
+```
+Usage:
+        ./rocker [flags] <input file> [output file]
+Possible flags:
+        '-t' or '--tmp'      :   Does not remove the temporary transpiled C files
+        '-c' or '--transpile':   Only transpiles the Rocker to C but does not compile to a native executable
+        '-l' or '--lexer'    :   Prints the tokens contained in the file and included files
+        '-h' or '--help'     :   Displays this message
+        '-v' or '--verbose'  :   Prints infos and commands ran by the compiler
+```
 ## Progress
 - [x] Simple rec and pro type generation
 - [x] Simple Hello World example compiling and working
