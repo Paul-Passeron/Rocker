@@ -1,0 +1,12 @@
+//-----------------------------------------------------------------------------
+//  ROCKER TOKEN
+//  MIT License
+//  Copyright (c) 2024 Paul Passeron
+//-----------------------------------------------------------------------------
+
+include "RockerSRC/stdlib.rkr"
+
+// TODO !!!
+let type_check(prog: ast): void => {
+    implemented("type_check");
+}

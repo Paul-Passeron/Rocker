@@ -6,17 +6,41 @@
 
 
 enum nt_kind => {
-    NT_FUN,
-    NT_VAR,
-    NT_USER_TYPE,
-    NT_BUILTIN_TYPE,
+    tdef,
+    fdef,
+    vdef,
+}
+
+rec constructor_spec => {
+    name: string,
+    type: type_spec,
+}
+
+rec type_spec => {
+    base_type: string,
+    arrays: int,
+    is_builtin: boolean,
+    tdef_kind: tdef_type,
+    constructors: constructor_spec [],
+}
+
+
+rec nt_fun => {
+    ret_type: type_spec,
+    args: type_spec [],
+}
+
+rec nt_var => {
+    type: type_spec,
 }
 
 rec nt_elem => {
-    kind: nt_kind,
+    Tag: nt_kind,
     name: string,
     scope: int,
-    ref: ast,
+    tdef: type_spec,
+    fun: nt_fun,
+    var: nt_var,
 }
 
 rec nt => {
@@ -24,15 +48,16 @@ rec nt => {
     scope: int
 }
 
-let get_ref(name: string, table: nt):ast => {
+let get_ref(name: string, table: nt):nt_elem => {
     let elems: nt_elem [] => table::elems;
     let max_scope: int => 0-1;
-    let res: ast => NULL;
+    let res: nt_elem => NULL;
     loop i: 0 -> get_length(elems) - 1 => {
         let elem: nt_elem => get(elems, i);
         if str_eq(elem::name, name) && max_scope < elem::scope then {
+            if elem::Tag = tdef then return elem;
             max_scope => elem::scope;
-            res => elem::ref;
+            res => elem;
         }
     }
     return res;
@@ -50,6 +75,7 @@ let new_nt(): nt => {
 let new_nt_scope(table: nt): void => {
     table::scope => table::scope + 1;
 }
+
 let end_nt_scope(table: nt): void => {
     let elems: nt_elem [] => table::elems;
     let i: int => get_length(elems) - 1;
@@ -64,14 +90,66 @@ let end_nt_scope(table: nt): void => {
     }
 }
 
-let push_nt(table: nt, name:string, kind: nt_kind, ref: ast): void => {
-    let res: nt_elem => {
-        kind => kind,
-        name => name,
-        ref => ref,
-        scope => table::scope
-    };
+let push_nt(table: nt, name: string, elem: nt_elem): void => {
     let elems: nt_elem [] => table::elems;
+    let res: nt_elem => {
+        Tag => elem::Tag,
+        name => elem::name,
+        tdef => elem::tdef,
+        fun => elem::fun,
+        var => elem::var,
+    };
+    res::scope => table::scope;
     append(elems, res);
 }
 
+let get_builtin_type(name: string): type_spec => {
+    let res: type_spec => {
+        base_type => name,
+        arrays => 0,
+        is_builtin => true,
+        tdef_kind => TDEF_BUILTIN, 
+        constructors => NULL,
+    };
+    return res;
+}
+
+let get_nt_fun(fundef: ast_fundef): nt_elem => {
+    let nt_args: type_spec [] => [];
+    let types: ast [] => fundef::types;
+    loop i: 0 -> get_length(types) - 1 =>
+        append(nt_args, nt_type_of_ast(get(types, i)));
+    let fundef_elem: nt_fun => {
+        ret_type => nt_type_of_ast(fundef::ret_type),
+        args => nt_args
+    };
+    let elem: nt_elem => {
+        Tag => fdef,
+        name => fundef::name::Lexeme,
+        fun => fundef_elem
+    };
+    return elem;
+}
+
+let get_nt_var(vardef: ast_vardef): nt_elem => {
+    let elem_var: nt_var => {
+        type => nt_type_of_ast(vardef::type)
+    };
+    let elem: nt_elem => {
+        Tag => vdef,
+        name => vardef::name::Lexeme,
+        var => elem_var
+    };
+    return elem;
+}
+
+let nt_type_of_ast(a: ast): type_spec => {
+    let type: ast_type => a::Data::data_type;
+    let res: type_spec => {
+        base_type => type::name::Lexeme,
+        is_builtin =>  is_builtin_typename(type::name::Lexeme),
+        tdef_kind =>TDEF_BUILTIN,
+        constructors => NULL,
+    };
+    return res;
+}

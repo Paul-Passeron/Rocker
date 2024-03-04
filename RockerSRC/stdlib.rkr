@@ -106,5 +106,12 @@ let create_string(src: string, offset: int,  length: int): string => {
     }
     return res;
 }
+
+let cons_str(src: string, offset: int): string => {
+    return create_string(src,
+                         offset,
+                         get_string_length(src) - offset);
+}
+
 //-----------------------------------------------------------------------------
 

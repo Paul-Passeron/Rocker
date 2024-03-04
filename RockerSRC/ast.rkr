@@ -124,6 +124,8 @@ rec ast_ifstmt => {
 enum tdef_type => {
     TDEF_REC,
     TDEF_PRO,
+    TDEF_ENUM,
+    TDEF_BUILTIN,
 }
 
 rec ast_tdef => {

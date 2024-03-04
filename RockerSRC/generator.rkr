@@ -37,13 +37,17 @@ let generate_gen_type_fun(g: gen, funcall: ast_funcall, suffixe: string): void =
     let arr_name: string => arr_ast::Data::data_identifier::id::Lexeme;
     // getting the type of the array (for the moment you have to bind
     // it to a variable, even if it is an argument to the function
-    let ref: ast => get_ref(arr_name, g::table);
-    if ref::Tag != tag_vardef then {
+    let ref: nt_elem => get_ref(arr_name, g::table);
+    if ref::Tag != vdef then {
         print("Arrays must be declared as variables !\n");
         exit(1);
     }
     // generate_type(g, ref::Data::data_vardef::type);
-    pfile(g::f, ref::Data::data_vardef::type::Data::data_type::name::Lexeme);
+    // pfile(g::f, ref::Data::data_vardef::type::Data::data_type::name::Lexeme);
+    if ref::var::type::arrays = 0 then
+        pfile(g::f, ref::var::type::base_type);
+    else
+        pfile(g::f, "__internal_dynamic_array_t");
     pfile(g::f, suffixe);
     pfile(g::f,"(");
         loop i: 0 -> get_length(args) - 1 => {
@@ -179,10 +183,20 @@ let generate_array_funcs(g: gen, type_name: string): void => {
         pfile(g::f, "}\n\n");
 }
 
+
+
 let generate_loop(g: gen, loop_ast: ast): void => {
     let l: ast_loop => loop_ast::Data::data_loop;
     new_nt_scope(g::table);
-    push_nt(g::table, l::variable::Lexeme, NT_VAR, loop_ast);
+    let var: nt_var => {
+        type => get_builtin_type("int")
+    };
+    let res: nt_elem => {
+        Tag => vdef,
+        name => l::variable::Lexeme,
+        var => var,
+    };
+    push_nt(g::table, l::variable::Lexeme, res);
     pfile(g::f, "for(int ");
     pfile(g::f, l::variable::Lexeme);
     pfile(g::f, " =");
@@ -278,10 +292,9 @@ let is_builtin_typename(name: string): boolean => {
     return false;
 }
 
-
 let generate_vardef(g: gen, var: ast): void => {
     let vardef: ast_vardef => var::Data::data_vardef;
-    push_nt(g::table, vardef::name::Lexeme, NT_VAR, var);
+    push_nt(g::table, vardef::name::Lexeme, get_nt_var(vardef));
     let type_name: string =>
         vardef::type::Data::data_type::name::Lexeme;
     if vardef::type::Data::data_type::is_array &&
@@ -422,11 +435,21 @@ let generate_fundef_proto(g: gen, fun: ast, add: boolean): void => {
     let types: ast [] => fundef::types;
     loop i: 0 -> get_length(args) - 1 => {
         let arg: token => get(args, i);
-        if add then
-            push_nt(g::table, arg::Lexeme, NT_VAR, fun);
+        let type: ast => get(types, i);
+        if add then {
+            let elem_var: nt_var => {
+                type => nt_type_of_ast(type)
+            };
+            let elem: nt_elem => {
+                Tag => vdef,
+                name => arg::Lexeme,
+                var => elem_var
+            };
+            push_nt(g::table, arg::Lexeme, elem);
+        }
         if i > 0 then
             pfile(g::f, ", ");
-        generate_type(g, get(types, i));
+        generate_type(g, type);
         pfile(g::f, " ");
         pfile(g::f, arg::Lexeme);
     }
@@ -436,7 +459,7 @@ let generate_fundef_proto(g: gen, fun: ast, add: boolean): void => {
 let generate_fundef(g: gen, fun: ast): void => {
     let fundef: ast_fundef => fun::Data::data_fundef;
     new_nt_scope(g::table);
-    push_nt(g::table, fundef::name::Lexeme, NT_FUN, fun);
+    push_nt(g::table, fundef::name::Lexeme, get_nt_fun(fundef));
     if str_eq(fundef::name::Lexeme, "main") = false then {
         generate_fundef_proto(g, fun, true);
         generate_compound(g, fundef::body);
