@@ -19,10 +19,11 @@ let usage(prog_name: string): void => {
     print(prog_name);
     print(" [flags] <input file> [output file]\n");
     print("Possible flags:\n");
-    print("\t\'-t\' or \'--tmp\'    :\t Does not remove the temporary transpiled C files\n");
-    print("\t\'-l\' or \'--lexer\'  :\t Prints the tokens contained in the file and included files\n");
-    print("\t\'-h\' or \'--help\'   :\t Displays this message\n");
-    print("\t\'-v\' or \'--verbose\':\t Prints infos and commands ran by the compiler\n");
+    print("\t\'-t\' or \'--tmp\'      :\t Does not remove the temporary transpiled C files\n");
+    print("\t\'-c\' or \'--transpile\':\t Only transpiles the Rocker to C but does not compile to a native executable\n");
+    print("\t\'-l\' or \'--lexer\'    :\t Prints the tokens contained in the file and included files\n");
+    print("\t\'-h\' or \'--help\'     :\t Displays this message\n");
+    print("\t\'-v\' or \'--verbose\'  :\t Prints infos and commands ran by the compiler\n");
 
     
 }
@@ -41,6 +42,7 @@ let main(): void => {
     let print_lexer: boolean => false;
     let quiet: boolean => true;
     let keep_tmp: boolean => false;
+    let transpile_only: boolean => false;
     loop i: 1 -> get_length(args) - 1 => {
         let arg: string => get(args, i);
         if get_nth_char(arg, 0) = '-' then {
@@ -59,6 +61,8 @@ let main(): void => {
             }
             else if str_eq(arg, "-t") || str_eq(arg, "--tmp") then
                 keep_tmp => true;
+            else if str_eq(arg, "-c") || str_eq(arg, "--transpile") then
+                transpile_only => true;
             else {
                 print("[ERR]  Unknown flag \'");
                 print(arg);
@@ -96,28 +100,30 @@ let main(): void => {
     kill_generator(g);
     if quiet = false then 
         print("[INFO] Transpiling to C successful\n");
-    let command: string => "";
-    command => concat_string(command, "clang-format ");
-    command => concat_string(command, cout);
-    command => concat_string(command, " -i");
-    command => concat_string(command, " && ");
-    command => concat_string(command, " gcc -Wall -g -o ");
-    command => concat_string(command, output);
-    command => concat_string(command, " ");
-    command => concat_string(command, cout);
-    command => concat_string(command,  " src/generation/fundefs.c");
-    command => concat_string(command, " src/generation/fundefs_internal.c");
-    command => concat_string(command, " RockerAllocator/alloc.c");
-    if quiet = false then {
-        print("[CMD]  ");
-        print(command);
-        print("\n");
+    if transpile_only = false then {
+        let command: string => "";
+        command => concat_string(command, "clang-format ");
+        command => concat_string(command, cout);
+        command => concat_string(command, " -i");
+        command => concat_string(command, " && ");
+        command => concat_string(command, " gcc -Wall -g -o ");
+        command => concat_string(command, output);
+        command => concat_string(command, " ");
+        command => concat_string(command, cout);
+        command => concat_string(command,  " src/generation/fundefs.c");
+        command => concat_string(command, " src/generation/fundefs_internal.c");
+        command => concat_string(command, " RockerAllocator/alloc.c");
+        if quiet = false then {
+            print("[CMD]  ");
+            print(command);
+            print("\n");
 
+        }
+        system(string_to_cstr(command));
+        if quiet = false then 
+            print("[INFO] Compiling transpiled C file successful\n");
     }
-    system(string_to_cstr(command));
-    if quiet = false then 
-        print("[INFO] Compiling transpiled C file successful\n");
-    if keep_tmp = false then {
+    if keep_tmp = false && transpile_only = false then {
 
     let remove_tmp: string => "rm ";
         remove_tmp => concat_string(remove_tmp, cout);
@@ -131,7 +137,7 @@ let main(): void => {
             system(string_to_cstr(remove_tmp));
         }
     }
-    if quiet = false then
+    if quiet = false && transpile_only = false then
         print("[INFO] Rocker compiling successful\n");
 }
 
