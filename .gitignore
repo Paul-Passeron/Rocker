@@ -5,4 +5,4 @@ rocker
 out*
 *_old.c
 rocker.c
-bootstrap
+!bootsrapper/bootstrap
