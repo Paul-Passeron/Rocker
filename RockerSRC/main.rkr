@@ -105,10 +105,12 @@ let main(): void => {
     }
     if transpile_only = false then {
         let command: string => "";
-        command => concat_string(command, "clang-format ");
-        command => concat_string(command, cout);
-        command => concat_string(command, " -i");
-        command => concat_string(command, " && ");
+        if keep_tmp = true then {
+            command => concat_string(command, "clang-format ");
+            command => concat_string(command, cout);
+            command => concat_string(command, " -i");
+            command => concat_string(command, " && ");
+        }
         command => concat_string(command, " gcc -Wall -g -o ");
         command => concat_string(command, output);
         command => concat_string(command, " ");
