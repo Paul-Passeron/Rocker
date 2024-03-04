@@ -41,11 +41,10 @@ let main() : int => {
 - [x] The Rocker version of the compiler can lex/tokenize itself
 - [x] The Rocker version of the compiler can parse itself
 - [x] Self-Hosting
-
+- [x] Made exit memory-safe
 ## TODO
 - [ ] Pattern matching product types
 - [ ] Get type of an expression (for match cases)
 - [ ] Generation of match expressions
 - [ ] Typechecking
 - [ ] Add foreach loop for array types
-- [ ] Make exit not leak memory

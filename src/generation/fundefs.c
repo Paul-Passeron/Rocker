@@ -1,5 +1,6 @@
 #include "fundefs.h"
 #include "../../RockerAllocator/alloc.h"
+#include "fundefs_internal.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -53,7 +54,7 @@ string read_file(string filename) {
     printf("Unable to open file \"%s\" for reading: ",
            string_to_cstr(filename));
     perror("");
-    exit(1);
+    exit_rocker(1);
   }
   fseek(f, 0, SEEK_END);
   size_t length = ftell(f);
@@ -82,7 +83,7 @@ void write_string_to_file(string s, string filename) {
     printf("Unable to open file \"%s\" for writing: ",
            string_to_cstr(filename));
     perror("");
-    exit(1);
+    exit_rocker(1);
   }
   fprintf(f, "%s", s.data);
   fclose(f);

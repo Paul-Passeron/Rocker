@@ -28,11 +28,11 @@ __internal_dynamic_array_t __internal_make_array(size_t size) {
 int __internal_push_array(__internal_dynamic_array_t arr, void *elem) {
   if (arr->data == NULL) {
     printf("Uninitialized array !\n");
-    exit(1);
+    exit_rocker(1);
   }
   if (elem == NULL) {
     printf("Could not push elem to dynamic array: BAD ELEM\n");
-    exit(1);
+    exit_rocker(1);
   }
   if (arr->length > arr->capacity) {
     arr->capacity *= 2;
@@ -42,7 +42,7 @@ int __internal_push_array(__internal_dynamic_array_t arr, void *elem) {
   void *dst = arr->data + arr->length * arr->elem_size;
   if (dst == NULL) {
     printf("Could not push elem to dynamic array: BAD ARRAY\n");
-    exit(1);
+    exit_rocker(1);
   }
   // memccpy(dst, elem, 1, arr->elem_size);
   for (int i = 0; i < arr->elem_size; i++) {

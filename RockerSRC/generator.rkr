@@ -83,6 +83,15 @@ let generate_funcall(g: gen, fun: ast): void => {
         generate_set(g, funcall);
     else if str_eq(funcall::name::Lexeme, "pop") then
         generate_pop(g, funcall);
+    else if str_eq(funcall::name::Lexeme, "exit") then {
+        pfile(g::f, "exit_rocker(");
+        let args: ast [] => funcall::args;
+        loop i: 0 -> get_length(args) - 1 => {
+            if i > 0 then pfile(g::f, ", ");
+            generate_expression(g, get(args, i));
+        }
+        pfile(g::f, ")");
+    }
     else {
         pfile(g::f, funcall::name::Lexeme);
         pfile(g::f, "(");
@@ -164,7 +173,7 @@ let generate_array_funcs(g: gen, type_name: string): void => {
         pfile(g::f, " *res = __internal_get_elem(arr, index);\n");
         pfile(g::f,"  if (res == NULL){ printf(\"NULL ELEMENT IN ");
         pfile(g::f, type_name);
-        pfile(g::f, "_get_elem\"); exit(1);}");
+        pfile(g::f, "_get_elem\"); exit_rocker(1);}");
         pfile(g::f, "  return *res;\n");
         pfile(g::f, "}\n\n");
         pfile(g::f, "void ");
