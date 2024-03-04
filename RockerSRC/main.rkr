@@ -145,9 +145,10 @@ let main(): void => {
             system(remove_tmp);
         }
     }
-    if quiet = false && transpile_only = false then
+    if quiet = false && transpile_only = false then{
         print_info();
         print("Rocker compiling successful\n");
+    }
 
 }
 
