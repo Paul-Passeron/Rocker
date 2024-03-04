@@ -131,6 +131,18 @@ let get_nt_fun(fundef: ast_fundef): nt_elem => {
     return elem;
 }
 
+let nt_builtin_vardef(name: string, type: string): nt_elem => {
+     let elem_var: nt_var => {
+        type => get_builtin_type(type)
+    };
+    let elem: nt_elem => {
+        Tag => vdef,
+        name => name,
+        var => elem_var
+    };
+    return elem;
+}
+
 let get_nt_var(vardef: ast_vardef): nt_elem => {
     let elem_var: nt_var => {
         type => nt_type_of_ast(vardef::type)
@@ -152,4 +164,35 @@ let nt_type_of_ast(a: ast): type_spec => {
         constructors => NULL,
     };
     return res;
+}
+
+
+let get_builtin_type_tdef(name: string): nt_elem => {
+    let elem: nt_elem => {
+        Tag => tdef,
+        name => name,
+        tdef => get_builtin_type(name),
+    };
+    return elem;
+}
+
+let setup_name_table(table: nt): void => {
+    // builtin types
+    push_nt(table, "int", get_builtin_type_tdef("int"));
+    push_nt(table, "boolean", get_builtin_type_tdef("boolean"));
+    push_nt(table, "char", get_builtin_type_tdef("char"));
+    push_nt(table, "string", get_builtin_type_tdef("string"));
+    push_nt(table, "void", get_builtin_type_tdef("void"));
+    push_nt(table, "null_type", get_builtin_type_tdef("null_type"));
+    push_nt(table, "array", get_builtin_type_tdef("array"));
+
+
+    // builtin literals
+    push_nt(table, "true", nt_builtin_vardef("true", "boolean"));
+    push_nt(table, "false", nt_builtin_vardef("false", "boolean"));
+    push_nt(table, "NULL", nt_builtin_vardef("NULL", "null_type"));
+
+    // builtin functions
+
+
 }

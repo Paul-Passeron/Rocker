@@ -15,14 +15,23 @@ include "RockerSRC/typechecker.rkr"
 
 let usage(prog_name: string): void => {
     print("Usage:\n");
-    printf(string_to_cstr("\t%s <input file> [output file]\n"),
-           string_to_cstr(prog_name));
+    print("\t");
+    print(prog_name);
+    print(" [flags] <input file> [output file]\n");
+    print("Possible flags:\n");
+    print("\t\'-t\' or \'--tmp\'    :\t Does not remove the temporary transpiled C files\n");
+    print("\t\'-l\' or \'--lexer\'  :\t Prints the tokens contained in the file and included files\n");
+    print("\t\'-h\' or \'--help\'   :\t Displays this message\n");
+    print("\t\'-v\' or \'--verbose\':\t Prints infos and command ran by the compiler\n");
+
+    
 }
 
 let main(): void => {
     let args: string [] => get_args();
     let this_file: string => get(args, 0);
     if get_length(args) < 2 then{
+        print("[ERR]  Expected input !\n");
         usage(this_file);
         exit(1);
     }
@@ -36,18 +45,22 @@ let main(): void => {
         let arg: string => get(args, i);
         if get_nth_char(arg, 0) = '-' then {
             if get_string_length(arg) = 1 then {
-                print("Unexpected emtpy flag !\n");
+                print("[ERR]  Unexpected empty flag !\n");
                 usage(this_file);
                 exit(1);
             }
-            if get_nth_char(arg, 1) = 'l' && print_lexer = false then
+            if str_eq(arg, "-l") || str_eq(arg, "--lexer") then
                 print_lexer => true;
-            else if get_nth_char(arg, 1) = 'v' && print_lexer = false then
+            else if str_eq(arg, "-v") || str_eq(arg, "--verbose") then
                 quiet => false;
-            else if str_eq(arg, "-tmp") then
+            else if str_eq(arg, "-h") || str_eq(arg, "--help") then{
+                usage(this_file);
+                exit(0);
+            }
+            else if str_eq(arg, "-t") || str_eq(arg, "--tmp") then
                 keep_tmp => true;
             else {
-                print("Unknown flag \'");
+                print("[ERR]  Unknown flag \'");
                 print(arg);
                 print("\'!\n");
                 usage(this_file);
@@ -64,7 +77,7 @@ let main(): void => {
         }
     }
     if get_string_length(input) = 0 then {
-        print("Expected input !\n");
+        print("[ERR]  Expected input !\n");
         usage(this_file);
         exit(1);
     }

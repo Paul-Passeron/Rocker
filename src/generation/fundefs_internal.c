@@ -222,3 +222,18 @@ __internal_dynamic_array_t get_args(void) {
   }
   return cmd_args;
 }
+
+void init_rocker(int argc, char **argv) {
+  init_compiler_stack();
+  fill_cmd_args(argc, argv);
+}
+
+void end_rocker(void) {
+  kill_compiler_stack();
+  //
+}
+
+void exit_rocker(int status) {
+  end_rocker();
+  exit(status);
+}

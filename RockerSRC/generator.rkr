@@ -289,6 +289,7 @@ let is_builtin_typename(name: string): boolean => {
     if str_eq(name, "boolean") then return true; 
     if str_eq(name, "string") then return true; 
     if str_eq(name, "char") then return true; 
+    if str_eq(name, "void") then return true; 
     return false;
 }
 
@@ -466,10 +467,9 @@ let generate_fundef(g: gen, fun: ast): void => {
         pfile(g::f, "\n\n");
     } else {
         pfile(g::f, "int main(int argc, char **argv) {\n");
-        pfile(g::f, "init_compiler_stack();\n");
-        pfile(g::f, "fill_cmd_args(argc, argv);\n");
+        pfile(g::f, "init_rocker(argc, argv);\n");
         generate_compound(g, fundef::body);
-        pfile(g::f, "kill_compiler_stack();\n");
+        pfile(g::f, "end_rocker();\n");
         pfile(g::f, "return 0;\n");
         pfile(g::f, "}\n\n");
     }
@@ -513,6 +513,7 @@ let generate_forward_defs(g: gen, program: ast): void => {
 }
 
 let transpile(g: gen, program: ast): void => {
+    setup_name_table(g::table);
     let stmts: ast [] => program::Data::data_program::prog;
     pfile(g::f, "#include \"./src/generation/fundefs.h\"\n");
     pfile(g::f, "#include \"./src/generation/fundefs_internal.h\"\n");
