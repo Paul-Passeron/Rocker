@@ -48,5 +48,4 @@ let main() : int => {
 - [ ] Generation of match expressions
 - [ ] Typechecking
 - [ ] Add foreach loop for array types
-- [ ] Add cstr type (for easier printfs mostly)
 - [ ] Make exit not leak memory
