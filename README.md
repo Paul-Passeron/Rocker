@@ -17,9 +17,8 @@ This language is transpiled to C for the moment
 ## Example code:
 
 ```
-let main() : int => {
+let main() : void => {
   print("Hello from Rocker!\n");
-  return 0;
 }
 ```
 
