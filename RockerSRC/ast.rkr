@@ -126,6 +126,7 @@ enum tdef_type => {
     TDEF_PRO,
     TDEF_ENUM,
     TDEF_BUILTIN,
+    TDEF_ANY
 }
 
 rec ast_tdef => {

@@ -1,34 +1,35 @@
 CC=gcc
 CFLAGS=-Werror -Wall -Wextra -g -pedantic
 SRC=src/
-BUILD=build/
+# BUILD=build/
 
-DEP=$(BUILD)bootstrap.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o $(BUILD)stringview.o
+# DEP=$(BUILD)bootstrap.o $(BUILD)lexer.o $(BUILD)token.o $(BUILD)alloc.o $(BUILD)ast.o $(BUILD)parser.o $(BUILD)generator.o $(BUILD)name_table.o $(BUILD)stringview.o
 
-all:  clean_rocker lines bootstrap rocker
+all:  clean_rocker lines rocker
 
 
 create_build:
 	mkdir build
-bootstrap: $(DEP)
-	$(CC) $(CFLAGS) -o $@ $^
-$(BUILD)%.o: RockerAllocator/%.c 
-	$(CC) $(CFLAGS) -o $@ $^ -c
+# bootstrap: $(DEP)
+# 	$(CC) $(CFLAGS) -o $@ $^
+# $(BUILD)%.o: RockerAllocator/%.c 
+# 	$(CC) $(CFLAGS) -o $@ $^ -c
 
-$(BUILD)%.o: $(SRC)%.c 
-	$(CC) $(CFLAGS) -o $@ $^ -c
-$(BUILD)bootstrap.o: $(SRC)main.c
-	$(CC) $(CFLAGS) -o $@ $^ -c
+# $(BUILD)%.o: $(SRC)%.c 
+# 	$(CC) $(CFLAGS) -o $@ $^ -c
+# $(BUILD)bootstrap.o: $(SRC)main.c
+# 	$(CC) $(CFLAGS) -o $@ $^ -c
 
 rocker:
-	./bootstrap RockerSRC/main.rkr $@
+	./bootstrapper/bootstrap RockerSRC/main.rkr $@
 	./rocker RockerSRC/main.rkr tmp_rocker
 	mv tmp_rocker rocker
 clean:
 	rm -rf $(BUILD)*
 	rm -rf rocker
+
 clean_rocker:
-	rm -rf rocker
+	@rm -rf rocker
 
 lines:
 	@echo "C:"

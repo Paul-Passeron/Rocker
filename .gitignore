@@ -6,3 +6,5 @@ out*
 *_old.c
 rocker.c
 !bootsrapper/bootstrap
+
+tmp_rocker*

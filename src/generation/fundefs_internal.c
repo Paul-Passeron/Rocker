@@ -71,7 +71,9 @@ void *__internal_pop_array(__internal_dynamic_array_t arr) {
 
 void *__internal_get_elem(__internal_dynamic_array_t arr, size_t index) {
   if (index >= arr->length) {
-    printf("Could not get elem from dynamic array: INDEX OUT OF BOUNDS\n");
+    printf("Could not get elem from dynamic array: INDEX OUT OF BOUNDS (%ld)\n",
+           index);
+
     int *tmp = NULL;
     *tmp = 3;
     return NULL;
@@ -93,7 +95,11 @@ void __internal_insert(__internal_dynamic_array_t arr, size_t index,
 void __internal_set_elem(__internal_dynamic_array_t arr, size_t index,
                          void *elem) {}
 
-size_t get_length(__internal_dynamic_array_t arr) { return arr->length; }
+size_t get_length(__internal_dynamic_array_t arr) {
+  if (arr == NULL)
+    return 0;
+  return arr->length;
+}
 
 __internal_dynamic_array_t int_make_array(void) {
   return __internal_make_array(sizeof(int));

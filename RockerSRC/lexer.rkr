@@ -155,7 +155,7 @@ let length_of_delimited_literal(l: lexer, c: char): int => {
         else if lexer_peek(l) = '\\' then pass => true;
         l::Cursor => l::Cursor+1;
     }
-    let res: int => l::Cursor - cursor + 1;
+    let res: int => 1 + l::Cursor - cursor;
     l::Cursor => cursor;
     return res;
 }

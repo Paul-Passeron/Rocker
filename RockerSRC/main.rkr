@@ -19,11 +19,11 @@ let usage(prog_name: string): void => {
     print(prog_name);
     print(" [flags] <input file> [output file]\n");
     print("Possible flags:\n");
-    print("\t\'-t\' or \'--tmp\'      :\t Does not remove the temporary transpiled C files\n");
-    print("\t\'-c\' or \'--transpile\':\t Only transpiles the Rocker to C but does not compile to a native executable\n");
-    print("\t\'-l\' or \'--lexer\'    :\t Prints the tokens contained in the file and included files\n");
-    print("\t\'-h\' or \'--help\'     :\t Displays this message\n");
-    print("\t\'-v\' or \'--verbose\'  :\t Prints infos and commands ran by the compiler\n");    
+    print("\t\'-t\' or \'--tmp\'       :\t Does not remove the temporary transpiled C files\n");
+    print("\t\'-c\' or \'--transpile\' :\t Only transpiles the Rocker to C but does not compile to a native executable\n");
+    print("\t\'-l\' or \'--lexer\'     :\t Prints the tokens contained in the file and included files\n");
+    print("\t\'-h\' or \'--help\'      :\t Displays this message\n");
+    print("\t\'-v\' or \'--verbose\'   :\t Prints infos and commands ran by the compiler\n");    
 }
 
 
@@ -47,7 +47,8 @@ let main(): void => {
         let arg: string => get(args, i);
         if get_nth_char(arg, 0) = '-' then {
             if get_string_length(arg) = 1 then {
-                print("[ERR]  Unexpected empty flag !\n");
+                print_error();
+                print("Unexpected empty flag !\n");
                 usage(this_file);
                 exit(1);
             }
@@ -74,6 +75,7 @@ let main(): void => {
         } else if get_string_length(input) = 0 then input => arg; 
          else if get_string_length(output) = 0 then output => arg;
          else {
+            print_error();
             print("Unexpected argument: \'");
             print(arg);
             print("\'!\n");
@@ -82,7 +84,8 @@ let main(): void => {
         }
     }
     if get_string_length(input) = 0 then {
-        print("[ERR]  Expected input !\n");
+        print_error();
+        print("Expected input !\n");
         usage(this_file);
         exit(1);
     }
@@ -98,6 +101,11 @@ let main(): void => {
     let cout: string => concat_string(output, ".c");
     let g: gen => new_gen(cout);
     transpile(g, p::Prog);
+    if g::error then{
+        g::f::Data => "";
+        keep_tmp => false;
+        exit(1);
+    }
     kill_generator(g);
     if quiet = false then {
         print_info();
@@ -111,7 +119,7 @@ let main(): void => {
             command => concat_string(command, " -i");
             command => concat_string(command, " && ");
         }
-        command => concat_string(command, " gcc -Wall -g -o ");
+        command => concat_string(command, "clang -Wall -g -o ");
         command => concat_string(command, output);
         command => concat_string(command, " ");
         command => concat_string(command, cout);
@@ -149,7 +157,6 @@ let main(): void => {
         print_info();
         print("Rocker compiling successful\n");
     }
-
 }
 
 //-----------------------------------------------------------------------------

@@ -5,6 +5,149 @@
 //-----------------------------------------------------------------------------
 
 include "RockerSRC/stdlib.rkr"
+include "RockerSRC/ast.rkr"
+include "RockerSRC/name_table.rkr"
+include "RockerSRC/token.rkr"
+
+let are_builtins_compatible(b1: string, b2: string): boolean => {
+    if str_eq(b1, b2) then return true;
+    if str_eq(b1, "int")     || str_eq(b2, "char")  then return true;  
+    if str_eq(b2, "int")     || str_eq(b1, "char")  then return true;  
+    if str_eq(b1, "boolean") || str_eq(b2, "char") then return true;  
+    if str_eq(b2, "boolean") || str_eq(b1, "char") then return true;
+    if str_eq(b1, "boolean") || str_eq(b2, "int")  then return true;  
+    if str_eq(b2, "boolean") || str_eq(b1, "int")  then return true;
+    return false;
+}
+
+let are_types_compatible(t1: type_spec, t2: type_spec): boolean => {
+    if t1::arrays != t2::arrays then return false;
+    if str_eq(t1::base_type, "__any") || str_eq(t2::base_type, "__any") then return true;
+    if t1::is_builtin != t2::is_builtin then return false;
+    if t1::tdef_kind != t2::tdef_kind then return false;
+    if str_eq(t1::base_type, t2::base_type) then return true;
+    return are_builtins_compatible(t1::base_type, t2::base_type);
+}
+
+
+let get_type_of_expression(table: nt, a: ast): type_spec => {
+    if a::Tag = tag_literal then {
+        let lit: token => a::Data::data_literal::lit;
+        if lit::Type = TOK_NUM_LIT then
+            return get_tdef_ref("int", table);
+        else if lit::Type = TOK_CHR_LIT then
+            return get_tdef_ref("char", table);
+        else if lit::Type = TOK_STR_LIT then
+            return get_tdef_ref("string", table);
+        else if lit::Type = TOK_WILDCARD then
+            return get_tdef_ref("__any", table);
+        else if lit::Type = TOK_ARR_DECL then
+            return get_tdef_ref("__any", table);
+    } else if a::Tag = tag_identifier then {
+        let id: token => a::Data::data_identifier::id;
+        if str_eq(id::Lexeme, "true") then
+            return get_tdef_ref("boolean", table);
+        else if str_eq(id::Lexeme, "false") then
+            return get_tdef_ref("boolean", table);
+        else {
+            let ref: nt_elem => get_ref(id::Lexeme, table);
+            if ref = NULL then return NULL;
+            if ref::Tag != vdef then return NULL;
+            return ref::var::type;
+        }
+    } else if a::Tag = tag_funcall then {
+        let funcall: ast_funcall => a::Data::data_funcall;
+        let fun_name: string => funcall::name::Lexeme;
+        // specila case because this is the only 'function' that can return
+        // any type (actually if its first arg is of type <t>[] it 
+        // has a <t> return type ) 
+
+        if str_eq(fun_name, "get") then{
+            let args: ast [] => funcall::args;
+            // This function does not really check
+            // if functions are correctly called
+            if get_length(args) = 0 then return NULL;
+            return get_type_of_expression(table, get(args, 0));
+        }
+        let ref: nt_elem => get_ref(fun_name, table);
+        if ref = NULL then return NULL;
+        if ref::Tag != fdef then
+            return NULL;
+        return ref::fun::ret_type;
+    } else if a::Tag = tag_record_expr then {
+        return get_tdef_ref("__any", table);
+    } else if a::Tag = tag_op then {
+        let lref: type_spec => get_type_of_expression(table, a::Data::data_op::left);
+        if lref = NULL then
+            return get_type_of_expression(table, a::Data::data_op::left);
+        if str_eq(lref::base_type, "__any") && lref::arrays = 0 then
+            return get_type_of_expression(table, a::Data::data_op::left);
+        return lref;
+    } else if a::Tag = tag_sub then
+        return get_type_of_sub(table, a::Data::data_sub);
+    return NULL;
+}
+
+
+let get_type_of_sub(table: nt, a: ast_sub): type_spec => {
+    // will have to change when we implement
+    // subs an other way
+    let path: token [] => a::path;
+    if path = NULL then return get_type_of_expression(table, a::expr);
+    if get_length(path) = 0 then return NULL;
+    let tok: token => get(path, 0);
+    let first: nt_elem => get_ref(tok::Lexeme, table);
+    if first = NULL then return NULL;
+    if first::Tag != vdef then return NULL;
+    let type: type_spec => first::var::type;
+    if type = NULL then return NULL;
+    type => get_tdef_ref(type::base_type, table);
+    if type = NULL then return NULL;
+    if type::arrays != 0 then return NULL;
+    let constructors: constructor_spec [] => type::constructors;
+    loop i: 1 -> get_length(path) - 1 => {
+        tok => get(path, i);
+        let j: int => 0;
+        let break_cond: boolean => false;
+       
+        while j < get_length(constructors) && break_cond = false do {
+          
+            let cons: constructor_spec => get(constructors, j);
+         
+            if str_eq(tok::Lexeme, cons::name) then {
+                break_cond => true;
+            }
+            else 
+                j => j+1;
+        }
+        if break_cond = false then {
+            return NULL;
+        }
+        let cons: constructor_spec => get(constructors, j);
+        type => cons::type;
+        type => get_tdef_ref(type::base_type, table);
+        constructors => type::constructors;
+    }
+    if a::expr::Tag != tag_identifier then return NULL;
+    tok => a::expr::Data::data_identifier::id;
+    let j: int => 0;
+    let break_cond: boolean => false;
+    while j < get_length(constructors) && break_cond = false do {
+        let cons: constructor_spec => get(constructors, j);
+        if str_eq(tok::Lexeme, cons::name) then {
+            break_cond => true;
+        }
+        else 
+            j => j+1;
+    }
+    if break_cond = false then {
+        return NULL;
+    }
+    let cons: constructor_spec => get(constructors, j);
+    return cons::type;
+}
+
+
 
 // TODO !!!
 let type_check(prog: ast): void => {

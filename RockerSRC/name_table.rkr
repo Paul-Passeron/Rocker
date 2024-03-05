@@ -63,6 +63,13 @@ let get_ref(name: string, table: nt):nt_elem => {
     return res;
 }
 
+let get_tdef_ref(name: string, table: nt): type_spec => {
+    let ref: nt_elem => get_ref(name, table);
+    if ref::Tag = tdef then
+        return ref::tdef;
+    else return NULL;
+}
+
 let new_nt(): nt => {
     let elems: nt_elem [] => [];
     let res: nt => {
@@ -155,14 +162,83 @@ let get_nt_var(vardef: ast_vardef): nt_elem => {
     return elem;
 }
 
+let get_nt_tdef(a: ast_tdef): nt_elem => {
+    let constructors: constructor_spec [] => [];
+    let t_spec: type_spec => {
+        tdef_kind => a::t,
+        base_type => a::name::Lexeme,
+        arrays => 0,
+        is_builtin => false,
+        constructors => NULL
+    };
+    let ast_conss: ast [] => a::constructors;
+    loop i: 0 -> get_length(ast_conss)-1 => {
+        let cons_ast: ast => get(ast_conss, i);
+        let cons: ast_cons => cons_ast::Data::data_cons;
+        let cons_elem: constructor_spec => {
+            name => cons::name::Lexeme,
+            type => nt_type_of_ast(cons::type),
+        };
+        append(constructors, cons_elem);
+    }
+    t_spec::constructors => constructors;
+    let res: nt_elem => {
+        Tag => tdef,
+        tdef => t_spec,
+        name => a::name::Lexeme,
+    };
+    return res;
+}
+
+
+let get_nt_enum_tdef(a: ast_enum_tdef): nt_elem => {
+    let constructors: constructor_spec [] => [];
+    let t_spec: type_spec => {
+        tdef_kind => TDEF_ENUM,
+        base_type => a::name::Lexeme,
+        arrays => 0,
+        is_builtin => false,
+        constructors => constructors
+    };
+    let items: token [] => a::items;
+    loop i: 0 -> get_length(items)-1 => {
+        let tok: token => get(items, i);
+        let cons_elem: constructor_spec => {
+            name => tok::Lexeme,
+            type => NULL
+        };
+        append(constructors, cons_elem);
+    }
+    let res: nt_elem => {
+        Tag => tdef,
+        tdef => t_spec,
+        name => a::name::Lexeme,
+    };
+    return res;
+}
+
+let add_enum_cons_to_nt(table: nt, a: ast_enum_tdef): void => {
+    let items: token [] => a::items;
+    loop i: 0 -> get_length(items)-1 => {
+        let tok: token => get(items, i);
+       
+        push_nt(table, tok::Lexeme, nt_builtin_vardef(tok::Lexeme, a::name::Lexeme));
+    }
+}
+
 let nt_type_of_ast(a: ast): type_spec => {
     let type: ast_type => a::Data::data_type;
     let res: type_spec => {
         base_type => type::name::Lexeme,
-        is_builtin =>  is_builtin_typename(type::name::Lexeme),
-        tdef_kind =>TDEF_BUILTIN,
-        constructors => NULL,
+        arrays => 0,
+        is_builtin => is_builtin_typename(type::name::Lexeme),
+        tdef_kind => TDEF_ANY,
+        constructors => NULL
     };
+    if type::is_array then {
+        res::arrays => 1;
+        res::is_builtin => false;
+    }
     return res;
 }
 
