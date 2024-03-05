@@ -31,11 +31,11 @@ let func(): array_wrapper => {
   a::Items => items;
   let names: string [] => [];
   a::Names => names;
-  append(items, 1);
+  append(a::Items, 1);
   append(names, "First\n");
-  append(items, 2);
+  append(a::Items, 2);
   append(names, "Second\n");
-  append(items, 3);
+  append(a::Items, 3);
   append(names, "Third\n");
 
   return a;

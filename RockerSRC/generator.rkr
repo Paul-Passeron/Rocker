@@ -33,20 +33,10 @@ let generate_type(g: gen, a: ast): void => {
 
 let generate_gen_type_fun(g: gen, funcall: ast_funcall, suffixe: string): void => {
     let args: ast [] => funcall::args;
-    // skipping error catching because this will be done by the typechecker
     let arr_ast: ast => get(args, 0);
-    let arr_name: string => arr_ast::Data::data_identifier::id::Lexeme;
-    // getting the type of the array (for the moment you have to bind
-    // it to a variable, even if it is an argument to the function
-    let ref: nt_elem => get_ref(arr_name, g::table);
-    if ref::Tag != vdef then {
-        print("Arrays must be declared as variables !\n");
-        exit(1);
-    }
-    // generate_type(g, ref::Data::data_vardef::type);
-    // pfile(g::f, ref::Data::data_vardef::type::Data::data_type::name::Lexeme);
-    if ref::var::type::arrays <= 1 then
-        pfile(g::f, ref::var::type::base_type);
+    let type: type_spec => get_type_of_expression(g::table, arr_ast);
+    if type::arrays <= 1 then
+        pfile(g::f, type::base_type);
     else
         pfile(g::f, "__internal_dynamic_array_t");
     pfile(g::f, suffixe);
