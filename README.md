@@ -64,3 +64,5 @@ Possible flags:
 - [ ] Typechecking
 - [ ] Add foreach loop for array types
 - [ ] Add variadic functions support
+- [ ] Support multi-dim arrays
+- [ ] Support accessing constructors without name binding
