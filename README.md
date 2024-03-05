@@ -57,11 +57,11 @@ Possible flags:
 - [x] The Rocker version of the compiler can parse itself
 - [x] Self-Hosting
 - [x] Made exit memory-safe
+- [x] Typechecking
 ## TODO
 - [ ] Pattern matching product types
 - [ ] Get type of an expression (for match cases)
 - [ ] Generation of match expressions
-- [ ] Typechecking
 - [ ] Add foreach loop for array types
 - [ ] Add variadic functions support
 - [ ] Support multi-dim arrays
