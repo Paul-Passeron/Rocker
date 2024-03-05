@@ -66,3 +66,9 @@ Possible flags:
 - [ ] Add variadic functions support
 - [ ] Support multi-dim arrays
 - [ ] Support accessing constructors without name binding
+
+
+## Warning
+The C version of the compiler is not actively maintained, only the rocker one is. The reason for that is that there is a bootstrapper compiler that can compile
+the current rocker compiler and that it is simpler to write the compiler in
+Rocker rather than in C. 
