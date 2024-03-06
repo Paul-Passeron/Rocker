@@ -20,6 +20,7 @@ let usage(prog_name: string): void => {
     print(prog_name);
     print(" [flags] <input file> [output file]\n");
     print("Possible flags:\n");
+    print("\t\'-o\' or \'--output\'    :\t Sets the output path of the executable and of the transpiled C file\n");
     print("\t\'-t\' or \'--tmp\'       :\t Does not remove the temporary transpiled C files\n");
     print("\t\'-c\' or \'--transpile\' :\t Only transpiles the Rocker to C but does not compile to a native executable\n");
     print("\t\'-l\' or \'--lexer\'     :\t Prints the tokens contained in the file and included files\n");
@@ -39,8 +40,8 @@ let main(): void => {
     }
     let compiler: string => "tcc";
     let input: string => "";
-    let output: string => "";
     let default_output: string => "a.out";
+    let output: string => default_output;
     let print_lexer: boolean => false;
     let quiet: boolean => true;
     let keep_tmp: boolean => false;
@@ -61,6 +62,15 @@ let main(): void => {
             else if str_eq(arg, "-h") || str_eq(arg, "--help") then{
                 usage(this_file);
                 exit(0);
+            }
+            else if str_eq(arg, "-o") || str_eq(arg, "--output") then{
+                if i = get_length(args) - 1 then {
+                    print_error();
+                    print("Expected output path after \'-o\' flag\n");
+                    exit(1);
+                }
+                output => get(args, i+1);
+                i => i + 1;
             }
             else if str_eq(arg, "-t") || str_eq(arg, "--tmp") then
                 keep_tmp => true;
@@ -91,17 +101,16 @@ let main(): void => {
         usage(this_file);
         exit(1);
     }
-    if get_string_length(output) = 0 then
-       output => default_output;
+    
     let l: lexer => new_lexer(input);
     lex_program(l);
-    let toks: token[] => l::Toks;
-    let p: parser => new_parser(toks);
+    let p: parser => new_parser(l::Toks);
     parse_program(p);
     if print_lexer then
         print_list_types(p::Toks);
     let cout: string => concat_string(output, ".c");
     let g: gen => new_gen(cout);
+    let stdlib_path: string => g::stdlib_path;
     transpile(g, p::Prog);
     if g::error then{
         g::f::Data => "";
@@ -113,6 +122,7 @@ let main(): void => {
         print_info();
         print("Transpiling to C successful\n");
     }
+
     if transpile_only = false then {
         let command: string => "";
         if keep_tmp = true then {
@@ -121,13 +131,19 @@ let main(): void => {
             command => concat_string(command, " -i");
             command => concat_string(command, " && ");
         }
+        let deps: string [] => [];
+        append(deps, concat_string(stdlib_path, "external/fundefs.c"));
+        append(deps, concat_string(stdlib_path, "external/fundefs_internal.c"));
+
         command => concat_string(command, compiler);
         command => concat_string(command, " -Wall -g -o ");
         command => concat_string(command, output);
         command => concat_string(command, " ");
         command => concat_string(command, cout);
-        command => concat_string(command,  " src/generation/fundefs.c");
-        command => concat_string(command, " src/generation/fundefs_internal.c");
+        iter dep: deps => {
+            command => concat_string(command, " ");
+            command => concat_string(command, dep);
+        }
         command => concat_string(command, " RockerAllocator/alloc.c");
         if quiet = false then {
             print_cmd();

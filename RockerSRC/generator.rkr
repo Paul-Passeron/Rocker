@@ -13,13 +13,15 @@ rec gen => {
     table: nt
     error: boolean,
     current_fun: string,
+    stdlib_path: string,
 }
 
 let new_gen(filename: string): gen => {
     let res: gen => {
         f => open_file(filename, WRITE_MODE),
         table => new_nt(),
-        current_fun => ""
+        current_fun => "",
+        stdlib_path => "stdlib/"
     };
     return res;
 }
@@ -631,9 +633,9 @@ let generate_forward_defs(g: gen, program: ast): void => {
 let transpile(g: gen, program: ast): void => {
     setup_name_table(g::table);
     let stmts: ast [] => program::Data::data_program::prog;
-    pfile(g::f, "#include \"./src/generation/fundefs.h\"\n");
-    pfile(g::f, "#include \"./src/generation/fundefs_internal.h\"\n");
-    pfile(g::f, "#include \"./src/generation/typedefs.h\"\n");
+    pfile(g::f, "#include \"./");pfile(g::f, g::stdlib_path); pfile(g::f, "external/fundefs.h\"\n");
+    pfile(g::f, "#include \"./");pfile(g::f, g::stdlib_path); pfile(g::f, "external/fundefs_internal.h\"\n");
+    pfile(g::f, "#include \"./");pfile(g::f, g::stdlib_path); pfile(g::f, "external/typedefs.h\"\n");
     pfile(g::f, "#include \"./RockerAllocator/alloc.h\"\n");
     generate_forward_defs(g, program);
     loop i: 0 -> get_length(stmts) - 1 => {
