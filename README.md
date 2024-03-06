@@ -23,6 +23,11 @@ let main() : void => {
 ```
 
 ## Compilation
+To bootstrap the compiler:
+```
+./bootstrapper/bootstrap2 RockerSRC/main.rkr -o rocker
+```
+To compile a file:
 ```
 ./rocker examples/hello_world.rkr
 ./a.out
