@@ -552,8 +552,3 @@ let decrease_array(table: nt, t: type_spec): type_spec => {
         constructors => NULL,
     }; return res;
 }
-
-let dummy(): void => {
-    let a: int => "";
-
-}

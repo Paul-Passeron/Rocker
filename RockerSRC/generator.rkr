@@ -349,7 +349,7 @@ let generate_vardef(g: gen, var: ast): void => {
             print_type_spec(expected_type);
             print("\' but got: \'");
             print_type_spec(expr_type);
-            print("\'...\n");
+            print("\'\n");
         }
     }
 
