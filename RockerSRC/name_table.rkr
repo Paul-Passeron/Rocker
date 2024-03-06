@@ -267,7 +267,8 @@ let setup_name_table(table: nt): void => {
     // builtin literals
     push_nt(table, "true", nt_builtin_vardef("true", "boolean"));
     push_nt(table, "false", nt_builtin_vardef("false", "boolean"));
-    push_nt(table, "NULL", nt_builtin_vardef("NULL", "__null_type"));
+    // push_nt(table, "NULL", nt_builtin_vardef("NULL", "__null_type"));
+    push_nt(table, "NULL", nt_builtin_vardef("NULL", "__any"));
 
     // builtin functions
 
@@ -354,7 +355,7 @@ let setup_name_table(table: nt): void => {
     let str_eq_args: type_spec [] => [];
     append(str_eq_args, get_builtin_type("string"));
     let str_eq_fun: nt_fun => {
-        ret_type => get_builtin_type("void"),
+        ret_type => get_builtin_type("boolean"),
         args => str_eq_args
     };
     let str_eq_elem: nt_elem => {
@@ -532,4 +533,27 @@ let setup_name_table(table: nt): void => {
         fun => append_string_fun
     };
     push_nt(table, "append_string", append_string_elem);
+}
+
+let print_type_spec(t: type_spec): void => {
+    print(t::base_type);
+    loop i: 1 -> t::arrays =>
+        print(" []");
+}
+
+let decrease_array(table: nt, t: type_spec): type_spec => {
+    if t::arrays = 0 then return NULL;
+    if t::arrays = 1 then return get_tdef_ref(t::base_type, table);
+    let res: type_spec => {
+        base_type => t::base_type,
+        arrays => t::arrays - 1,
+        is_builtin => false,
+        tdef_kind => TDEF_ANY,
+        constructors => NULL,
+    }; return res;
+}
+
+let dummy(): void => {
+    let a: int => "";
+
 }
