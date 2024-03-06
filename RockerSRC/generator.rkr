@@ -5,7 +5,7 @@
 //-----------------------------------------------------------------------------
 
 include "RockerSRC/name_table.rkr"
-include "RockerSRC/stdlib.rkr"
+include "stdlib/stdlib.rkr"
 
 rec gen => {
     f: file,

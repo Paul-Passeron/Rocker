@@ -7,7 +7,7 @@
 // Compiler of Rocker programming 
 // language written in itself !
 
-include "RockerSRC/stdlib.rkr"
+include "stdlib/stdlib.rkr"
 include "RockerSRC/lexer.rkr"
 include "RockerSRC/parser.rkr"
 include "RockerSRC/generator.rkr"

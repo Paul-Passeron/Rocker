@@ -97,6 +97,10 @@ int str_eq(string s1, string s2) {
 
 string get_abs_path(string path) {
   char *abs_path_tmp = realpath(path.data, NULL);
+  if (abs_path_tmp == NULL) {
+    printf("Could not get absolute path of file \'%s\'\n", path.data);
+    exit(1);
+  }
   char *abs_path = allocate_compiler(strlen(abs_path_tmp + 1));
   memcpy(abs_path, abs_path_tmp, strlen(abs_path_tmp) + 1);
   free(abs_path_tmp);

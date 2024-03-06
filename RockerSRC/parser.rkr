@@ -6,7 +6,7 @@
 
 include "RockerSRC/token.rkr"
 include "RockerSRC/lexer.rkr"
-include "RockerSRC/stdlib.rkr"
+include "stdlib/stdlib.rkr"
 include "RockerSRC/ast.rkr"
 
 rec parser => {

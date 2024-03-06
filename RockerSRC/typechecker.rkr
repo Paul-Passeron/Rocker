@@ -4,7 +4,7 @@
 //  Copyright (c) 2024 Paul Passeron
 //-----------------------------------------------------------------------------
 
-include "RockerSRC/stdlib.rkr"
+include "stdlib/stdlib.rkr"
 include "RockerSRC/ast.rkr"
 include "RockerSRC/name_table.rkr"
 include "RockerSRC/token.rkr"
@@ -12,21 +12,7 @@ include "RockerSRC/token.rkr"
 let are_builtins_compatible(t1: type_spec, t2: type_spec): boolean => {
     if t1::arrays != 0 then return false;
     if t2::arrays != 0 then return false;
-
     if str_eq(t1::base_type, t2::base_type) then return true;
-    // if str_eq(b1, "int")     || str_eq(b2, "char")  then return true;  
-    // if str_eq(b2, "int")     || str_eq(b1, "char")  then return true;  
-    // if str_eq(b1, "boolean") || str_eq(b2, "char") then return true;  
-    // if str_eq(b2, "boolean") || str_eq(b1, "char") then return true;
-    // if str_eq(b1, "boolean") || str_eq(b2, "int")  then return true;  
-    // if str_eq(b2, "boolean") || str_eq(b1, "int")  then return true;
-
-    // if str_eq(b1, "__any")   || str_eq(b2, "char")  then return true;  
-    // if str_eq(b2, "__any")   || str_eq(b1, "char")  then return true;  
-    // if str_eq(b1, "boolean") || str_eq(b2, "__any") then return true;  
-    // if str_eq(b2, "boolean") || str_eq(b1, "__any") then return true;
-    // if str_eq(b1, "__any")   || str_eq(b2, "int")  then return true;  
-    // if str_eq(b2, "__any")   || str_eq(b1, "int")  then return true;
     if is_type_spec_num(t1) && is_type_spec_num(t2) then return true;
     return false;
 }
