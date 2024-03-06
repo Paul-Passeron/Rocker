@@ -65,6 +65,7 @@ Possible flags:
 - [ ] Add variadic functions support
 - [ ] Support multi-dim arrays
 - [ ] Support accessing constructors without name binding
+- [ ] Mark and sweep garbage collector
 
 
 ## Warning
