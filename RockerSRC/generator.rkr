@@ -399,22 +399,18 @@ let generate_vardef(g: gen, var: ast): void => {
                 expr_type => get_tdef_ref(expr_type::base_type, g::table);
                 generate_expression(g, expr);
             } else {
-                if expr::Tag = tag_literal then {
+                if expr::Tag = tag_literal then
                     if expr::Data::data_literal::lit::Type = TOK_ARR_DECL then {
                         if expr_type::arrays = 1 then
                             pfile(g::f, expr_type::base_type);
                         else
                             pfile(g::f, "__internal_dynamic_array_t");
                         pfile(g::f, "_make_array()\n");
-
                     }
-                    else {
+                    else 
                         generate_expression(g, expr);
-                    }
-                }
-                else {
+                else
                     generate_expression(g, expr);
-                }
             }
         }
         pfile(g::f, "};\n");
