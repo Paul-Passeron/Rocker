@@ -4,7 +4,7 @@ Rocker is meant to be a compiled programming language, with aspects of imperativ
 
 The memory management is occulted from the user, no pointers. This is in part thanks to the simple allocator library [RockerAlloc](https://github.com/Paul-Passeron/RockerAllocator.git)
 
-## Features:
+## Features (Goal):
 - user defined types
 - pattern matching
 - int literals
@@ -69,6 +69,5 @@ Possible flags:
 - [ ] Add '=' support for comparison between strings (s1 = s2 <=> streq(s1, s2)) 
 
 ## Warning
-The C version of the compiler is not actively maintained, only the rocker one is. The reason for that is that there is a bootstrapper compiler that can compile
-the current rocker compiler and that it is simpler to write the compiler in
-Rocker rather than in C. 
+The C version of the compiler is not actively maintained, only the rocker one is.
+The reason for that is that there is a bootstrapper compiler that can compile the current rocker compiler and that it is simpler to write the compiler in Rocker rather than in C. 
