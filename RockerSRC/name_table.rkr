@@ -552,3 +552,15 @@ let decrease_array(table: nt, t: type_spec): type_spec => {
         constructors => NULL,
     }; return res;
 }
+
+
+let get_type_spec_of_constructor(t: type_spec, name: string): type_spec => {
+    if t::arrays != 0 then return NULL;
+    if t::constructors = NULL then return NULL;
+    loop i: 0 -> get_length(t::constructors) -1 => {
+        let c: constructor_spec => get(t::constructors, i);
+        if str_eq(c::name, name) then
+            return c::type;
+    }
+    return NULL;
+}

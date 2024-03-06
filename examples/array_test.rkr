@@ -19,7 +19,7 @@ let test(): void => {
 
 rec array_wrapper => {
   Items: int [],
-  Names: int [],
+  Names: string [],
 }
 
 let func(): array_wrapper => {
@@ -58,5 +58,9 @@ let main(): void => {
   loop i: 0 -> get_length(names) - 1 => {
     print(get(names, i));
   }
+  let new_arr: array_wrapper => {
+    Items => [],
+    Names => []
+  };
 }
 

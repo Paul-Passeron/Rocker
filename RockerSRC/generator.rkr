@@ -321,38 +321,35 @@ let generate_vardef(g: gen, var: ast): void => {
     let vardef: ast_vardef => var::Data::data_vardef;
     let elem: nt_elem => get_nt_var(vardef);
     push_nt(g::table, vardef::name::Lexeme, elem);
-    if true then
-    {
-        let expr_type: type_spec => get_type_of_expression(g::table, vardef::expr);
-        if expr_type::arrays = 0 then
-            expr_type => get_tdef_ref(expr_type::base_type, g::table);
-        if expr_type = NULL then {
-            g::error => true;
-            print_error_prefix_tok(vardef::name);
-            
-            print(" Could not resolve type of expression in variable declaration.\n");
-        }
-        let expected_type: type_spec => elem::var::type;
-        if expected_type::arrays = 0 then
-            expected_type => get_tdef_ref(expected_type::base_type, g::table);
-        if are_types_compatible(expr_type, expected_type) = false then {
-            g::error => true;
-            print_error_prefix_tok(vardef::name);
-            if str_eq(g::current_fun, "") = false then{
-                print(" In function \'");
-                print(g::current_fun);
-                print("\': ");
-            }
-            print(" Type mismatch in definition of variable \'");
-            print(vardef::name::Lexeme);
-            print("\'. Expected: \'");
-            print_type_spec(expected_type);
-            print("\' but got: \'");
-            print_type_spec(expr_type);
-            print("\'\n");
-        }
-    }
 
+    let expr_type: type_spec => get_type_of_expression(g::table, vardef::expr);
+    if expr_type::arrays = 0 then
+        expr_type => get_tdef_ref(expr_type::base_type, g::table);
+    if expr_type = NULL then {
+        g::error => true;
+        print_error_prefix_tok(vardef::name);
+        print(" Could not resolve type of expression in variable declaration.\n");
+    }
+    let expected_type: type_spec => elem::var::type;
+    if expected_type::arrays = 0 then
+        expected_type => get_tdef_ref(expected_type::base_type, g::table);
+    if are_types_compatible(expr_type, expected_type) = false then {
+        g::error => true;
+        print_error_prefix_tok(vardef::name);
+        if str_eq(g::current_fun, "") = false then{
+            print(" In function \'");
+            print(g::current_fun);
+            print("\': ");
+        }
+        print(" Type mismatch in definition of variable \'");
+        print(vardef::name::Lexeme);
+        print("\'. Expected: \'");
+        print_type_spec(expected_type);
+        print("\' but got: \'");
+        print_type_spec(expr_type);
+        print("\'\n");
+        
+    }
     let type_name: string =>
         vardef::type::Data::data_type::name::Lexeme;
     if vardef::type::Data::data_type::is_array &&
@@ -393,7 +390,32 @@ let generate_vardef(g: gen, var: ast): void => {
             pfile(g::f, ".");
             pfile(g::f, name::Lexeme);
             pfile(g::f, " = ");
-            generate_expression(g, expr);
+            let expr_type: type_spec => get_type_spec_of_constructor(expected_type, name::Lexeme);
+            if expr_type = NULL then {
+                print("TDOD\n");
+                exit(1);
+            }
+            if expr_type::arrays = 0 then{
+                expr_type => get_tdef_ref(expr_type::base_type, g::table);
+                generate_expression(g, expr);
+            } else {
+                if expr::Tag = tag_literal then {
+                    if expr::Data::data_literal::lit::Type = TOK_ARR_DECL then {
+                        if expr_type::arrays = 1 then
+                            pfile(g::f, expr_type::base_type);
+                        else
+                            pfile(g::f, "__internal_dynamic_array_t");
+                        pfile(g::f, "_make_array()\n");
+
+                    }
+                    else {
+                        generate_expression(g, expr);
+                    }
+                }
+                else {
+                    generate_expression(g, expr);
+                }
+            }
         }
         pfile(g::f, "};\n");
         pfile(g::f, vardef::name::Lexeme);
