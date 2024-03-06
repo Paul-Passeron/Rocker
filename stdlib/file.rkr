@@ -1,0 +1,53 @@
+//-----------------------------------------------------------------------------
+//  ROCKER STANDARD LIBRARY
+//  FILE UTILITIES
+//  MIT License
+//  Copyright (c) 2024 Paul Passeron
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// FILE HANDLING
+//-----------------------S------------------------------------------------------
+
+rec file => {
+    Filename: string,
+    Data: string,
+    Mode: int,
+}
+
+
+enum file_mode => {
+    READ_MODE,
+    WRITE_MODE,
+    CLOSED
+}
+
+
+let open_file(filename: string, mode: file_mode): file => {
+    let res: file => {
+        Filename => filename,
+        Data => "",
+        Mode => mode
+    }; 
+    if mode = READ_MODE then  
+        res::Data => read_file(filename);
+    else if mode != WRITE_MODE then
+    {
+        print("Could not open file \'");
+        print(filename);
+        print("\': Invalid mode specified\n");
+        exit(1);
+    }
+    return res;
+}
+
+let close_file(f: file): void => {
+    write_string_to_file(f::Data, f::Filename);
+    f::Data => "";
+    f::Filename => "";
+}
+
+let pfile(f: file, s: string): void => {
+    f::Data => concat_string(f::Data, s);
+}
+//-----------------------------------------------------------------------------

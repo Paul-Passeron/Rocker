@@ -8,6 +8,7 @@
 // language written in itself !
 
 include "stdlib/stdlib.rkr"
+include "stdlib/term.rkr"
 include "RockerSRC/lexer.rkr"
 include "RockerSRC/parser.rkr"
 include "RockerSRC/generator.rkr"
@@ -36,6 +37,7 @@ let main(): void => {
         usage(this_file);
         exit(1);
     }
+    let compiler: string => "tcc";
     let input: string => "";
     let output: string => "";
     let default_output: string => "a.out";
@@ -119,7 +121,8 @@ let main(): void => {
             command => concat_string(command, " -i");
             command => concat_string(command, " && ");
         }
-        command => concat_string(command, "clang -Wall -g -o ");
+        command => concat_string(command, compiler);
+        command => concat_string(command, " -Wall -g -o ");
         command => concat_string(command, output);
         command => concat_string(command, " ");
         command => concat_string(command, cout);

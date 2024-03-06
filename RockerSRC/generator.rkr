@@ -6,6 +6,7 @@
 
 include "RockerSRC/name_table.rkr"
 include "stdlib/stdlib.rkr"
+include "stdlib/term.rkr"
 
 rec gen => {
     f: file,
