@@ -72,7 +72,8 @@ Possible flags:
 - [ ] Support multi-dim arrays
 - [ ] Support accessing constructors without name binding
 - [ ] Mark and sweep garbage collector
-- [ ] Add '=' support for comparison between strings (s1 = s2 <=> streq(s1, s2)) 
+- [ ] Add '=' support for comparison between strings (s1 = s2 <=> streq(s1, s2))
+- [ ] Remake the parsing of expression (better handling of parenthesis and subs)
 
 ## Warning
 The C version of the compiler is not actively maintained, only the rocker one is.
