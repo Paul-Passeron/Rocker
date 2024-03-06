@@ -207,7 +207,37 @@ let generate_array_funcs(g: gen, type_name: string): void => {
         pfile(g::f, "}\n\n");
 }
 
-
+let generate_iter(g: gen, iter_ast: ast): void => {
+    let iter_loop: ast_iter => iter_ast::Data::data_iter;
+    let type_of_array: type_spec => get_type_of_expression(g::table, iter_loop::over);
+    if type_of_array = NULL then {
+        print_error_prefix_tok(iter_loop::name);
+        print("TODO");
+        exit(1);
+    }
+    let type_of_elem: type_spec => decrease_array(g::table, type_of_array);
+    if type_of_elem = NULL then {
+        print_error_prefix_tok(iter_loop::name);
+        print("TODO");
+        exit(1);
+    }
+    pfile(g::f, "{\n");
+    let prefix: string => type_of_elem::base_type;
+    if type_of_elem::arrays > 0 then
+        prefix => "__internal_dynamic_array_t";
+    pfile(g::f, "__internal_dynamic_array_t __tmp_array = ");
+    generate_expression(g, iter_loop::over);
+    pfile(g::f, ";\n"); 
+    pfile(g::f, "for(int __tmp = 0; __tmp < (int)get_length(__tmp_array); __tmp++){\n");
+    pfile(g::f, prefix);
+    pfile(g::f, " ");
+    pfile(g::f, iter_loop::name::Lexeme);
+    pfile(g::f, " = ");
+    pfile(g::f, prefix);
+    pfile(g::f, "_get_elem(__tmp_array, __tmp);\n");
+    generate_statement(g, iter_loop::statement);
+    pfile(g::f, "}\n}\n");
+}
 
 let generate_loop(g: gen, loop_ast: ast): void => {
     let l: ast_loop => loop_ast::Data::data_loop;
@@ -456,6 +486,8 @@ let generate_statement(g: gen, a: ast): void => {
         generate_fundef(g, a);
     else if tag = tag_loop then
         generate_loop(g, a);
+    else if tag = tag_iter then
+        generate_iter(g, a);
     else if tag = tag_while_loop then
         generate_while_loop(g, a);
     else if tag = tag_assign then

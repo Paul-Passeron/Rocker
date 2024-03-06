@@ -57,16 +57,16 @@ Possible flags:
 - [x] Self-Hosting
 - [x] Made exit memory-safe
 - [x] Typechecking
+- [x] Add foreach loop for array types (iter loop)
 ## TODO
 - [ ] Pattern matching product types
 - [ ] Get type of an expression (for match cases)
 - [ ] Generation of match expressions
-- [ ] Add foreach loop for array types
 - [ ] Add variadic functions support
 - [ ] Support multi-dim arrays
 - [ ] Support accessing constructors without name binding
 - [ ] Mark and sweep garbage collector
-
+- [ ] Add '=' support for comparison between strings (s1 = s2 <=> streq(s1, s2)) 
 
 ## Warning
 The C version of the compiler is not actively maintained, only the rocker one is. The reason for that is that there is a bootstrapper compiler that can compile

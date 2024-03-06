@@ -317,6 +317,7 @@ let parse_statement(p: parser): ast => {
     if a = TOK_PRO || a = TOK_REC then return parse_tdef(p);
     if a = TOK_WHILE then return parse_while_loop(p);
     if is_assign(p) then return parse_assign(p);
+    if a = TOK_ITERATE then return parse_iter(p);
     if a = TOK_LOOP then return parse_loop(p);
     if a = TOK_RETURN then return parse_ret(p);
     if a = TOK_MATCH then return parse_match(p);
@@ -441,6 +442,33 @@ let parse_fundef(p: parser): ast => {
     };
     return res;
 }
+
+let parse_iter(p: parser): ast => {
+    expect(p, TOK_ITERATE);
+    consume_token(p);
+    expect(p, TOK_IDENTIFIER);
+    let var_name: token => consume_token(p);
+    expect(p, TOK_COLON);
+    consume_token(p);
+    let over: ast => parse_expression(p);
+    expect(p, TOK_BIG_ARROW);
+    consume_token(p);
+    let statement: ast => parse_statement(p);
+    let data_iter: ast_iter => {
+        name => var_name,
+        over => over,
+        statement => statement,
+    };
+    let data: ast_data => {
+        data_iter => data_iter,
+    };
+    let res: ast => {
+        Tag => tag_iter,
+        Data => data
+    };
+    return res;
+}
+
 
 let parse_loop(p: parser): ast => {
     expect(p, TOK_LOOP);

@@ -542,6 +542,7 @@ let print_type_spec(t: type_spec): void => {
 }
 
 let decrease_array(table: nt, t: type_spec): type_spec => {
+    if t = NULL then return NULL;
     if t::arrays = 0 then return NULL;
     if t::arrays = 1 then return get_tdef_ref(t::base_type, table);
     let res: type_spec => {

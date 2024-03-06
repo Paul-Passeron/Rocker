@@ -22,6 +22,7 @@ rec ast_data => {
     data_while_loop: ast_while_loop,
     data_enum_tdef: ast_enum_tdef,
     data_type: ast_type,
+    data_iter: ast_iter,
 }
 
 enum ast_kind => {
@@ -46,6 +47,7 @@ enum ast_kind => {
     tag_while_loop,
     tag_enum_tdef,
     tag_type,
+    tag_iter,
 }
 
 rec ast_op => {
@@ -165,6 +167,12 @@ rec ast_while_loop => {
 rec ast_enum_tdef => {
     name: token,
     items: token [],
+}
+
+rec ast_iter => {
+    name: token,
+    over: ast,
+    statement: ast,
 }
 
 // Using a record type as an union type

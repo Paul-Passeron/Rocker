@@ -1,0 +1,15 @@
+include "RockerSRC/stdlib.rkr"
+
+
+let main(): void => {
+    let a: int [] => [];
+    append(a, 3);
+    append(a, 4);
+    append(a, 5);
+    append(a, 6);
+    append(a, 7);
+    iter elem: a => {
+        print_int(elem);
+        print("\n");
+    }
+}
