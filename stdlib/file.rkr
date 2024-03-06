@@ -42,9 +42,20 @@ let open_file(filename: string, mode: file_mode): file => {
 }
 
 let close_file(f: file): void => {
-    write_string_to_file(f::Data, f::Filename);
+    if f::Mode = WRITE_MODE then
+        write_string_to_file(f::Data, f::Filename);
     f::Data => "";
     f::Filename => "";
+    f::Mode => CLOSED;
+}
+
+let get_file_contents(f: file): string => {
+    if f::Mode != READ_MODE then {
+        print_error();
+        print("Cannot access contents of a file that is not opened or not readable\n");
+        exit(1);
+    }
+    return f::Data;
 }
 
 let pfile(f: file, s: string): void => {

@@ -1,0 +1,178 @@
+include "stdlib/stdlib.rkr"
+include "stdlib/term.rkr"
+include "RockerSRC/lexer.rkr"
+include "RockerSRC/token.rkr"
+include "RockerSRC/parser.rkr"
+
+let format_parser(p: parser): void => {
+    let prog: ast [] => [];
+    while p::Cursor < get_length(p::Toks) do {
+        if peek_type(p) = TOK_INCLUDE then {
+            consume_token(p);
+            consume_token(p);
+        }
+        else
+            append(prog, parse_statement(p));
+    }
+    let data_program: ast_program => { prog => prog };
+    let data: ast_data => { data_program => data_program };
+    let res: ast => {
+        Tag => tag_program,
+        Data => data
+    };
+    p::Prog => res;
+}
+
+let parse_format_file(filename: string): ast [] => {
+    let l: lexer => new_lexer(filename);
+    lex_program(l);
+    let p: parser => new_parser(l::Toks);
+    format_parser(p);
+    return p::Prog::Data::data_program::prog;
+}
+
+let get_includes(filename: string): string [] => {
+    let res: string [] => [];
+    let l: lexer => new_lexer(filename);
+    lex_program(l);
+    let p: parser => new_parser(l::Toks);
+    while p::Cursor < get_length(p::Toks) do {
+        if peek_type(p) = TOK_INCLUDE then {
+            consume_token(p);
+            let tok: token => consume_token(p);
+            if tok::Type = TOK_STR_LIT then {
+                append(res, tok::Lexeme);
+            }
+        } else consume_token(p);
+    }
+    return res;
+}
+
+let print_fundef(fdef: ast_fundef): void => {
+    print("let ");
+    print(fdef::name::Lexeme);
+    print("(");
+    loop i: 0 -> get_length(fdef::args) - 1 => {
+        let arg: token => get(fdef::args, i);
+        let type_ast: ast => get(fdef::types, i);
+        let type: ast_type => type_ast::Data::data_type;
+        if i > 0 then
+            print(", ");
+        print(arg::Lexeme);
+        print(": ");
+        print(type::name::Lexeme);
+        if type::is_array then
+            print(" []");
+    }
+    print("): ");
+    let type_ast: ast => fdef::ret_type;
+    print(type_ast::Data::data_type::name::Lexeme);
+    if type_ast::Data::data_type::is_array then
+        print(" []");
+    print(" => ");
+    print_compound(fdef::body::Data::data_compound, 1);
+    print("\n");
+}
+
+let print_tabs(n: int): void => {
+    if n <= 0 then return;
+    loop i: 1 -> n => print("    ");
+}
+
+let print_compound(a: ast_compound, level: int): void => {
+    print_tabs(level - 1);
+    print("{\n");
+    iter stmt: a::stmts => {
+        print_tabs(level);
+        print_statement(stmt);
+    }
+    print_tabs(level - 1);
+    print("}");
+}
+
+
+let print_op(a: ast_op): void => {
+    print_expression(a::left);
+    print(" ");
+    print(lexeme_of_type(a::op));
+    print(" ");
+    print_expression(a::right);
+}
+
+
+let print_expression(a: ast): void => {
+    if a::Tag = tag_funcall then 
+        print_funcall(a::Data::data_funcall);
+    if a::Tag = tag_literal then 
+        print(a::Data::data_literal::lit::Lexeme);
+    if a::Tag = tag_op then
+        print_op(a::Data::data_op);
+    if a::Tag = tag_identifier then
+        print(a::Data::data_identifier::id::Lexeme);
+}
+
+let print_funcall(fcall: ast_funcall): void => {
+    print(fcall::name::Lexeme);
+    print("(");
+    let comma: boolean => false;
+    iter arg: fcall::args => {
+        if comma then
+            print(", ");
+        else
+            comma => true;
+        print_expression(arg);
+    }
+    print(")");
+}
+
+let print_type(t: ast_type): void => {
+    print(t::name::Lexeme);
+    if t::is_array then
+        print(" []");
+}
+
+let print_vardef(vdef: ast_vardef): void => {
+    print("let ");
+    print(vdef::name::Lexeme);
+    print(": ");
+    print_type(vdef::type::Data::data_type);
+    print(" => ");
+    print_expression(vdef::expr);
+    print(";");
+    
+}
+
+let print_statement(a: ast): void => {
+    if a::Tag = tag_fundef then {
+        print_fundef(a::Data::data_fundef);
+    } else if a::Tag = tag_funcall then {
+        print_funcall(a::Data::data_funcall);
+        print(";");
+    } else if a::Tag = tag_vardef then {
+        print_vardef(a::Data::data_vardef);
+    }
+    print("\n");
+}
+
+let main(): void => {
+    let args: string [] => get_args();
+    if get_length(args) < 2 then {
+        print_error();
+        print("Expected input file path\n");
+        exit(1);
+    }
+    let filename: string => get(args, 1);
+
+    let includes: string [] => get_includes(filename);
+    iter inc: includes => {
+        print("include ");
+        print(inc);
+        print("\n");
+    }
+    print("\n");
+    let prog: ast [] => parse_format_file(filename);
+    iter stmt: prog => {
+        print_statement(stmt);
+    }
+
+}

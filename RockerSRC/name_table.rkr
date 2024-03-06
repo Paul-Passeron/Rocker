@@ -150,6 +150,16 @@ let nt_builtin_vardef(name: string, type: string): nt_elem => {
     return elem;
 }
 
+let vardef_from_type_spec(t: type_spec, name: string): nt_elem => {
+    let elem_var: nt_var => { type => t};
+    let elem: nt_elem => {
+        Tag => vdef,
+        name => name,
+        var => elem_var
+    };
+    return elem;
+}
+
 let get_nt_var(vardef: ast_vardef): nt_elem => {
     let elem_var: nt_var => {
         type => nt_type_of_ast(vardef::type)

@@ -1,0 +1,11 @@
+include "stdlib/stdlib.rkr"
+include "stdlib/term.rkr"
+include "stdlib/file.rkr"
+
+let main(): void => {
+    print("Hello, World !\n");
+}
+
+let fun_with_args(a1: int, names: string []): type => {
+    
+}

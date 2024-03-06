@@ -105,6 +105,7 @@ let generate_funcall(g: gen, fun: ast): void => {
         pfile(g::f, "system(string_to_cstr(");
         let args: ast [] => funcall::args;
         loop i: 0 -> get_length(args) - 1 => {
+            // TODO: type check arguments
             if i > 0 then pfile(g::f, ", ");
             generate_expression(g, get(args, i));
         }
@@ -219,6 +220,7 @@ let generate_iter(g: gen, iter_ast: ast): void => {
         exit(1);
     }
     let type_of_elem: type_spec => decrease_array(g::table, type_of_array);
+    push_nt(g::table, iter_loop::name::Lexeme, vardef_from_type_spec(type_of_elem, iter_loop::name::Lexeme));
     if type_of_elem = NULL then {
         print_error_prefix_tok(iter_loop::name);
         print("TODO");
@@ -356,6 +358,11 @@ let generate_vardef(g: gen, var: ast): void => {
     push_nt(g::table, vardef::name::Lexeme, elem);
 
     let expr_type: type_spec => get_type_of_expression(g::table, vardef::expr);
+    if expr_type = NULL then {
+        print_error();
+        print("WTF ?");
+        exit(1);
+    }
     if expr_type::arrays = 0 then
         expr_type => get_tdef_ref(expr_type::base_type, g::table);
     if expr_type = NULL then {
