@@ -33,11 +33,12 @@ let main() : void => {
 Usage:
         ./rocker [flags] <input file> [output file]
 Possible flags:
-        '-t' or '--tmp'      :   Does not remove the temporary transpiled C files
-        '-c' or '--transpile':   Only transpiles the Rocker to C but does not compile to a native executable
-        '-l' or '--lexer'    :   Prints the tokens contained in the file and included files
-        '-h' or '--help'     :   Displays this message
-        '-v' or '--verbose'  :   Prints infos and commands ran by the compiler
+        '-o' or '--output'    :  Sets the output path of the executable and of the transpiled C file
+        '-t' or '--tmp'       :  Does not remove the temporary transpiled C files
+        '-c' or '--transpile' :  Only transpiles the Rocker to C but does not compile to a native executable
+        '-l' or '--lexer'     :  Prints the tokens contained in the file and included files
+        '-h' or '--help'      :  Displays this message
+        '-v' or '--verbose'   :  Prints infos and commands ran by the compiler
 ```
 ## Progress
 - [x] Simple rec and pro type generation
