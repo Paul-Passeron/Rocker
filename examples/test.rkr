@@ -1,2 +1,4 @@
-// Trying to parse an assignment
-let this_is_a_var: int => 3;
+let main(): void => {
+    let a: string => s;
+    print(a);
+}

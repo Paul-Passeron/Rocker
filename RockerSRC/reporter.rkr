@@ -1,0 +1,27 @@
+include "stdlib/stdlib.rkr"
+include "stdlib/term.rkr"
+
+
+rec reporter => {
+  Filename: string,
+  Line: int,
+  Col: int,
+  CurrentFunc: string,
+}
+
+let report(r: reporter, msg: string): void => {
+  print_error();
+  print(r::Filename);
+  print(":");
+  print_int(r::Line);
+  print(":");
+  print_int(r::Col);
+  if str_eq(r::CurrentFunc, "") = false then {
+    print(" In function \'");
+    print(r::CurrentFunc);
+    print("\'");
+  }
+  print(": ");
+  print(msg);
+  print("\n");
+}

@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------------
 
 include "RockerSRC/name_table.rkr"
+include "RockerSRC/reporter.rkr"
 include "stdlib/stdlib.rkr"
 include "stdlib/term.rkr"
 
@@ -17,9 +18,15 @@ rec gen => {
 }
 
 let new_gen(filename: string): gen => {
+    let r: reporter => {
+        Filename => "",
+        Col => 1,
+        Line => 1,
+        CurrentFunc => ""
+    };
     let res: gen => {
         f => open_file(filename, WRITE_MODE),
-        table => new_nt(),
+        table => new_nt(r),
         current_fun => "",
         stdlib_path => "stdlib/"
     };
@@ -71,6 +78,10 @@ let generate_pop(g: gen, funcall: ast_funcall): void => {
 
 let generate_funcall(g: gen, fun: ast): void => {
     let funcall: ast_funcall => fun::Data::data_funcall;
+
+    g::table::r::Col      => funcall::name::Col;
+    g::table::r::Line     => funcall::name::Line;
+    g::table::r::Filename => funcall::name::Filename;
     let ref: nt_elem => get_ref(funcall::name::Lexeme, g::table);
     let is_error: boolean => false;
 
@@ -308,6 +319,9 @@ let generate_enum_tdef(g: gen, expr: ast): void => {
 let generate_expression(g: gen, expr: ast): void => {
     if expr::Tag = tag_literal then {
         let tok: token => expr::Data::data_literal::lit;
+        g::table::r::Col      => tok::Col;
+        g::table::r::Line     => tok::Line;
+        g::table::r::Filename => tok::Filename;
         if tok::Type != TOK_STR_LIT then
             pfile(g::f, tok::Lexeme);
         else {
@@ -317,9 +331,13 @@ let generate_expression(g: gen, expr: ast): void => {
             pfile(g::f, string_of_int(get_lit_str_length(tok::Lexeme)-2));
             pfile(g::f, "})");
         }
-    } else if expr::Tag = tag_identifier then 
-        // for the moment we don't perform any checks
-        pfile(g::f, expr::Data::data_identifier::id::Lexeme); 
+    } else if expr::Tag = tag_identifier then {
+        let tok: token => expr::Data::data_identifier::id;
+        g::table::r::Col      => tok::Col;
+        g::table::r::Line     => tok::Line;
+        g::table::r::Filename => tok::Filename;
+        pfile(g::f, tok::Lexeme);
+    }
     else if expr::Tag = tag_funcall then
         generate_funcall(g, expr);
     else if expr::Tag = tag_op then
@@ -579,6 +597,7 @@ let generate_fundef_proto(g: gen, fun: ast, add: boolean): void => {
 let generate_fundef(g: gen, fun: ast): void => {
     let fundef: ast_fundef => fun::Data::data_fundef;
     g::current_fun => fundef::name::Lexeme;
+    g::table::r::CurrentFunc => g::current_fun;
     new_nt_scope(g::table);
     if str_eq(fundef::name::Lexeme, "main") = false then {
         generate_fundef_proto(g, fun, true);

@@ -4,6 +4,7 @@
 //  Copyright (c) 2024 Paul Passeron
 //-----------------------------------------------------------------------------
 
+include "RockerSRC/reporter.rkr"
 
 enum nt_kind => {
     tdef,
@@ -45,7 +46,8 @@ rec nt_elem => {
 
 rec nt => {
     elems: nt_elem [],
-    scope: int
+    scope: int,
+    r: reporter,
 }
 
 let get_ref(name: string, table: nt):nt_elem => {
@@ -60,6 +62,12 @@ let get_ref(name: string, table: nt):nt_elem => {
             res => elem;
         }
     }
+    if res = NULL then {
+        let msg: string => "Identifier \'";
+        msg => concat_string(msg, name);
+        msg => concat_string(msg, "\' not declared in current scope.");
+        report(table::r, msg);
+    }
     return res;
 }
 
@@ -70,11 +78,12 @@ let get_tdef_ref(name: string, table: nt): type_spec => {
     else return NULL;
 }
 
-let new_nt(): nt => {
+let new_nt(r: reporter): nt => {
     let elems: nt_elem [] => [];
     let res: nt => {
         elems => elems,
         scope => 0,
+        r => r,
     };
     return res;
 }

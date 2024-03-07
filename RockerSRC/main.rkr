@@ -38,7 +38,7 @@ let main(): void => {
         usage(this_file);
         exit(1);
     }
-    let compiler: string => "tcc";
+    let compiler: string => "gcc";
     let input: string => "";
     let default_output: string => "a.out";
     let output: string => default_output;
