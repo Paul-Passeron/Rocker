@@ -40,7 +40,7 @@ Usage:
 Possible flags:
         '-o' or '--output'    :  Sets the output path of the executable and of the transpiled C file
         '-t' or '--tmp'       :  Does not remove the temporary transpiled C files
-        '-c' or '--transpile' :  Only transpiles the Rocker to C but does not compile it
+        '-c' or '--transpile' :  Only transpiles the Rocker to C but does not compile to a native executable
         '-l' or '--lexer'     :  Prints the tokens contained in the file and included files
         '-h' or '--help'      :  Displays this message
         '-v' or '--verbose'   :  Prints infos and commands ran by the compiler
